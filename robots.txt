@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://abt-code.netlify.app/sitemap.xml

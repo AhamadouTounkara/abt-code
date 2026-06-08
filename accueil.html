@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code - Inscription</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-footer-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .form-footer-link a {
+            color: #0e639c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .form-footer-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+
+    <style id="form-responsive">
+    @media (max-width: 600px) {
+        body.form-body { padding: 10px !important; align-items: flex-start !important; }
+        .form-container { padding: 20px 16px !important; margin: 8px !important; border-radius: 10px !important; }
+        .form-container h2 { font-size: 1.2rem !important; }
+        .form-group input, .form-group select { font-size: 0.95rem !important; padding: 9px !important; }
+        .btn-submit { font-size: 1rem !important; padding: 11px !important; }
+        /* Récupération mot de passe */
+        #panneau-recuperation input { font-size: 0.88rem !important; }
+    }
+    </style>
+</head>
+<body class="form-body">
+
+    <div class="form-container">
+        <h2>🎓 Bienvenue sur ABT Code</h2>
+        <p>Veuillez remplir ces informations pour accéder aux ressources de programmation.</p>
+        
+        <form id="student-form">
+            <div class="form-group">
+                <label for="nom">Nom :</label>
+                <input type="text" id="nom" required placeholder="Votre nom">
+            </div>
+
+            <div class="form-group">
+                <label for="prenom">Prénom :</label>
+                <input type="text" id="prenom" required placeholder="Votre prénom">
+            </div>
+
+            <div class="form-group">
+                <label for="age">Âge :</label>
+                <input type="number" id="age" min="15" max="99" required placeholder="Ex: 20">
+            </div>
+
+            <div class="form-group">
+                <label for="niveau">Niveau d'études :</label>
+                <select id="niveau" required>
+                    <option value="">-- Choisir votre niveau --</option>
+                    <option value="Licence 1">Licence 1</option>
+                    <option value="Licence 2">Licence 2</option>
+                    <option value="Licence 3">Licence 3</option>
+                    <option value="Master">Master</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ecole">Université / École :</label>
+                <input type="text" id="ecole" required placeholder="Ex: Université de Bamako, ENI...">
+            </div>
+
+            <div class="form-group">
+                <label for="localite">Localité / Quartier :</label>
+                <input type="text" id="localite" required placeholder="Ex: Kalabancoura, Hamdallaye...">
+            </div>
+
+            <div class="form-group">
+                <label for="adresse">Adresse email :</label>
+                <input type="email" id="adresse" required placeholder="exemple@mail.com">
+            </div>
+
+            <div class="form-group">
+                <label for="mdp">Mot de passe :</label>
+                <input type="password" id="mdp" required placeholder="Minimum 6 caract&#232;res" minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="mdp2">Confirmer le mot de passe :</label>
+                <input type="password" id="mdp2" required placeholder="R&#233;p&#233;tez votre mot de passe">
+            </div>
+
+            <div id="erreur-mdp" style="display:none; background:#fed7d7; color:#742a2a; padding:10px 14px; border-radius:6px; border-left:4px solid #e53e3e; font-weight:bold; margin-bottom:10px; font-size:0.9rem;">
+                &#10060; Les mots de passe ne correspondent pas. Veuillez r&#233;essayer.
+            </div>
+
+            <button type="submit" class="btn-submit">Cr&#233;er mon compte</button>
+        </form>
+
+        <div class="form-footer-link">
+            Déjà inscrit ? <a href="Entre.html">Connectez-vous ici</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('student-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const nom    = document.getElementById('nom').value.trim();
+            const prenom = document.getElementById('prenom').value.trim();
+            const email  = document.getElementById('adresse').value.trim().toLowerCase();
+            const mdp    = document.getElementById('mdp').value;
+            const mdp2   = document.getElementById('mdp2').value;
+
+            // Vérifie que les deux mots de passe sont identiques
+            if (mdp !== mdp2) {
+                document.getElementById('erreur-mdp').style.display = 'block';
+                return;
+            }
+            document.getElementById('erreur-mdp').style.display = 'none';
+
+            // Récupère la liste des comptes existants (ou tableau vide)
+            const comptes = JSON.parse(localStorage.getItem('abt_comptes') || '[]');
+
+            // Vérifie si cet email est déjà inscrit
+            const dejaInscrit = comptes.find(c => c.email === email);
+            if (dejaInscrit) {
+                alert("\u26a0\ufe0f Cette adresse email est d\u00e9j\u00e0 inscrite. Veuillez vous connecter.");
+                window.location.href = "Entre.html";
+                return;
+            }
+
+            // Crée le nouveau compte avec le mot de passe
+            const nouveauCompte = {
+                nom:      nom,
+                prenom:   prenom,
+                email:    email,
+                mdp:      mdp,
+                age:      document.getElementById('age').value,
+                niveau:   document.getElementById('niveau').value,
+                ecole:    document.getElementById('ecole').value,
+                localite: document.getElementById('localite').value
+            };
+            comptes.push(nouveauCompte);
+            localStorage.setItem('abt_comptes', JSON.stringify(comptes));
+
+            // Géolocalisation
+            function saveAndRedirect(lat, lng) {
+                nouveauCompte.gps_lat = lat || '';
+                nouveauCompte.gps_lng = lng || '';
+                comptes.push(nouveauCompte);
+                localStorage.setItem('abt_comptes', JSON.stringify(comptes));
+                localStorage.setItem('abt_session_email',  email);
+                localStorage.setItem('abt_session_prenom', prenom);
+                localStorage.setItem('abt_connecte', 'true');
+                window.location.href = "index.html";
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => saveAndRedirect(pos.coords.latitude, pos.coords.longitude),
+                    ()  => saveAndRedirect('', '')
+                );
+            } else {
+                saveAndRedirect('', '');
+            }
+        });
+    </script>
+
+    <script src="abt_ai.js"></script>
+</body>
+</html>

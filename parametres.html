@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code — Paramètres</title>
+    <script src="themes.js"></script>
+    <style>
+        :root{--bg:#0d0f14;--bg2:#141720;--bg3:#1c2030;--border:#2a2f45;--text:#e2e8f0;--muted:#64748b;--accent:#4f8ef7;--accent2:#a78bfa;--green:#48bb78;--red:#e53e3e;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;}
+
+        nav{background:rgba(13,15,20,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+        .nav-logo{font-family:monospace;font-weight:700;font-size:1.1rem;color:var(--accent);}
+        .nav-logo span{color:var(--text);}
+        .nav-links{display:flex;gap:8px;}
+        .btn-back{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:7px;text-decoration:none;font-size:0.85rem;font-weight:600;transition:all 0.2s;}
+        .btn-back:hover{border-color:var(--accent);color:var(--accent);}
+        .user-info{display:flex;align-items:center;gap:10px;}
+        .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;color:white;}
+
+        .page-wrap{max-width:920px;margin:0 auto;padding:36px 24px 80px;}
+        .page-hero{margin-bottom:32px;}
+        .page-hero h1{font-size:2rem;font-weight:800;margin-bottom:8px;}
+        .page-hero p{color:var(--muted);font-size:0.95rem;}
+
+        /* BLOCS */
+        .bloc{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;transition:border-color 0.2s;}
+        .bloc-header{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+        .bloc-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+        .bloc-title{font-size:1.05rem;font-weight:700;}
+        .bloc-desc{color:var(--muted);font-size:0.85rem;margin-bottom:20px;margin-top:4px;}
+
+        /* THÈMES */
+        .themes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;}
+        .theme-card{border:2px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all 0.22s;text-align:center;background:var(--bg3);}
+        .theme-card:hover{transform:translateY(-3px);border-color:var(--accent);}
+        .theme-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,0.25);}
+        .theme-preview{height:38px;border-radius:8px;margin-bottom:10px;position:relative;overflow:hidden;}
+        .theme-check{position:absolute;top:3px;right:5px;font-size:0.8rem;display:none;}
+        .theme-card.active .theme-check{display:block;}
+        .theme-name{font-size:0.78rem;font-weight:700;color:var(--text);}
+
+        /* LANGUES */
+        .langs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;}
+        .lang-card{border:2px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;transition:all 0.2s;background:var(--bg3);display:flex;align-items:center;gap:12px;}
+        .lang-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+        .lang-card.active{border-color:var(--accent);background:rgba(79,142,247,0.08);}
+        .lang-flag{font-size:1.6rem;}
+        .lang-name{font-weight:700;font-size:0.88rem;}
+        .lang-native{color:var(--muted);font-size:0.75rem;margin-top:2px;}
+
+        /* POLICE */
+        .font-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+        .font-btn{padding:10px 18px;border:2px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;font-weight:700;color:var(--muted);transition:all 0.2s;font-family:inherit;}
+        .font-btn:hover{border-color:var(--accent);color:var(--accent);}
+        .font-btn.active{border-color:var(--accent);background:rgba(79,142,247,0.1);color:var(--accent);}
+        .font-preview{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 20px;color:var(--muted);line-height:1.6;}
+
+        /* ESPACEMENT */
+        .spacing-btns{display:flex;gap:10px;flex-wrap:wrap;}
+        .spacing-btn{padding:10px 18px;border:2px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;font-weight:700;color:var(--muted);transition:all 0.2s;font-family:inherit;}
+        .spacing-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+        .spacing-btn.active{border-color:var(--accent2);background:rgba(167,139,250,0.1);color:var(--accent2);}
+
+        /* TOGGLES */
+        .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+        .toggle-row:last-child{border-bottom:none;}
+        .toggle-label{font-size:0.9rem;font-weight:600;}
+        .toggle-desc{color:var(--muted);font-size:0.78rem;margin-top:3px;}
+        .switch{position:relative;width:46px;height:26px;display:inline-block;flex-shrink:0;}
+        .switch input{display:none;}
+        .slider{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border);border-radius:26px;cursor:pointer;transition:0.3s;}
+        .slider:before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--muted);bottom:3px;left:3px;transition:0.3s;}
+        input:checked + .slider{background:rgba(72,187,120,0.2);border-color:var(--green);}
+        input:checked + .slider:before{transform:translateX(20px);background:var(--green);}
+
+        /* RESET */
+        .reset-btn{background:rgba(229,62,62,0.1);border:1px solid rgba(229,62,62,0.3);color:#fc8181;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.88rem;transition:all 0.2s;margin-right:10px;margin-bottom:8px;}
+        .reset-btn:hover{background:rgba(229,62,62,0.2);border-color:var(--red);}
+
+        /* PROFIL */
+        .profil-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .profil-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;}
+        .profil-label{font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+        .profil-value{font-size:0.9rem;font-weight:600;}
+
+        /* MOT DE PASSE */
+        .mdp-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+        .mdp-form input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.9rem;font-family:inherit;}
+        .mdp-form input:focus{outline:none;border-color:var(--accent);}
+        .btn-save-mdp{background:var(--accent);color:white;border:none;padding:11px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.9rem;transition:all 0.2s;margin-top:12px;}
+        .btn-save-mdp:hover{background:#3b7de8;}
+        .mdp-feedback{margin-top:10px;padding:10px 14px;border-radius:6px;font-size:0.85rem;font-weight:600;display:none;}
+        .mdp-ok{background:rgba(72,187,120,0.12);color:#68d391;border-left:3px solid var(--green);display:block;}
+        .mdp-err{background:rgba(229,62,62,0.1);color:#fc8181;border-left:3px solid var(--red);display:block;}
+
+        /* TOAST */
+        .save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid var(--green);border-radius:12px;padding:12px 24px;font-size:0.88rem;font-weight:700;color:var(--green);z-index:9999;transition:transform 0.3s ease;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.4);}
+        .save-toast.show{transform:translateX(-50%) translateY(0);}
+
+        /* CONFIRM */
+        .confirm-msg{margin-top:12px;font-size:0.85rem;font-weight:700;color:var(--green);min-height:20px;}
+    </style>
+    <link rel="stylesheet" href="responsive.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-logo"><span>ABT</span>Code &nbsp;/&nbsp; ⚙️ Paramètres</div>
+    <div class="nav-links">
+        <a href="abt_ide.html" class="btn-back">💻 ABT-Code IDE</a>
+        <a href="dashboard.html" class="btn-back">🏠 Tableau de bord</a>
+    </div>
+    <div class="user-info">
+        <div class="avatar" id="nav-avatar">?</div>
+        <span id="nav-prenom" style="font-size:0.88rem;color:var(--muted);"></span>
+    </div>
+</nav>
+
+<div class="page-wrap">
+    <div class="page-hero">
+        <h1>⚙️ Mes Paramètres</h1>
+        <p id="hero-desc">Personnalisez entièrement votre expérience ABT Code. Tous les réglages sont sauvegardés automatiquement.</p>
+    </div>
+
+    <!-- MON PROFIL + MOT DE PASSE -->
+    <div class="bloc">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(79,142,247,0.15);">👤</div>
+            <div><div class="bloc-title" id="lbl-profil">Mon Profil</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-profil-desc">Informations de votre compte étudiant</div>
+        <div class="profil-grid">
+            <div class="profil-item"><div class="profil-label">Prénom & Nom</div><div class="profil-value" id="p-nom">—</div></div>
+            <div class="profil-item"><div class="profil-label">Email</div><div class="profil-value" id="p-email" style="font-size:0.82rem;">—</div></div>
+            <div class="profil-item"><div class="profil-label">Niveau</div><div class="profil-value" id="p-niveau">—</div></div>
+            <div class="profil-item"><div class="profil-label">École</div><div class="profil-value" id="p-ecole">—</div></div>
+        </div>
+
+        <!-- CHANGER MOT DE PASSE -->
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+            <div style="font-weight:700;margin-bottom:4px;" id="lbl-mdp">🔑 Changer mon mot de passe</div>
+            <div style="color:var(--muted);font-size:0.82rem;margin-bottom:12px;" id="lbl-mdp-desc">Entrez votre mot de passe actuel puis définissez le nouveau.</div>
+            <div class="mdp-form">
+                <input type="password" id="mdp-actuel" placeholder="Mot de passe actuel">
+                <div></div>
+                <input type="password" id="mdp-nouveau" placeholder="Nouveau mot de passe (min. 6 car.)">
+                <input type="password" id="mdp-confirm" placeholder="Confirmer le nouveau mot de passe">
+            </div>
+            <button class="btn-save-mdp" onclick="changerMotDePasse()" id="btn-mdp">Enregistrer le nouveau mot de passe</button>
+            <div class="mdp-feedback" id="mdp-feedback"></div>
+        </div>
+    </div>
+
+    <!-- THÈME DE COULEUR -->
+    <div class="bloc">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(167,139,250,0.15);">🎨</div>
+            <div><div class="bloc-title" id="lbl-theme">Thème de couleur</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-theme-desc">Choisissez l'apparence visuelle de toutes les pages du site.</div>
+        <div class="themes-grid" id="themes-grid">
+            <!-- Généré par JS -->
+        </div>
+        <div class="confirm-msg" id="theme-confirm"></div>
+    </div>
+
+    <!-- LANGUE -->
+    <div class="bloc">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(52,211,153,0.15);">🌍</div>
+            <div><div class="bloc-title" id="lbl-langue">Langue de l'interface</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-langue-desc">Changez la langue de toutes les pages, chapitres, exercices et sous-pages.</div>
+        <div class="langs-grid" id="langs-grid">
+            <!-- Généré par JS -->
+        </div>
+        <div class="confirm-msg" id="lang-confirm"></div>
+    </div>
+
+    <!-- TAILLE DU TEXTE -->
+    <div class="bloc">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(251,191,36,0.15);">🔤</div>
+            <div><div class="bloc-title" id="lbl-taille">Taille du texte</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-taille-desc">Ajustez la taille du texte selon votre confort de lecture.</div>
+        <div class="font-btns">
+            <button class="font-btn" data-size="13" onclick="setFont(13,this)" style="font-size:0.75rem;">A— Très petit</button>
+            <button class="font-btn" data-size="15" onclick="setFont(15,this)" style="font-size:0.88rem;">A Petit</button>
+            <button class="font-btn" data-size="16" onclick="setFont(16,this)" style="font-size:1rem;">A Normal</button>
+            <button class="font-btn" data-size="18" onclick="setFont(18,this)" style="font-size:1.1rem;">A+ Grand</button>
+            <button class="font-btn" data-size="20" onclick="setFont(20,this)" style="font-size:1.25rem;">A++ Très grand</button>
+        </div>
+        <div class="font-preview" id="font-preview">
+            Aperçu : "ABT Code vous aide à maîtriser la programmation pas à pas, avec des cours simples et des exercices interactifs."
+        </div>
+    </div>
+
+    <!-- ESPACEMENT -->
+    <div class="bloc">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(251,146,60,0.15);">📏</div>
+            <div><div class="bloc-title" id="lbl-esp">Espacement des lignes</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-esp-desc">Choisissez l'espacement entre les lignes pour une meilleure lisibilité.</div>
+        <div class="spacing-btns">
+            <button class="spacing-btn" data-sp="1.4" onclick="setSpacing(1.4,this)">📐 Compact</button>
+            <button class="spacing-btn" data-sp="1.6" onclick="setSpacing(1.6,this)">📄 Normal</button>
+            <button class="spacing-btn" data-sp="1.9" onclick="setSpacing(1.9,this)">📋 Aéré</button>
+            <button class="spacing-btn" data-sp="2.2" onclick="setSpacing(2.2,this)">📃 Très aéré</button>
+        </div>
+    </div>
+
+    <!-- OPTIONS VISUELLES -->
+    <div class="bloc">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(244,114,182,0.15);">✨</div>
+            <div><div class="bloc-title" id="lbl-visuel">Options visuelles</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-visuel-desc">Activez ou désactivez les effets visuels.</div>
+        <div class="toggle-row"><div><div class="toggle-label" id="tog-lbl-anim">Animations et transitions</div><div class="toggle-desc" id="tog-desc-anim">Effets lors de la navigation</div></div><label class="switch"><input type="checkbox" id="tog-anim" checked onchange="saveOpt('animations',this.checked)"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label" id="tog-lbl-prog">Afficher ma progression</div><div class="toggle-desc" id="tog-desc-prog">Barres de progression sur l'accueil</div></div><label class="switch"><input type="checkbox" id="tog-prog" checked onchange="saveOpt('progression',this.checked)"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label" id="tog-lbl-son">Sons de confirmation</div><div class="toggle-desc" id="tog-desc-son">Son lors de la validation d'un exercice</div></div><label class="switch"><input type="checkbox" id="tog-son" onchange="saveOpt('sons',this.checked)"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label" id="tog-lbl-focus">Mode lecture (focus)</div><div class="toggle-desc" id="tog-desc-focus">Réduit les distractions visuelles</div></div><label class="switch"><input type="checkbox" id="tog-focus" onchange="saveOpt('focus',this.checked)"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label" id="tog-lbl-notif">Notifications et annonces</div><div class="toggle-desc" id="tog-desc-notif">Annonces et félicitations admin</div></div><label class="switch"><input type="checkbox" id="tog-notif" checked onchange="saveOpt('notif',this.checked)"><span class="slider"></span></label></div>
+    </div>
+
+    <!-- RÉINITIALISATION -->
+    <div class="bloc" style="border-color:rgba(229,62,62,0.2);">
+        <div class="bloc-header">
+            <div class="bloc-icon" style="background:rgba(229,62,62,0.12);">🔄</div>
+            <div><div class="bloc-title" style="color:#fc8181;" id="lbl-reset">Réinitialisation</div></div>
+        </div>
+        <div class="bloc-desc" id="lbl-reset-desc">Remet vos paramètres aux valeurs par défaut. Vos cours ne seront pas affectés.</div>
+        <button class="reset-btn" onclick="resetParams()" id="btn-reset">🔄 Réinitialiser les paramètres visuels</button>
+        <button class="reset-btn" onclick="resetProg()" id="btn-reset-prog" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.3);color:#fbbf24;">🗑️ Effacer ma progression</button>
+    </div>
+</div>
+
+<div class="save-toast" id="save-toast">✓ Sauvegardé</div>
+
+<script>
+// ══════════════════════════════════════
+// DONNÉES
+// ══════════════════════════════════════
+const THEMES_DATA = {
+    dark:     {name:'🌙 Sombre',    g:'linear-gradient(135deg,#0d0f14,#1c2030,#4f8ef7)'},
+    ocean:    {name:'🌊 Océan',     g:'linear-gradient(135deg,#0a1628,#112952,#38bdf8)'},
+    forest:   {name:'🌿 Forêt',     g:'linear-gradient(135deg,#0a1a0f,#122b1a,#34d399)'},
+    sunset:   {name:'🌅 Coucher',   g:'linear-gradient(135deg,#1a0a00,#3a1a00,#f59e0b)'},
+    purple:   {name:'🔮 Galaxie',   g:'linear-gradient(135deg,#120a1e,#251540,#8b5cf6)'},
+    rose:     {name:'🌸 Rose',      g:'linear-gradient(135deg,#1a0a10,#3a1530,#f472b6)'},
+    light:    {name:'☀️ Clair',     g:'linear-gradient(135deg,#f8fafc,#e2e8f0,#3b82f6)'},
+    contrast: {name:'⚡ Contraste', g:'linear-gradient(135deg,#000,#1a1a1a,#ffff00)'},
+};
+
+const LANGUES_DATA = {
+    fr:{flag:'🇫🇷',name:'Français',  native:'Français'},
+    en:{flag:'🇬🇧',name:'Anglais',   native:'English'},
+    ar:{flag:'🇩🇿',name:'Arabe',     native:'العربية'},
+    pt:{flag:'🇧🇷',name:'Portugais', native:'Português'},
+    es:{flag:'🇪🇸',name:'Espagnol',  native:'Español'},
+    sw:{flag:'🇰🇪',name:'Swahili',   native:'Kiswahili'},
+    ha:{flag:'🇳🇬',name:'Haoussa',   native:'Hausa'},
+    bm:{flag:'🇲🇱',name:'Bambara',   native:'Bamanankan'},
+};
+
+// Traductions de cette page
+const T = {
+    fr:{hero:'⚙️ Mes Paramètres',herod:'Personnalisez votre expérience ABT Code. Tous les réglages sont sauvegardés automatiquement.',profil:'Mon Profil',profild:'Informations de votre compte',mdp:'🔑 Changer mon mot de passe',mdpd:'Entrez votre mot de passe actuel puis définissez le nouveau.',theme:'Thème de couleur',themed:'Choisissez l\'apparence visuelle de toutes les pages.',langue:'Langue de l\'interface',langued:'Changez la langue de toutes les pages et chapitres.',taille:'Taille du texte',tailed:'Ajustez la taille selon votre confort de lecture.',esp:'Espacement des lignes',espd:'Choisissez l\'espacement entre les lignes.',visuel:'Options visuelles',visueld:'Activez ou désactivez les effets visuels.',reset:'Réinitialisation',resetd:'Remet vos paramètres aux valeurs par défaut.',toast:'✓ Sauvegardé',btnMdp:'Enregistrer le nouveau mot de passe',btnReset:'🔄 Réinitialiser les paramètres',btnResetP:'🗑️ Effacer ma progression'},
+    en:{hero:'⚙️ My Settings',herod:'Customize your ABT Code experience. All settings are saved automatically.',profil:'My Profile',profild:'Your student account info',mdp:'🔑 Change password',mdpd:'Enter your current password then set the new one.',theme:'Color theme',themed:'Choose the visual appearance of all pages.',langue:'Interface language',langued:'Change the language of all pages and chapters.',taille:'Text size',tailed:'Adjust text size for reading comfort.',esp:'Line spacing',espd:'Choose line spacing for readability.',visuel:'Visual options',visueld:'Enable or disable visual effects.',reset:'Reset settings',resetd:'Restores settings to default values.',toast:'✓ Saved',btnMdp:'Save new password',btnReset:'🔄 Reset settings',btnResetP:'🗑️ Clear my progress'},
+    ar:{hero:'⚙️ إعداداتي',herod:'خصص تجربة ABT Code. يتم حفظ جميع الإعدادات تلقائيًا.',profil:'ملفي الشخصي',profild:'معلومات حسابك',mdp:'🔑 تغيير كلمة المرور',mdpd:'أدخل كلمة مرورك الحالية ثم اضبط الجديدة.',theme:'لون الواجهة',themed:'اختر المظهر البصري لجميع الصفحات.',langue:'لغة الواجهة',langued:'غيّر لغة جميع الصفحات والفصول.',taille:'حجم النص',tailed:'اضبط حجم النص لراحة القراءة.',esp:'تباعد الأسطر',espd:'اختر تباعد الأسطر للقراءة.',visuel:'خيارات مرئية',visueld:'تفعيل أو تعطيل التأثيرات المرئية.',reset:'إعادة تعيين',resetd:'يعيد الإعدادات إلى القيم الافتراضية.',toast:'✓ تم الحفظ',btnMdp:'حفظ كلمة المرور الجديدة',btnReset:'🔄 إعادة تعيين',btnResetP:'🗑️ مسح تقدمي'},
+    pt:{hero:'⚙️ Minhas Configurações',herod:'Personalize sua experiência no ABT Code.',profil:'Meu Perfil',profild:'Informações da sua conta',mdp:'🔑 Alterar senha',mdpd:'Digite sua senha atual e defina a nova.',theme:'Tema de cores',themed:'Escolha a aparência de todas as páginas.',langue:'Idioma',langued:'Mude o idioma de todas as páginas.',taille:'Tamanho do texto',tailed:'Ajuste o tamanho do texto.',esp:'Espaçamento de linhas',espd:'Escolha o espaçamento entre linhas.',visuel:'Opções visuais',visueld:'Ativar ou desativar efeitos visuais.',reset:'Redefinir',resetd:'Redefine as configurações padrão.',toast:'✓ Salvo',btnMdp:'Salvar nova senha',btnReset:'🔄 Redefinir',btnResetP:'🗑️ Limpar progresso'},
+    es:{hero:'⚙️ Mis Ajustes',herod:'Personaliza tu experiencia en ABT Code.',profil:'Mi Perfil',profild:'Información de tu cuenta',mdp:'🔑 Cambiar contraseña',mdpd:'Ingresa tu contraseña actual y establece la nueva.',theme:'Tema de color',themed:'Elige la apariencia de todas las páginas.',langue:'Idioma',langued:'Cambia el idioma de todas las páginas.',taille:'Tamaño del texto',tailed:'Ajusta el tamaño del texto.',esp:'Espaciado de líneas',espd:'Elige el espaciado entre líneas.',visuel:'Opciones visuales',visueld:'Activar o desactivar efectos visuales.',reset:'Restablecer',resetd:'Restablece la configuración predeterminada.',toast:'✓ Guardado',btnMdp:'Guardar nueva contraseña',btnReset:'🔄 Restablecer',btnResetP:'🗑️ Borrar progreso'},
+};
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+    loadProfil();
+    buildThemesGrid();
+    buildLangsGrid();
+    loadFontSize();
+    loadSpacing();
+    loadOptions();
+    applyLang(localStorage.getItem('abt_lang') || 'fr');
+});
+
+// ══════════════════════════════════════
+// PROFIL
+// ══════════════════════════════════════
+function loadProfil() {
+    const email  = localStorage.getItem('abt_session_email') || '';
+    const prenom = localStorage.getItem('abt_session_prenom') || 'Étudiant';
+    const comptes = JSON.parse(localStorage.getItem('abt_comptes') || '[]');
+    const c = comptes.find(x => x.email === email) || {};
+    document.getElementById('nav-avatar').innerText = prenom.charAt(0).toUpperCase();
+    document.getElementById('nav-prenom').innerText = prenom;
+    document.getElementById('p-nom').innerText    = (c.prenom||'') + ' ' + (c.nom||'');
+    document.getElementById('p-email').innerText  = email || '—';
+    document.getElementById('p-niveau').innerText = c.niveau || '—';
+    document.getElementById('p-ecole').innerText  = c.ecole  || '—';
+    document.getElementById('mdp-actuel').placeholder = 'Mot de passe actuel';
+}
+
+// ══════════════════════════════════════
+// CHANGEMENT MOT DE PASSE
+// ══════════════════════════════════════
+function changerMotDePasse() {
+    const email    = localStorage.getItem('abt_session_email') || '';
+    const actuel   = document.getElementById('mdp-actuel').value;
+    const nouveau  = document.getElementById('mdp-nouveau').value;
+    const confirm2 = document.getElementById('mdp-confirm').value;
+    const fb       = document.getElementById('mdp-feedback');
+
+    if (!actuel || !nouveau || !confirm2) {
+        fb.className = 'mdp-feedback mdp-err'; fb.innerText = '❌ Remplissez tous les champs.'; return;
+    }
+    if (nouveau.length < 6) {
+        fb.className = 'mdp-feedback mdp-err'; fb.innerText = '❌ Le nouveau mot de passe doit avoir au moins 6 caractères.'; return;
+    }
+    if (nouveau !== confirm2) {
+        fb.className = 'mdp-feedback mdp-err'; fb.innerText = '❌ Les nouveaux mots de passe ne correspondent pas.'; return;
+    }
+
+    const comptes = JSON.parse(localStorage.getItem('abt_comptes') || '[]');
+    const idx = comptes.findIndex(c => c.email === email);
+
+    if (idx === -1) {
+        fb.className = 'mdp-feedback mdp-err'; fb.innerText = '❌ Compte introuvable.'; return;
+    }
+    if (comptes[idx].mdp !== actuel) {
+        fb.className = 'mdp-feedback mdp-err'; fb.innerText = '❌ Mot de passe actuel incorrect.'; return;
+    }
+
+    comptes[idx].mdp = nouveau;
+    localStorage.setItem('abt_comptes', JSON.stringify(comptes));
+
+    fb.className = 'mdp-feedback mdp-ok';
+    fb.innerText = '✅ Mot de passe modifié avec succès !';
+    document.getElementById('mdp-actuel').value  = '';
+    document.getElementById('mdp-nouveau').value = '';
+    document.getElementById('mdp-confirm').value = '';
+    showToast('Mot de passe mis à jour !');
+}
+
+// ══════════════════════════════════════
+// THÈMES
+// ══════════════════════════════════════
+function buildThemesGrid() {
+    const saved = localStorage.getItem('abt_theme') || 'dark';
+    const grid  = document.getElementById('themes-grid');
+    grid.innerHTML = '';
+
+    Object.entries(THEMES_DATA).forEach(([id, t]) => {
+        const card = document.createElement('div');
+        card.className = 'theme-card' + (id === saved ? ' active' : '');
+        card.innerHTML = `
+            <div class="theme-preview" style="background:${t.g};">
+                <span class="theme-check">✓</span>
+            </div>
+            <div class="theme-name">${t.name}</div>`;
+        card.onclick = () => {
+            document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            if (window.abtApplyTheme) window.abtApplyTheme(id);
+            else localStorage.setItem('abt_theme', id);
+            const el = document.getElementById('theme-confirm');
+            el.innerText = '✅ Thème "' + t.name + '" appliqué sur toutes les pages !';
+            setTimeout(() => el.innerText = '', 3000);
+            showToast('Thème ' + t.name);
+        };
+        grid.appendChild(card);
+    });
+}
+
+// ══════════════════════════════════════
+// LANGUES
+// ══════════════════════════════════════
+function buildLangsGrid() {
+    const saved = localStorage.getItem('abt_lang') || 'fr';
+    const grid  = document.getElementById('langs-grid');
+    grid.innerHTML = '';
+
+    Object.entries(LANGUES_DATA).forEach(([code, l]) => {
+        const card = document.createElement('div');
+        card.className = 'lang-card' + (code === saved ? ' active' : '');
+        card.innerHTML = `
+            <span class="lang-flag">${l.flag}</span>
+            <div>
+                <div class="lang-name">${l.name}</div>
+                <div class="lang-native">${l.native}</div>
+            </div>`;
+        card.onclick = () => {
+            document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            localStorage.setItem('abt_lang', code);
+            applyLang(code);
+            const el = document.getElementById('lang-confirm');
+            el.innerText = '✅ Langue changée en ' + l.name + ' ! Toutes les pages sont mises à jour.';
+            setTimeout(() => el.innerText = '', 3500);
+            showToast('Langue : ' + l.name);
+        };
+        grid.appendChild(card);
+    });
+}
+
+function applyLang(code) {
+    const t = T[code] || T['fr'];
+    document.documentElement.lang = code;
+    document.documentElement.dir  = code === 'ar' ? 'rtl' : 'ltr';
+    document.title = 'ABT Code — ' + t.hero;
+    setText('page-hero h1', t.hero);
+    setText('hero-desc', t.herod);
+    setText('lbl-profil', t.profil);
+    setText('lbl-profil-desc', t.profild);
+    setText('lbl-mdp', t.mdp);
+    setText('lbl-mdp-desc', t.mdpd);
+    setText('lbl-theme', t.theme);
+    setText('lbl-theme-desc', t.themed);
+    setText('lbl-langue', t.langue);
+    setText('lbl-langue-desc', t.langued);
+    setText('lbl-taille', t.taille);
+    setText('lbl-taille-desc', t.tailed);
+    setText('lbl-esp', t.esp);
+    setText('lbl-esp-desc', t.espd);
+    setText('lbl-visuel', t.visuel);
+    setText('lbl-visuel-desc', t.visueld);
+    setText('lbl-reset', t.reset);
+    setText('lbl-reset-desc', t.resetd);
+    setText('save-toast', t.toast);
+    setText('btn-mdp', t.btnMdp);
+    setText('btn-reset', t.btnReset);
+    setText('btn-reset-prog', t.btnResetP);
+}
+
+function setText(id, val) {
+    const el = document.getElementById(id) || document.querySelector('.'+id) || document.querySelector(id);
+    if (el) el.innerText = val;
+}
+
+// ══════════════════════════════════════
+// POLICE & ESPACEMENT
+// ══════════════════════════════════════
+function loadFontSize() {
+    const saved = parseInt(localStorage.getItem('abt_font_size') || '16');
+    document.body.style.fontSize = saved + 'px';
+    document.getElementById('font-preview').style.fontSize = saved + 'px';
+    document.querySelectorAll('.font-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.size) === saved);
+    });
+}
+
+function setFont(size, btn) {
+    document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.body.style.fontSize = size + 'px';
+    document.getElementById('font-preview').style.fontSize = size + 'px';
+    localStorage.setItem('abt_font_size', size);
+    showToast('Taille : ' + size + 'px');
+}
+
+function loadSpacing() {
+    const saved = localStorage.getItem('abt_line_height') || '1.6';
+    document.body.style.lineHeight = saved;
+    document.querySelectorAll('.spacing-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.sp === saved);
+    });
+}
+
+function setSpacing(val, btn) {
+    document.querySelectorAll('.spacing-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.body.style.lineHeight = val;
+    localStorage.setItem('abt_line_height', val);
+    showToast('Espacement appliqué');
+}
+
+// ══════════════════════════════════════
+// OPTIONS ON/OFF
+// ══════════════════════════════════════
+function loadOptions() {
+    const opts = JSON.parse(localStorage.getItem('abt_opts') || '{}');
+    const defs = {animations:true,progression:true,sons:false,focus:false,notif:true};
+    Object.entries({...defs,...opts}).forEach(([k,v]) => {
+        const el = document.getElementById('tog-'+k);
+        if (el) el.checked = v;
+    });
+}
+
+function saveOpt(key, val) {
+    const opts = JSON.parse(localStorage.getItem('abt_opts') || '{}');
+    opts[key] = val;
+    localStorage.setItem('abt_opts', JSON.stringify(opts));
+    showToast(key + ' : ' + (val ? 'Activé' : 'Désactivé'));
+}
+
+// ══════════════════════════════════════
+// RESET
+// ══════════════════════════════════════
+function resetParams() {
+    if (!confirm('Réinitialiser tous les paramètres visuels ?')) return;
+    ['abt_theme','abt_lang','abt_font_size','abt_line_height','abt_opts'].forEach(k => localStorage.removeItem(k));
+    location.reload();
+}
+
+function resetProg() {
+    if (!confirm('Effacer toute votre progression (exercices Python et R) ?')) return;
+    ['abt_exo_py','abt_exo_r'].forEach(k => localStorage.removeItem(k));
+    showToast('Progression effacée');
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+function showToast(msg) {
+    const t = document.getElementById('save-toast');
+    t.innerText = '✓ ' + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+<!-- NAV BAS MOBILE -->
+<div id="mob-nav-p" style="display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,15,20,0.97);border-top:1px solid var(--border);padding:8px 0;z-index:100;justify-content:space-around;">
+    <a href="dashboard.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);text-decoration:none;font-size:0.65rem;padding:4px 10px;"><span style="font-size:1.2rem;">🏠</span>Accueil</a>
+    <a href="apprendre.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);text-decoration:none;font-size:0.65rem;padding:4px 10px;"><span style="font-size:1.2rem;">📚</span>Cours</a>
+    <a href="abt_ide.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);text-decoration:none;font-size:0.65rem;padding:4px 10px;"><span style="font-size:1.2rem;">💻</span>IDE</a>
+    <a href="parametres.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--accent);text-decoration:none;font-size:0.65rem;padding:4px 10px;"><span style="font-size:1.2rem;">⚙️</span>Options</a>
+</div>
+<style>@media(max-width:900px){#mob-nav-p{display:flex!important;}}</style>
+    <script src="abt_ai.js"></script>
+</body>
+</html>

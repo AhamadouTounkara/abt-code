@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code - Chapitre 2 : Variables et Allocation Mémoire</title>
+    <style>
+        /* DESIGN SYSTEM GLOBAL DE LA PLATEFORME ABT CODE */
+        :root {
+            --purple-main: #805AD5;
+            --purple-light: #f3e8ff;
+            --purple-dark: #6b46c1;
+            --blue-main: #3182ce;
+            --blue-light: #ebf8ff;
+            --blue-dark: #2b6cb0;
+            --orange-main: #dd6b20;
+            --orange-light: #fffaf0;
+            --orange-dark: #c05621;
+            --green-success: #48bb78;
+            --green-dark: #38a169;
+            --bg-body: #f4f6f9;
+            --text-main: #2c3e50;
+            --text-muted: #4a5568;
+            --border-gray: #cbd5e0;
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; 
+            color: #333; 
+            margin: 0; 
+            padding: 20px; 
+        }
+
+        .container { 
+            max-width: 950px; 
+            margin: 2rem auto; 
+        }
+
+        /* BARRE DE STATUT SUPÉRIEURE */
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .progress-indicator { 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+        }
+
+        .color-theorie { color: var(--purple-main); }
+        .color-exemple { color: var(--blue-main); }
+        .color-exercice { color: var(--orange-main); }
+
+        .btn-home { 
+            background: #cbd5e0; 
+            color: var(--text-muted); 
+            padding: 8px 16px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            font-size: 0.9rem; 
+            transition: all 0.2s; 
+        }
+        .btn-home:hover { background: #b2bfcc; color: white; }
+
+        /* ARCHITECTURE DES ÉCRANS */
+        .screen-card { 
+            background: white; 
+            padding: 50px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+        }
+        
+        .border-theorie { border-top: 6px solid var(--purple-main); }
+        .border-exemple { border-top: 6px solid var(--blue-main); }
+        .border-exercice { border-top: 6px solid var(--orange-main); }
+
+        h1 { margin-top: 0; font-size: 2.2rem; color: var(--text-main); }
+        h2 { color: var(--text-main); font-size: 1.5rem; margin-top: 35px; border-bottom: 2px solid #edf2f7; padding-bottom: 8px; }
+        p, ul, ol { font-size: 1.1rem; line-height: 1.8; color: var(--text-muted); }
+        li { margin-bottom: 12px; }
+        
+        /* ZONE INTERACTIVE D'EXÉCUTION (SIMULATEUR) */
+        .interactive-simulator { background: #2c3e50; border-radius: 8px; padding: 20px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .simulator-header { color: #fff; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .param-control { background: #34495e; padding: 12px 18px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; color: #ecf0f1; }
+        .param-row { display: flex; align-items: center; gap: 15px; }
+        .param-input { width: 120px; padding: 6px; border: none; border-radius: 4px; font-size: 1rem; text-align: center; }
+        .btn-run { background: var(--green-success); color: white; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .btn-run:hover { background: var(--green-dark); }
+
+        pre { color: #f8f8f2; padding: 0; margin: 0; font-family: 'Consolas', 'Courier New', monospace; font-size: 1.05rem; line-height: 1.6; }
+        .comment { color: #75715e; font-style: italic; }
+        .string { color: #e6db74; }
+        .keyword { color: #f92672; font-weight: bold; }
+        .builtin { color: #66d9ef; }
+        
+        .output-console { background: #1a252f; border-left: 5px solid var(--blue-main); padding: 15px 20px; font-family: 'Consolas', monospace; border-radius: 4px; margin-top: 15px; color: #48bb78; font-size: 1.05rem; min-height: 60px; white-space: pre-line; }
+        
+        /* FORMULAIRES DE DÉFI */
+        .input-box { width: 100%; padding: 15px; font-size: 1.15rem; border: 2px solid var(--border-gray); border-radius: 8px; margin: 20px 0; box-sizing: border-box; }
+        .feedback { margin-top: 15px; padding: 15px; border-radius: 6px; font-weight: bold; display: none; font-size: 1.1rem; }
+        .feedback.correct { background: #c6f6d5; color: #22543d; display: block; border-left: 4px solid var(--green-success); }
+        .feedback.incorrect { background: #fed7d7; color: #742a2a; display: block; border-left: 4px solid #e53e3e; }
+
+        /* BOUTONS DE NAVIGATION */
+        .btn-nav { color: white; padding: 14px 28px; font-weight: bold; border-radius: 8px; text-decoration: none; display: inline-block; float: right; margin-top: 20px; cursor: pointer; border: none; font-size: 1.05rem; transition: all 0.2s; }
+        .btn-theorie { background: var(--purple-main); }
+        .btn-exemple { background: var(--blue-main); }
+        .btn-exercice { background: var(--orange-main); }
+        .btn-suivant { background: var(--green-success); display: none; }
+        .btn-suivant:hover { background: var(--green-dark); }
+        
+        .btn-back { background: #cbd5e0; color: var(--text-muted); padding: 14px 28px; font-weight: bold; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 20px; border: none; font-size: 1.05rem; }
+        .btn-back:hover { background: #b2bfcc; color: white; }
+        .clearfix { clear: both; }
+    </style>
+    <script>
+        if (localStorage.getItem('abt_connecte') !== 'true') {
+            window.location.href = 'Entre.html';
+        }
+    </script>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+
+    <style id="cours-responsive">
+    /* Responsive cours */
+    @media (max-width: 768px) {
+        body { padding: 10px !important; }
+        .container { margin: 0.5rem auto !important; }
+        .screen-card { padding: 18px 14px !important; border-radius: 8px !important; }
+        .screen-card h1 { font-size: 1.3rem !important; line-height: 1.3 !important; }
+        .top-bar {
+            flex-wrap: wrap !important; gap: 6px !important;
+            padding: 10px 12px !important;
+        }
+        .btn-nav, .btn-back {
+            padding: 10px 16px !important; font-size: 0.85rem !important;
+            float: none !important; display: inline-block !important;
+        }
+        .clearfix::after { content: ''; display: table; clear: both; }
+        .interactive-simulator pre { font-size: 0.78rem !important; overflow-x: auto; }
+        .output-console { font-size: 0.82rem !important; }
+        .param-row { flex-direction: column !important; align-items: flex-start !important; }
+        .param-input { width: 100% !important; }
+        .input-box { font-size: 0.95rem !important; }
+        /* Navigation buttons side by side on mobile */
+        .btn-nav, .btn-back { margin: 6px 4px !important; }
+        table { font-size: 0.8rem !important; }
+        table th, table td { padding: 6px 8px !important; }
+        .info-box { padding: 12px !important; font-size: 0.88rem !important; }
+    }
+    @media (max-width: 480px) {
+        .screen-card h1 { font-size: 1.15rem !important; }
+        .btn-nav { width: calc(50% - 8px) !important; text-align: center !important; margin: 4px !important; }
+        .btn-back { width: calc(50% - 8px) !important; text-align: center !important; margin: 4px !important; }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div id="ecran-theorie" class="screen-card border-theorie">
+            <div class="top-bar">
+                <div class="progress-indicator color-theorie">Chapitre 2 : Variables et Allocation (Écran 1 : Théorie)</div>
+                <a href="exercices_python.html" class="btn-home" style="background:#3776ab;color:white;margin-right:6px;">🎯 Exercices Python</a><a href="abt_ia_page.html" class="btn-home" style="background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);">✦ ABT IA</a>
+                    <a href="index.html" class="btn-home">🏠 Menu Principal</a>
+                    <a href="abt_ide.html" class="btn-home" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);">💻 IDE</a>
+                    </div>
+            
+            <h1>2.1 Mécanismes de Stockage et Typage Dynamique</h1>
+            
+            <h2>1. Qu'est-ce qu'une Variable ?</h2>
+            <p>En programmation, une <b>variable</b> est un espace nommé dans la mémoire RAM de l'ordinateur. Elle permet de stocker une donnée pour la réutiliser plus tard. En Python, l'affectation se fait avec le signe égal (<code>=</code>).</p>
+            
+            <h2>2. Types de Données essentiels</h2>
+            <table>
+                <thead>
+                    <tr><th>Type</th><th>Nom Anglais</th><th>Exemple</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><b>int</b></td><td>Integer (Entier)</td><td><code>age = 25</code></td></tr>
+                    <tr><td><b>float</b></td><td>Float (Décimal)</td><td><code>prix = 19.99</code></td></tr>
+                    <tr><td><b>str</b></td><td>String (Texte)</td><td><code>nom = "Ahmad"</code></td></tr>
+                    <tr><td><b>bool</b></td><td>Boolean (Logique)</td><td><code>valide = True</code></td></tr>
+                </tbody>
+            </table>
+
+            <h2>3. Le Casting (Conversion)</h2>
+            <p>Parfois, il faut transformer un type en un autre. Par exemple, convertir du texte en nombre pour faire un calcul. On utilise les fonctions <code>int()</code>, <code>float()</code> ou <code>str()</code>.</p>
+
+            <button class="btn-nav btn-exemple" onclick="voirExemple()">Accéder à l'Écran Exemples Interactifs ➔</button>
+            <div class="clearfix"></div>
+        </div>
+
+        <div id="ecran-exemple" class="screen-card border-exemple" style="display: none;">
+            <div class="top-bar">
+                <div class="progress-indicator color-exemple">Chapitre 2 : Variables (Écran 2 : Exemples Modifiables)</div>
+                <a href="index.html" class="btn-home">🏠 Menu Principal</a>
+                    </div>
+            
+            <h1>2.2 Testez la puissance des variables et du Casting</h1>
+            <p>Modifiez les valeurs ci-dessous pour voir comment Python détecte le type et réalise les conversions de données en direct.</p>
+            
+            <div class="interactive-simulator">
+                <div class="simulator-header">
+                    <span>💻 Simulateur de RAM (Variables & Casting)</span>
+                    <button class="btn-run" onclick="executerCodeExemple2()">▶ Lancer le Code Python</button>
+                </div>
+                
+                <div class="param-control">
+                    <div class="param-row">
+                        <label for="valeur-initiale">Valeur initiale (total) :</label>
+                        <input type="number" id="valeur-initiale" class="param-input" value="100">
+                    </div>
+                    <div class="param-row">
+                        <label for="valeur-saisie">Simulation d'entrée (str) :</label>
+                        <input type="text" id="valeur-saisie" class="param-input" value="50">
+                    </div>
+                </div>
+
+                <pre><span class="comment"># 1. Détection du type dynamique</span>
+total = <span id="code-init-dynamique" class="string">100</span>
+<span class="builtin">print</span>(<span class="string">"Type de départ :"</span>, <span class="builtin">type</span>(total))
+
+<span class="comment"># 2. Conversion (Casting) du texte en nombre</span>
+saisie = <span id="code-saisie-dynamique" class="string">"50"</span>
+nombre = <span class="builtin">int</span>(saisie)
+resultat = total + nombre
+
+<span class="builtin">print</span>(<span class="string">"Somme calculée :"</span>, resultat)</pre>
+
+                <div id="console-output-ch2" class="output-console">Cliquez sur "Lancer le Code" pour voir l'exécution...</div>
+            </div>
+
+            <button class="btn-back" onclick="voirTheorie()">⬅ Retour à la Théorie</button>
+            <button class="btn-nav btn-exercice" onclick="voirExercice()">Passer à l'Exercice de Validation ➔</button>
+            <div class="clearfix"></div>
+        </div>
+
+        <div id="ecran-exercice" class="screen-card border-exercice" style="display: none;">
+            <div class="top-bar">
+                <div class="progress-indicator color-exercice">Chapitre 2 : Variables (Écran 3 : Défi)</div>
+                <a href="index.html" class="btn-home">🏠 Menu Principal</a>
+                    </div>
+            
+            <h1>2.3 Examen de Validation du Module 2</h1>
+            <p>Prouvez votre maîtrise de la syntaxe Python pour débloquer la suite.</p>
+            
+            <p><b>Énoncé du Défi :</b> Soit une variable nommée <code>total</code>. Écrivez l'instruction la plus courte possible (en utilisant l'opérateur augmenté, <b>sans aucun espace</b>) permettant d'ajouter directement la valeur 5 à cette variable.</p>
+            
+            <input type="text" id="reponse-ch2" class="input-box" placeholder="Tapez votre code ici (ex: x+=1)..." onkeydown="if(event.key === 'Enter') validerExercice2()">
+            
+            <div id="msg-ch2" class="feedback"></div>
+            
+            <button id="btn-retour-ch2" class="btn-back" onclick="retourExemple()">⬅ Revoir les Exemples</button>
+            <button id="btn-valider-ch2" class="btn-nav btn-exercice" onclick="validerExercice2()">Soumettre mon Code</button>
+            
+            <a href="notion3_exercice.html" id="btn-suivant-ch2" class="btn-nav btn-suivant">Ouvrir le Chapitre 3 (Les Conditions) ➔</a>
+            <div class="clearfix"></div>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = function() {
+            document.getElementById('valeur-initiale').addEventListener('input', function() {
+                document.getElementById('code-init-dynamique').innerText = this.value;
+            });
+            document.getElementById('valeur-saisie').addEventListener('input', function() {
+                document.getElementById('code-saisie-dynamique').innerText = '"' + this.value + '"';
+            });
+        }
+
+        function executerCodeExemple2() {
+            const initVal = parseFloat(document.getElementById('valeur-initiale').value);
+            const saisieVal = document.getElementById('valeur-saisie').value.trim();
+            const consoleZone = document.getElementById('console-output-ch2');
+            
+            if (isNaN(initVal)) {
+                consoleZone.style.color = "#fc8181";
+                consoleZone.innerText = "Error: Valeur initiale invalide.";
+                return;
+            }
+
+            consoleZone.style.color = "#48bb78";
+            let typePython = Number.isInteger(initVal) ? "<class 'int'>" : "<class 'float'>";
+            let conversion = parseInt(saisieVal);
+            
+            let output = "Type de départ : " + typePython + "\n";
+            if (isNaN(conversion)) {
+                output += "Erreur : Impossible de convertir '" + saisieVal + "' en nombre !";
+                consoleZone.style.color = "#fc8181";
+            } else {
+                output += "Somme calculée : " + (initVal + conversion);
+            }
+            consoleZone.innerText = output;
+        }
+
+        function voirExemple() {
+            document.getElementById('ecran-theorie').style.display = 'none';
+            document.getElementById('ecran-exemple').style.display = 'block';
+            window.scrollTo(0,0);
+            executerCodeExemple2();
+        }
+        function voirTheorie() {
+            document.getElementById('ecran-exemple').style.display = 'none';
+            document.getElementById('ecran-theorie').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+        function voirExercice() {
+            document.getElementById('ecran-exemple').style.display = 'none';
+            document.getElementById('ecran-exercice').style.display = 'block';
+            window.scrollTo(0,0);
+            setTimeout(() => { document.getElementById('reponse-ch2').focus(); }, 100);
+        }
+        function retourExemple() {
+            document.getElementById('ecran-exercice').style.display = 'none';
+            document.getElementById('ecran-exemple').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+
+        // --- VALIDATION SANS BLOCAGE ---
+        function validerExercice2() {
+            const reponse = document.getElementById('reponse-ch2').value.trim().replace(/\s+/g, '');
+            const feedback = document.getElementById('msg-ch2');
+            const btnSuivant = document.getElementById('btn-suivant-ch2');
+            
+            if (reponse === "total+=5") {
+                feedback.className = "feedback correct";
+                feedback.innerText = "🎉 Parfait ! L'opérateur augmenté (+=) est la méthode la plus efficace. Vous pouvez continuer.";
+                btnSuivant.style.display = 'inline-block';
+            } else {
+                feedback.className = "feedback incorrect";
+                feedback.innerText = "❌ Ce n'est pas tout à fait ça. Rappelez-vous : pas d'espaces, et on ajoute 5 à 'total'. Indice : total += ...";
+                btnSuivant.style.display = 'none';
+            }
+        }
+    </script>
+    <script src="abt_ai.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code — Maintenance</title>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg,#0d0f14);color:var(--text,#e2e8f0);font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;}
+        .wrap{max-width:500px;}
+        .icon{font-size:5rem;margin-bottom:20px;}
+        h1{font-size:1.8rem;margin-bottom:10px;color:var(--accent,#4f8ef7);}
+        p{color:var(--muted,#64748b);line-height:1.6;font-size:1rem;}
+        .prog{margin:28px 0;background:var(--bg3,#1c2030);border-radius:20px;height:8px;overflow:hidden;}
+        .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent,#4f8ef7),var(--accent2,#a78bfa));border-radius:20px;width:0%;animation:load 3s ease forwards;}
+        @keyframes load{to{width:75%;}}
+        .contact{margin-top:20px;font-size:0.85rem;color:var(--muted,#64748b);}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="icon">🔧</div>
+        <h1>Maintenance en cours</h1>
+        <p>ABT Code est temporairement indisponible pour des améliorations. Nous serons de retour très bientôt !</p>
+        <div class="prog"><div class="prog-fill"></div></div>
+        <p>Progression de la mise à jour...</p>
+        <div class="contact">Des questions ? Contactez l'administrateur ABT Code.</div>
+    </div>
+    <script>
+        // Si l'admin est connecté, le laisser passer
+        if(localStorage.getItem('abt_admin_bypass')==='true'){
+            window.location.href='dashboard.html';
+        }
+    </script>
+<script src="abt_ai.js"></script>
+</body>
+</html>

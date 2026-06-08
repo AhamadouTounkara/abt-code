@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABT IA — Assistant Éducatif</title>
+<script src="settings.js"></script>
+<script src="themes.js"></script>
+<link rel="stylesheet" href="responsive.css">
+<script>if(localStorage.getItem('abt_connecte')!=='true'){window.location.href='Entre.html';}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg,#0d0f14);color:var(--text,#e2e8f0);font-family:'Segoe UI',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+nav{background:rgba(13,15,20,0.97);border-bottom:1px solid var(--border,#2a2f45);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.nav-logo{font-family:monospace;font-weight:800;font-size:1.05rem;background:linear-gradient(135deg,#4f8ef7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-links{display:flex;gap:8px;}
+.btn-nav{background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);color:var(--muted,#64748b);padding:6px 14px;border-radius:7px;text-decoration:none;font-size:0.82rem;font-weight:600;transition:all 0.2s;cursor:pointer;}
+.btn-nav:hover{border-color:#4f8ef7;color:#4f8ef7;}
+.chat-container{flex:1;display:flex;flex-direction:column;max-width:860px;width:100%;margin:0 auto;padding:0 16px;min-height:0;}
+.chat-header{padding:20px 0 16px;text-align:center;flex-shrink:0;}
+.chat-header h1{font-size:1.6rem;font-weight:800;margin-bottom:6px;background:linear-gradient(135deg,#4f8ef7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.chat-header p{color:var(--muted,#64748b);font-size:0.88rem;}
+.badge-edu{display:inline-block;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);color:#4f8ef7;padding:3px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;margin-top:6px;}
+.messages{flex:1;overflow-y:auto;padding:10px 0;display:flex;flex-direction:column;gap:12px;min-height:0;scrollbar-width:thin;}
+.msg-wrap{display:flex;gap:10px;align-items:flex-start;}
+.msg-wrap.user{flex-direction:row-reverse;}
+.msg-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.msg-avatar.ai{background:linear-gradient(135deg,#4f8ef7,#a78bfa);}
+.msg-avatar.user{background:linear-gradient(135deg,#48bb78,#38a169);font-size:0.88rem;font-weight:800;color:white;}
+.msg-bubble{max-width:75%;padding:12px 16px;border-radius:16px;font-size:0.9rem;line-height:1.6;word-break:break-word;}
+.msg-bubble.ai{background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);border-top-left-radius:4px;}
+.msg-bubble.user{background:rgba(79,142,247,0.15);border:1px solid rgba(79,142,247,0.25);border-top-right-radius:4px;}
+.msg-bubble code{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-family:'Consolas',monospace;font-size:0.85rem;color:#4ec9b0;}
+.msg-bubble pre{background:#1a1a2e;border-radius:8px;padding:14px;margin:10px 0;overflow-x:auto;border:1px solid var(--border,#2a2f45);}
+.msg-bubble pre code{background:none;padding:0;color:#f8f8f2;font-size:0.85rem;display:block;}
+.msg-time{font-size:0.68rem;color:var(--muted,#64748b);margin-top:4px;text-align:right;}
+.typing-indicator{display:flex;gap:4px;padding:4px 0;}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--muted,#64748b);animation:typingAnim 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:0.2s;}
+.typing-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes typingAnim{0%,80%,100%{transform:scale(0.8);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
+.suggestions{padding:8px 0;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
+.suggest-btn{background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);color:var(--muted,#64748b);padding:6px 14px;border-radius:20px;font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.suggest-btn:hover{border-color:#4f8ef7;color:#4f8ef7;}
+.input-area{padding:12px 0 16px;display:flex;gap:10px;flex-shrink:0;}
+.input-wrap{flex:1;background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);border-radius:12px;display:flex;align-items:flex-end;padding:8px 14px;gap:8px;transition:border-color 0.2s;}
+.input-wrap:focus-within{border-color:#4f8ef7;}
+#chat-input{flex:1;background:none;border:none;color:var(--text,#e2e8f0);font-size:0.92rem;outline:none;resize:none;max-height:120px;min-height:24px;line-height:1.5;font-family:inherit;}
+#chat-input::placeholder{color:var(--muted,#64748b);}
+#send-btn{background:linear-gradient(135deg,#4f8ef7,#a78bfa);border:none;width:38px;height:38px;border-radius:9px;cursor:pointer;color:white;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;}
+#send-btn:hover{opacity:0.85;transform:scale(1.05);}
+.edu-badge{background:rgba(72,187,120,0.1);border:1px solid rgba(72,187,120,0.25);color:#48bb78;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;display:inline-block;margin-left:6px;}
+.out-of-scope{background:rgba(251,191,36,0.08);border-left:3px solid #fbbf24;padding:10px 14px;border-radius:4px;color:#fbbf24;font-size:0.85rem;margin-top:6px;}
+a.ai-link{color:#4f8ef7;text-decoration:none;font-weight:600;}
+a.ai-link:hover{text-decoration:underline;}
+@media(max-width:600px){.msg-bubble{max-width:88%;}.chat-header h1{font-size:1.3rem;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">✦ ABT IA</div>
+  <div class="nav-links">
+    <a href="abt_ide.html" class="btn-nav">💻 IDE</a>
+    <a href="apprendre.html" class="btn-nav">📚 Cours</a>
+    <a href="dashboard.html" class="btn-nav">🏠 Accueil</a>
+  </div>
+</nav>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <h1>✦ ABT IA</h1>
+    <p>Assistant IA spécialisé en apprentissage de la programmation</p>
+    <span class="badge-edu">🎓 Éducation uniquement · Python · R · SQL · HTML · CSS · JavaScript</span>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="msg-wrap">
+      <div class="msg-avatar ai">✦</div>
+      <div>
+        <div class="msg-bubble ai">
+          Bonjour ! Je suis <b>ABT IA</b>, votre assistant spécialisé en <b>programmation et apprentissage du code</b>.<br><br>
+          Je peux vous aider à :<br>
+          🐍 <b>Python</b> — écrire, expliquer, corriger du code<br>
+          📊 <b>R</b> — statistiques, vecteurs, visualisation<br>
+          🗄️ <b>SQL</b> — requêtes, jointures, bases de données<br>
+          🌐 <b>HTML/CSS/JS</b> — création de pages web<br>
+          💡 <b>Idées de projets</b> éducatifs et algorithmiques<br>
+          🐛 <b>Débogage</b> — trouver et corriger les erreurs<br><br>
+          <span style="color:var(--muted,#64748b);font-size:0.85rem;">⚠️ Je suis limité aux sujets éducatifs liés à la programmation.</span>
+        </div>
+        <div class="msg-time">ABT IA · Maintenant</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="suggest-btn" onclick="sendSuggestion(this)">Expliquer les boucles Python</button>
+    <button class="suggest-btn" onclick="sendSuggestion(this)">Écrire une fonction R</button>
+    <button class="suggest-btn" onclick="sendSuggestion(this)">Requête SQL avec jointure</button>
+    <button class="suggest-btn" onclick="sendSuggestion(this)">Idée de projet Python</button>
+    <button class="suggest-btn" onclick="sendSuggestion(this)">Corriger mon code</button>
+    <button class="suggest-btn" onclick="sendSuggestion(this)">Créer une page HTML</button>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="chat-input" placeholder="Posez votre question sur la programmation..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+        oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()" title="Envoyer">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const prenom = localStorage.getItem('abt_session_prenom') || 'Étudiant';
+let history = [];
+
+// ══════════════════════════════════════════════
+// MOTEUR IA ÉDUCATIF
+// ══════════════════════════════════════════════
+const EDU_KEYWORDS = ['python','javascript','js','html','css','sql','r ','algorith','program','code','fonction','variable','boucle','condition','classe','objet','array','liste','tableau','dict','base de données','requête','select','for','while','if','def','return','import','print','plot','ggplot','pandas','numpy','flask','django','node','react','vecteur','matrix','dataframe','erreur','bug','debug','projet','exercice','apprendre','langage','script','compiler','exécuter','syntax','méthode','library','framework','api','json','csv','fichier','input','output','terminal','ide','vscode','git','github','web','serveur','client','frontend','backend','data','statistique','régression','machine learning','ia','intelligence artificielle'];
+
+const OUT_SCOPE = ['politique','sport','musique','film','cuisine','voyage','amour','religion','actualité','météo','jeu vidéo','bitcoin','crypto','médecine','droit','finance','bourse','physique','chimie','biologie','guerre','histoire','géographie','philosophie','psychologie'];
+
+function isEducational(msg) {
+    const m = msg.toLowerCase();
+    if (EDU_KEYWORDS.some(k => m.includes(k))) return true;
+    if (m.includes('?') && m.length < 50) return true; // courtes questions générales OK
+    return false;
+}
+
+function isOutOfScope(msg) {
+    const m = msg.toLowerCase();
+    return OUT_SCOPE.some(k => m.includes(k));
+}
+
+// ── Génération de réponses ──
+function generateResponse(msg) {
+    const m = msg.toLowerCase();
+
+    // Salutations
+    if (/^(bonjour|salut|bonsoir|hello|hi|coucou)/.test(m)) {
+        return `Bonjour **${prenom}** ! 👋 Comment puis-je vous aider avec votre apprentissage de la programmation aujourd'hui ?`;
+    }
+
+    // Hors sujet
+    if (isOutOfScope(msg) && !isEducational(msg)) {
+        return `__OUTSCOPE__Je suis spécialisé uniquement dans l'enseignement de la **programmation** et du **code**.\n\nJe ne peux pas répondre aux questions sur ce sujet. Mais je peux vous aider avec Python, R, SQL, HTML, CSS, JavaScript, ou tout autre langage de programmation ! 🎓`;
+    }
+
+    // Variables Python
+    if (m.includes('variable') && (m.includes('python') || !m.includes('r '))) {
+        return `## Variables en Python\n\nEn Python, une variable est créée simplement par assignation :\n\`\`\`python\n# Différents types de variables\nnom    = "Aminata"      # chaîne de texte (str)\nage    = 21             # entier (int)\nnote   = 16.5           # décimal (float)\nactif  = True           # booléen (bool)\n\n# Afficher les types\nprint(type(nom))    # <class 'str'>\nprint(type(age))    # <class 'int'>\n\`\`\`\n\n💡 **Règles importantes :**\n- Les noms de variables sont sensibles à la casse (`age` ≠ `Age`)\n- Pas d'espaces ni de caractères spéciaux\n- Ne pas commencer par un chiffre\n\nVoulez-vous en savoir plus sur un type spécifique ?`;
+    }
+
+    // Boucles Python
+    if ((m.includes('boucle') || m.includes('for') || m.includes('while')) && (m.includes('python') || !m.includes('r '))) {
+        return `## Boucles en Python\n\n**Boucle \`for\`** — quand on connaît le nombre d'itérations :\n\`\`\`python\n# Parcourir une plage de nombres\nfor i in range(5):\n    print(f"Tour {i}")\n\n# Parcourir une liste\nfruits = ["mangue", "banane", "papaye"]\nfor fruit in fruits:\n    print(fruit.upper())\n\`\`\`\n\n**Boucle \`while\`** — tant qu'une condition est vraie :\n\`\`\`python\ncompteur = 0\nwhile compteur < 5:\n    print(f"Compteur : {compteur}")\n    compteur += 1  # ⚠️ Ne pas oublier cette ligne !\n\`\`\`\n\n💡 **Différence clé :** Utilisez \`for\` quand vous connaissez le nombre de répétitions, et \`while\` quand vous attendez une condition.`;
+    }
+
+    // Fonctions Python
+    if ((m.includes('fonction') || m.includes('def') || m.includes('return')) && (m.includes('python') || !m.includes('r '))) {
+        return `## Fonctions en Python\n\nUne fonction regroupe des instructions réutilisables :\n\`\`\`python\n# Définition basique\ndef saluer(prenom):\n    return f"Bonjour {prenom} !"\n\n# Avec valeur par défaut\ndef calculer_moyenne(notes, arrondi=2):\n    if not notes:\n        return 0\n    moy = sum(notes) / len(notes)\n    return round(moy, arrondi)\n\n# Appels\nprint(saluer("Aminata"))           # Bonjour Aminata !\nprint(calculer_moyenne([12,18,15])) # 15.0\nprint(calculer_moyenne([12,18,15], arrondi=1)) # 15.0\n\`\`\`\n\n💡 **Bonnes pratiques :**\n- Un nom descriptif (verbe)\n- Une seule responsabilité par fonction\n- Documenter avec un docstring si nécessaire`;
+    }
+
+    // Conditions Python
+    if (m.includes('condition') || m.includes('if') || m.includes('elif') || m.includes('else')) {
+        return `## Conditions en Python\n\n\`\`\`python\nnote = 15.5\n\nif note >= 16:\n    mention = "Très bien"\nelif note >= 14:\n    mention = "Bien"\nelif note >= 12:\n    mention = "Assez bien"\nelif note >= 10:\n    mention = "Passable"\nelse:\n    mention = "Insuffisant"\n\nprint(f"Mention : {mention}")  # Bien\n\`\`\`\n\n**Opérateurs de comparaison :**\n- \`==\` égal, \`!=\` différent\n- \`>\`, \`<\`, \`>=\`, \`<=\`\n- \`and\`, \`or\`, \`not\` (opérateurs logiques)\n\n\`\`\`python\n# Combinaison\nif note >= 10 and note <= 20:\n    print("Note valide")\n\`\`\``;
+    }
+
+    // R vecteurs
+    if (m.includes('vecteur') && m.includes('r')) {
+        return `## Vecteurs en R\n\nLe vecteur est l'unité de base en R :\n\`\`\`r\n# Créer un vecteur avec c()\nnotes <- c(12, 16, 18, 14, 9, 20)\n\n# Opérations vectorisées (sans boucle !)\nprint(notes * 2)          # Multiplie chaque élément par 2\nprint(notes[notes >= 15]) # Filtrer les notes >= 15\n\n# Statistiques\ncat("Moyenne :", mean(notes), "\\n")     # 14.83\ncat("Écart-type :", round(sd(notes),2), "\\n") # 3.97\ncat("Max :", max(notes), "\\n")          # 20\n\`\`\`\n\n💡 **Particularité R :** Les indices commencent à **1** (pas 0 comme Python)`;
+    }
+
+    // SQL SELECT
+    if (m.includes('select') || (m.includes('requête') && m.includes('sql'))) {
+        return `## Requêtes SQL\n\n**SELECT basique :**\n\`\`\`sql\n-- Tous les étudiants\nSELECT * FROM etudiants;\n\n-- Colonnes spécifiques\nSELECT prenom, nom, note FROM notes\nWHERE note >= 15\nORDER BY note DESC;\n\n-- Agrégation\nSELECT niveau, COUNT(*) as nb, AVG(note) as moy\nFROM notes\nJOIN etudiants ON notes.etudiant_id = etudiants.id\nGROUP BY niveau\nHAVING AVG(note) > 12;\n\`\`\`\n\n**Jointure (JOIN) :**\n\`\`\`sql\nSELECT e.prenom, e.nom, n.note, c.titre\nFROM notes n\nJOIN etudiants e ON n.etudiant_id = e.id\nJOIN cours c ON n.cours_id = c.id\nORDER BY n.note DESC;\n\`\`\``;
+    }
+
+    // HTML page
+    if (m.includes('html') && (m.includes('page') || m.includes('créer') || m.includes('faire'))) {
+        return `## Créer une page HTML\n\n\`\`\`html\n<!DOCTYPE html>\n<html lang="fr">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Ma Page</title>\n    <style>\n        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }\n        h1   { color: #4f8ef7; }\n        .btn { background: #4f8ef7; color: white; padding: 10px 20px;\n               border: none; border-radius: 6px; cursor: pointer; }\n    </style>\n</head>\n<body>\n    <h1>Mon titre</h1>\n    <p>Mon premier paragraphe HTML !</p>\n    <button class="btn" onclick="alert('Bonjour!')">Cliquez ici</button>\n</body>\n</html>\n\`\`\`\n\nEssayez ce code dans l'<a href="abt_ide.html" class="ai-link">IDE ABT-Code</a> !`;
+    }
+
+    // JavaScript
+    if (m.includes('javascript') || m.includes(' js ') || m.includes('dom')) {
+        return `## JavaScript — Fondamentaux\n\n\`\`\`javascript\n// Variables modernes (ES2024)\nconst nom = "Aminata";     // immuable\nlet   age = 21;            // modifiable\n\n// Fonctions fléchées\nconst carre = n => n ** 2;\nconst saluer = (prenom, titre="Étudiant") => \`Bonjour \${titre} \${prenom} !\`;\n\nconsole.log(saluer("Moussa"));    // Bonjour Étudiant Moussa !\nconsole.log([1,2,3,4,5].map(carre)); // [1, 4, 9, 16, 25]\n\n// Manipulation du DOM\ndocument.getElementById('monId').innerText = "Nouveau texte";\ndocument.querySelector('.maClasse').style.color = "red";\n\`\`\`\n\nVoulez-vous voir un exemple avec des **événements**, des **classes ES6**, ou des **requêtes fetch** ?`;
+    }
+
+    // Idée de projet
+    if (m.includes('projet') || m.includes('idée') || m.includes('que faire')) {
+        const lang = m.includes('r ') ? 'R' : m.includes('sql') ? 'SQL' : m.includes('html') || m.includes('web') ? 'Web' : 'Python';
+        const projets = {
+            Python: ['📊 Analyseur de notes d\'étudiants (lire CSV, calculer moyennes, afficher graphiques)','🎮 Jeu de devinettes avec score et niveaux de difficulté','📝 Gestionnaire de tâches en ligne de commande','🧮 Calculatrice scientifique avec historique','📈 Simulateur de budget personnel'],
+            R: ['📊 Analyse statistique d\'un dataset réel (notes, salaires)','📈 Visualisation de données avec ggplot2','🔬 Régression linéaire sur données économiques','📉 Analyse de séries temporelles'],
+            SQL: ['🏫 Base de données d\'une école (étudiants, cours, notes)','🏥 Gestion d\'une clinique (patients, médecins, rendez-vous)','📚 Catalogue d\'une bibliothèque'],
+            Web: ['🌐 Portfolio personnel en HTML/CSS','🎨 Page d\'accueil responsive avec animations CSS','📱 Application To-Do List en JavaScript','🛒 Interface e-commerce simple']
+        };
+        const ideas = projets[lang] || projets.Python;
+        return `## 💡 Idées de projets ${lang}\n\n${ideas.map((p,i)=>`**${i+1}.** ${p}`).join('\n\n')}\n\n---\n\n**Quel projet vous intéresse ?** Je peux vous guider étape par étape, vous donner la structure du code, et répondre à vos questions ! 🚀`;
+    }
+
+    // Débogage / erreur
+    if (m.includes('erreur') || m.includes('bug') || m.includes('debug') || m.includes('ne marche pas') || m.includes('problème')) {
+        return `## 🐛 Débogage\n\nPour vous aider à corriger votre erreur, partagez :\n1. **Votre code** (copiez-collez le)\n2. **Le message d'erreur** exact\n3. **Ce que vous attendiez** comme résultat\n\n**Erreurs Python courantes :**\n\`\`\`python\n# SyntaxError — oubli de : ou indentation\nif x > 0     # ❌ manque :\nif x > 0:    # ✅\n\n# NameError — variable non définie\nprint(resultat)  # ❌ si 'resultat' n'existe pas\n\n# IndentationError — mauvais espacement\ndef ma_fonction():\nprint("bonjour")  # ❌ non indenté\n    print("bonjour")  # ✅\n\n# TypeError — mauvais type\n"5" + 5   # ❌ str + int\nint("5") + 5  # ✅\n\`\`\`\n\nCollez votre code et je l'analyserai ! 🔍`;
+    }
+
+    // Classe/POO
+    if (m.includes('classe') || m.includes('objet') || m.includes('poo') || m.includes('héritage')) {
+        return `## Programmation Orientée Objet en Python\n\n\`\`\`python\nclass Etudiant:\n    # Attribut de classe\n    institution = "ABT Code"\n    \n    def __init__(self, nom, notes):\n        self.nom   = nom      # attribut d'instance\n        self.notes = notes\n    \n    def moyenne(self):\n        return sum(self.notes) / len(self.notes)\n    \n    def mention(self):\n        moy = self.moyenne()\n        if moy >= 16: return "Très bien"\n        if moy >= 14: return "Bien"\n        return "Passable"\n    \n    def __repr__(self):\n        return f"Etudiant({self.nom}, moy={self.moyenne():.1f})"\n\n# Héritage\nclass EtudiantMaster(Etudiant):\n    def __init__(self, nom, notes, sujet_these):\n        super().__init__(nom, notes)\n        self.sujet_these = sujet_these\n\ne = Etudiant("Aminata", [15, 18, 12, 20])\nprint(e)           # Etudiant(Aminata, moy=16.2)\nprint(e.mention()) # Très bien\n\`\`\``;
+    }
+
+    // Question générale sur le site
+    if (m.includes('abt') || m.includes('site') || m.includes('cours') || m.includes('exercice')) {
+        return `Je suis **ABT IA**, l'assistant IA de la plateforme ABT Code.\n\nPour les questions sur le site, je vous recommande :\n- 📚 <a href="apprendre.html" class="ai-link">Cours Python & R</a>\n- 🎯 <a href="exercices_python.html" class="ai-link">Exercices Python</a> et <a href="exercices_r.html" class="ai-link">Exercices R</a>\n- 💻 <a href="abt_ide.html" class="ai-link">ABT-Code IDE</a>\n\nPour une question de **programmation**, je suis là ! 🎓`;
+    }
+
+    // Réponse par défaut éducative
+    return `Je n'ai pas encore de réponse précise sur ce sujet, mais voici ce que je peux faire :\n\n- 🐍 Expliquer du **code Python** (variables, boucles, fonctions, classes)\n- 📊 Aider avec le langage **R** (vecteurs, statistiques, graphiques)\n- 🗄️ Écrire des **requêtes SQL** (SELECT, JOIN, GROUP BY)\n- 🌐 Créer des pages **HTML/CSS/JavaScript**\n- 🐛 **Déboguer** votre code\n- 💡 Proposer des **idées de projets** éducatifs\n\nPosez-moi une question plus précise ou copiez votre code pour que je l'analyse ! 🎓`;
+}
+
+// ── Markdown léger ──
+function renderMarkdown(text) {
+    return text
+        .replace(/^## (.+)$/gm, '<strong style="font-size:1rem;color:var(--accent,#4f8ef7);">$1</strong><br>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+            `<pre><code>${code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code></pre>`)
+        .replace(/^- (.+)$/gm, '• $1')
+        .replace(/\n/g, '<br>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="ai-link" target="_blank">$1</a>');
+}
+
+// ── Envoi message ──
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    autoResize(input);
+
+    addMessage('user', msg);
+    history.push({role:'user', content:msg});
+
+    // Typing
+    const typingId = addTyping();
+
+    setTimeout(() => {
+        removeTyping(typingId);
+        let resp = generateResponse(msg);
+        const isOOS = resp.startsWith('__OUTSCOPE__');
+        if (isOOS) resp = resp.replace('__OUTSCOPE__','');
+        addMessage('ai', resp, isOOS);
+        history.push({role:'ai', content:resp});
+    }, 600 + Math.random()*800);
+}
+
+function sendSuggestion(btn) {
+    document.getElementById('chat-input').value = btn.innerText;
+    sendMessage();
+}
+
+function addMessage(role, content, outScope=false) {
+    const msgs = document.getElementById('messages');
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap' + (role==='user'?' user':'');
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar ' + role;
+    avatar.innerText = role==='ai' ? '✦' : (prenom.charAt(0).toUpperCase());
+    const inner = document.createElement('div');
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble ' + role;
+    if (outScope) {
+        bubble.innerHTML = '<div class="out-of-scope">⚠️ Question hors domaine éducatif</div>' + renderMarkdown(content);
+    } else {
+        bubble.innerHTML = renderMarkdown(content);
+    }
+    const time = document.createElement('div');
+    time.className = 'msg-time';
+    time.innerText = (role==='ai'?'ABT IA':'Vous') + ' · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    inner.appendChild(bubble);
+    inner.appendChild(time);
+    wrap.appendChild(avatar);
+    wrap.appendChild(inner);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTyping() {
+    const msgs = document.getElementById('messages');
+    const id = 'typing-' + Date.now();
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap'; wrap.id = id;
+    const av = document.createElement('div'); av.className='msg-avatar ai'; av.innerText='✦';
+    const bubble = document.createElement('div'); bubble.className='msg-bubble ai';
+    bubble.innerHTML='<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    wrap.appendChild(av); wrap.appendChild(bubble);
+    msgs.appendChild(wrap); msgs.scrollTop = msgs.scrollHeight;
+    return id;
+}
+
+function removeTyping(id) { document.getElementById(id)?.remove(); }
+
+function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+</script>
+<script src="abt_ai.js"></script>
+</body>
+</html>

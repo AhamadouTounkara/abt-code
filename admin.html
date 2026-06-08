@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABT Code — Administration</title>
+<script src="settings.js"></script>
+<link rel="stylesheet" href="abt.css">
+<style>
+body{overflow-x:hidden;}
+/* Layout admin */
+.admin-wrap{display:flex;min-height:calc(100vh - 58px);}
+.adm-sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:12px 0;flex-shrink:0;overflow-y:auto;}
+.adm-section{padding:4px 12px 2px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:10px;}
+.adm-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:0.86rem;color:var(--muted);transition:all 0.15s;border-left:3px solid transparent;}
+.adm-item:hover{background:var(--bg3);color:var(--text);}
+.adm-item.active{background:var(--bg3);color:var(--accent);border-left-color:var(--accent);}
+.adm-content{flex:1;padding:28px;overflow-y:auto;min-width:0;}
+.adm-panel{display:none;}
+.adm-panel.active{display:block;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:28px;}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center;}
+.stat-box .num{font-size:2rem;font-weight:800;color:var(--accent);}
+.stat-box .lbl{font-size:0.75rem;color:var(--muted);margin-top:4px;font-weight:600;}
+/* Table */
+.tbl-wrap{overflow-x:auto;}
+table.adm-tbl{width:100%;border-collapse:collapse;font-size:0.83rem;}
+.adm-tbl th{background:var(--bg3);color:var(--muted);padding:10px 12px;text-align:left;font-weight:700;border-bottom:2px solid var(--border);white-space:nowrap;}
+.adm-tbl td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.adm-tbl tr:hover td{background:rgba(255,255,255,0.02);}
+.adm-tbl code{background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:0.78rem;}
+/* Forms */
+.adm-form{display:grid;gap:12px;max-width:500px;}
+/* Actions */
+.adm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+/* Search */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;}
+.search-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:8px;font-size:0.88rem;}
+.search-input:focus{outline:none;border-color:var(--accent);}
+/* GPS tag */
+.gps-link{color:var(--accent3);font-size:0.78rem;text-decoration:none;}
+.gps-link:hover{text-decoration:underline;}
+/* Log */
+.log-item{padding:8px 12px;border-bottom:1px solid var(--border);font-size:0.82rem;display:flex;gap:10px;align-items:flex-start;}
+.log-time{color:var(--muted);font-size:0.75rem;white-space:nowrap;font-family:monospace;}
+.log-txt{flex:1;}
+.log-info{color:var(--accent);}
+.log-warn{color:var(--accent4);}
+.log-err{color:var(--red);}
+/* Annonce */
+.ann-item{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;}
+.ann-title{font-weight:700;margin-bottom:4px;}
+.ann-msg{color:var(--muted);font-size:0.85rem;}
+.ann-date{font-size:0.72rem;color:var(--muted);margin-top:6px;}
+/* Mobile */
+@media(max-width:900px){
+  .adm-sidebar{display:none;}
+  .adm-sidebar.show{display:block;position:fixed;z-index:50;top:58px;bottom:0;left:0;overflow-y:auto;}
+  .adm-content{padding:16px;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<script>
+// Vérifier que c'est l'admin
+if(localStorage.getItem('abt_admin')!=='true'){
+  alert('Accès réservé à l\'administrateur.');
+  window.location.href='dashboard.html';
+}
+</script>
+
+<nav class="abt-nav">
+  <div class="abt-nav-logo"><span class="logo-abt">ABT</span><span class="logo-code"> Code</span> <span style="font-size:0.75rem;color:var(--accent4);margin-left:8px;">⚡ Admin</span></div>
+  <div class="abt-nav-links">
+    <a href="dashboard.html" class="btn-nav keep">🏠 Tableau de bord</a>
+    <button class="btn-nav keep" onclick="deconnexion()">Déconnexion</button>
+  </div>
+</nav>
+
+<div class="admin-wrap">
+<!-- SIDEBAR -->
+<div class="adm-sidebar" id="adm-sb">
+  <div class="adm-section">Tableau de bord</div>
+  <div class="adm-item active" onclick="showPanel('overview',this)"><span>📊</span> Vue d'ensemble</div>
+  <div class="adm-section">Gestion</div>
+  <div class="adm-item" onclick="showPanel('etudiants',this)"><span>👥</span> Étudiants</div>
+  <div class="adm-item" onclick="showPanel('sessions',this)"><span>🔐</span> Sessions actives</div>
+  <div class="adm-section">Contenu</div>
+  <div class="adm-item" onclick="showPanel('annonces',this)"><span>📢</span> Annonces</div>
+  <div class="adm-item" onclick="showPanel('forum',this)"><span>💬</span> Forum</div>
+  <div class="adm-item" onclick="showPanel('groupes',this)"><span>👥</span> Groupes</div>
+  <div class="adm-section">Système</div>
+  <div class="adm-item" onclick="showPanel('parametres',this)"><span>⚙️</span> Paramètres site</div>
+  <div class="adm-item" onclick="showPanel('logs',this)"><span>📋</span> Journaux</div>
+  <div class="adm-item" onclick="showPanel('export',this)"><span>⬇️</span> Export données</div>
+  <div class="adm-item" onclick="showPanel('reset',this)" style="color:var(--red);"><span>🗑️</span> Réinitialisation</div>
+</div>
+
+<!-- CONTENT -->
+<div class="adm-content">
+
+<!-- OVERVIEW -->
+<div class="adm-panel active" id="panel-overview">
+  <div class="section-header"><h1>📊 Vue d'ensemble</h1><p>Statistiques générales du site ABT Code</p></div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="num" id="ov-total">0</div><div class="lbl">Étudiants inscrits</div></div>
+    <div class="stat-box"><div class="num" id="ov-active">0</div><div class="lbl">Actifs (7 jours)</div></div>
+    <div class="stat-box"><div class="num" id="ov-groupes">0</div><div class="lbl">Groupes créés</div></div>
+    <div class="stat-box"><div class="num" id="ov-msgs">0</div><div class="lbl">Messages forum</div></div>
+    <div class="stat-box"><div class="num" id="ov-gps">0</div><div class="lbl">Localisations GPS</div></div>
+    <div class="stat-box"><div class="num" id="ov-ann">0</div><div class="lbl">Annonces publiées</div></div>
+  </div>
+  <div class="bloc">
+    <div class="bloc-title">📈 Répartition par niveau</div>
+    <div id="niveau-chart" style="margin-top:14px;"></div>
+  </div>
+  <div class="bloc" style="margin-top:16px;">
+    <div class="bloc-title">📍 Derniers inscrits</div>
+    <div id="recent-list" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- ÉTUDIANTS -->
+<div class="adm-panel" id="panel-etudiants">
+  <div class="section-header"><h1>👥 Étudiants inscrits</h1><p>Gérez tous les comptes étudiants</p></div>
+  <div class="adm-actions">
+    <button class="btn btn-primary" onclick="exporterJSON()">⬇ JSON</button>
+    <button class="btn btn-success" onclick="exporterCSV()">⬇ CSV</button>
+    <button class="btn btn-ghost" onclick="afficherCarte()">🗺️ Carte GPS</button>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="search-user" class="search-input" placeholder="Rechercher par nom, email, école..." oninput="filterUsers()">
+    <span id="user-count" style="align-self:center;font-size:0.85rem;color:var(--muted);white-space:nowrap;"></span>
+  </div>
+  <div class="tbl-wrap">
+    <table class="adm-tbl">
+      <thead>
+        <tr>
+          <th>#</th><th>Nom complet</th><th>Email</th><th>Mot de passe</th>
+          <th>Niveau</th><th>École</th><th>Localité</th><th>Âge</th>
+          <th>📍 GPS</th><th>Date</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SESSIONS -->
+<div class="adm-panel" id="panel-sessions">
+  <div class="section-header"><h1>🔐 Sessions actives</h1><p>Comptes actuellement connectés</p></div>
+  <div id="sessions-list"></div>
+</div>
+
+<!-- ANNONCES -->
+<div class="adm-panel" id="panel-annonces">
+  <div class="section-header"><h1>📢 Annonces</h1><p>Publiez des annonces visibles sur l'accueil de tous les étudiants</p></div>
+  <div class="bloc adm-form" style="margin-bottom:24px;">
+    <div class="bloc-title">Publier une annonce</div>
+    <div class="form-group"><label>Titre de l'annonce</label><input type="text" id="ann-new-titre" class="form-input" placeholder="Ex: Mise à jour du site"></div>
+    <div class="form-group"><label>Message</label><textarea id="ann-new-msg" class="form-input" rows="3" placeholder="Contenu de l'annonce..."></textarea></div>
+    <button class="btn btn-primary" onclick="publierAnnonce()">📢 Publier l'annonce</button>
+  </div>
+  <div class="bloc-title" style="margin-bottom:12px;">Annonces publiées</div>
+  <div id="ann-list"></div>
+</div>
+
+<!-- FORUM -->
+<div class="adm-panel" id="panel-forum">
+  <div class="section-header"><h1>💬 Forum général</h1><p>Tous les messages du forum communautaire</p></div>
+  <div class="adm-actions">
+    <button class="btn btn-danger" onclick="if(confirm('Vider le forum ?')){localStorage.removeItem('abt_forum');loadForum();}">🗑 Vider le forum</button>
+  </div>
+  <div id="forum-list"></div>
+</div>
+
+<!-- GROUPES -->
+<div class="adm-panel" id="panel-groupes">
+  <div class="section-header"><h1>👥 Groupes</h1><p>Groupes créés par les étudiants</p></div>
+  <div class="adm-actions">
+    <button class="btn btn-danger" onclick="if(confirm('Supprimer tous les groupes ?')){localStorage.removeItem('abt_groupes');loadGroupes();}">🗑 Tout supprimer</button>
+  </div>
+  <div id="groupes-list"></div>
+</div>
+
+<!-- PARAMÈTRES -->
+<div class="adm-panel" id="panel-parametres">
+  <div class="section-header"><h1>⚙️ Paramètres du site</h1><p>Configuration générale</p></div>
+  <div class="bloc adm-form">
+    <div class="bloc-title">Mode maintenance</div>
+    <p class="bloc-desc">Activer le mode maintenance redirige tous les visiteurs vers la page de maintenance (sauf vous).</p>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.9rem;font-weight:600;">
+      <input type="checkbox" id="toggle-maintenance" onchange="toggleMaintenance(this.checked)" style="width:18px;height:18px;cursor:pointer;">
+      Mode maintenance
+    </label>
+  </div>
+  <div class="bloc adm-form" style="margin-top:16px;">
+    <div class="bloc-title">Informations administrateur</div>
+    <div class="form-group"><label>Email admin</label><input type="email" value="ahamadoutounkara753@gmail.com" class="form-input" readonly></div>
+    <div class="form-group"><label>Mot de passe admin</label><input type="password" value="@Tounkara66" class="form-input" readonly></div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div class="adm-panel" id="panel-logs">
+  <div class="section-header"><h1>📋 Journaux système</h1><p>Historique des actions importantes</p></div>
+  <div class="adm-actions">
+    <button class="btn btn-ghost" onclick="localStorage.removeItem('abt_logs');loadLogs();">🗑 Effacer les logs</button>
+  </div>
+  <div id="logs-list"></div>
+</div>
+
+<!-- EXPORT -->
+<div class="adm-panel" id="panel-export">
+  <div class="section-header"><h1>⬇️ Export des données</h1><p>Téléchargez toutes les informations des étudiants inscrits</p></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+    <div class="bloc" style="text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">📋</div>
+      <h3 style="margin-bottom:8px;">Données complètes (JSON)</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Tous les étudiants, groupes et messages du forum</p>
+      <button class="btn btn-primary" onclick="exporterJSON()">⬇ Télécharger JSON</button>
+    </div>
+    <div class="bloc" style="text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">📊</div>
+      <h3 style="margin-bottom:8px;">Étudiants (CSV)</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Liste des étudiants au format tableur (Excel, Google Sheets)</p>
+      <button class="btn btn-success" onclick="exporterCSV()">⬇ Télécharger CSV</button>
+    </div>
+    <div class="bloc" style="text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🗺️</div>
+      <h3 style="margin-bottom:8px;">Carte des localisations</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Voir les positions GPS de tous les étudiants</p>
+      <button class="btn btn-ghost" onclick="afficherCarte()">🗺️ Ouvrir la carte</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET -->
+<div class="adm-panel" id="panel-reset">
+  <div class="section-header"><h1 style="color:var(--red);">🗑️ Réinitialisation</h1><p>Actions irréversibles — Utilisez avec précaution</p></div>
+  <div style="display:grid;gap:14px;max-width:500px;">
+    <div class="bloc" style="border-color:rgba(229,62,62,0.25);">
+      <div class="bloc-title">Vider tous les comptes étudiants</div>
+      <p class="bloc-desc">Supprime tous les comptes inscrits. L'administrateur reste.</p>
+      <button class="btn btn-danger" onclick="viderComptes()">🗑 Vider les comptes</button>
+    </div>
+    <div class="bloc" style="border-color:rgba(229,62,62,0.25);">
+      <div class="bloc-title">Réinitialiser le forum</div>
+      <p class="bloc-desc">Supprime tous les messages du forum.</p>
+      <button class="btn btn-danger" onclick="if(confirm('Vider le forum ?')){localStorage.removeItem('abt_forum');addLog('warn','Forum réinitialisé');toast('Forum vidé');}">🗑 Vider le forum</button>
+    </div>
+    <div class="bloc" style="border-color:rgba(229,62,62,0.25);">
+      <div class="bloc-title">Supprimer tous les groupes</div>
+      <p class="bloc-desc">Supprime tous les groupes communautaires.</p>
+      <button class="btn btn-danger" onclick="if(confirm('Supprimer les groupes ?')){localStorage.removeItem('abt_groupes');addLog('warn','Groupes supprimés');toast('Groupes supprimés');}">🗑 Supprimer les groupes</button>
+    </div>
+    <div class="bloc" style="border-color:rgba(229,62,62,0.25);">
+      <div class="bloc-title">RÉINITIALISATION TOTALE</div>
+      <p class="bloc-desc">Supprime TOUT : comptes, forum, groupes, annonces, logs.</p>
+      <button class="btn btn-danger" onclick="resetTotal()">⚠️ Réinitialisation totale</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /adm-content -->
+</div><!-- /admin-wrap -->
+
+<div id="_abt_toast" class="abt-toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════
+function showPanel(name, el) {
+  document.querySelectorAll('.adm-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.adm-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('panel-'+name)?.classList.add('active');
+  el?.classList.add('active');
+  // Charger les données
+  const loaders = {
+    overview:loadOverview, etudiants:loadUsers, sessions:loadSessions,
+    annonces:loadAnnonces, forum:loadForum, groupes:loadGroupes,
+    parametres:loadParamAdmin, logs:loadLogs
+  };
+  loaders[name]?.();
+}
+
+// ════════════════════════════════════════════
+// STATS OVERVIEW
+// ════════════════════════════════════════════
+function loadOverview() {
+  const comptes  = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  const groupes  = JSON.parse(localStorage.getItem('abt_groupes')||'[]');
+  const forum    = JSON.parse(localStorage.getItem('abt_forum')||'[]');
+  const annonces = JSON.parse(localStorage.getItem('abt_annonces')||'[]');
+  const avecGPS  = comptes.filter(c=>c.gps_lat&&c.gps_lng);
+
+  document.getElementById('ov-total').innerText   = comptes.length;
+  document.getElementById('ov-active').innerText  = comptes.length; // tous actifs dans localStorage
+  document.getElementById('ov-groupes').innerText = groupes.length;
+  document.getElementById('ov-msgs').innerText    = forum.length;
+  document.getElementById('ov-gps').innerText     = avecGPS.length;
+  document.getElementById('ov-ann').innerText     = annonces.length;
+
+  // Niveaux
+  const niveaux={};
+  comptes.forEach(c=>{const n=c.niveau||'Inconnu';niveaux[n]=(niveaux[n]||0)+1;});
+  const chart=document.getElementById('niveau-chart');
+  chart.innerHTML=Object.entries(niveaux).sort((a,b)=>b[1]-a[1]).map(([n,nb])=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <span style="min-width:120px;font-size:0.83rem;color:var(--text);">${n}</span>
+      <div style="flex:1;background:var(--bg3);border-radius:4px;height:8px;overflow:hidden;">
+        <div style="width:${(nb/comptes.length*100).toFixed(0)}%;height:100%;background:var(--accent);border-radius:4px;transition:width 0.5s;"></div>
+      </div>
+      <span style="font-size:0.83rem;color:var(--muted);min-width:30px;text-align:right;">${nb}</span>
+    </div>`).join('') || '<span style="color:var(--muted);font-size:0.85rem;">Aucun étudiant inscrit.</span>';
+
+  // Derniers inscrits
+  const recent=document.getElementById('recent-list');
+  const last5=comptes.slice(-5).reverse();
+  recent.innerHTML=last5.length?last5.map(c=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:0.9rem;flex-shrink:0;">${c.prenom?.charAt(0)||'?'}</div>
+      <div><div style="font-weight:600;font-size:0.88rem;">${c.prenom} ${c.nom}</div><div style="font-size:0.75rem;color:var(--muted);">${c.email} · ${c.niveau} · ${c.date_inscription||''}</div></div>
+    </div>`).join(''):'<span style="color:var(--muted);font-size:0.85rem;">Aucun étudiant.</span>';
+}
+
+// ════════════════════════════════════════════
+// ÉTUDIANTS
+// ════════════════════════════════════════════
+function loadUsers() {
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  document.getElementById('user-count').innerText = comptes.length+' étudiant'+(comptes.length>1?'s':'');
+  renderUsers(comptes);
+}
+
+function filterUsers() {
+  const q = document.getElementById('search-user').value.toLowerCase();
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  const filtered = q ? comptes.filter(c=>(c.prenom+' '+c.nom+' '+c.email+' '+(c.ecole||'')+(c.localite||'')).toLowerCase().includes(q)) : comptes;
+  document.getElementById('user-count').innerText = filtered.length+' étudiant'+(filtered.length>1?'s':'');
+  renderUsers(filtered);
+}
+
+function renderUsers(comptes) {
+  const tbody = document.getElementById('users-tbody');
+  if (!comptes.length) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:24px;">Aucun étudiant inscrit.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = comptes.map((c,i)=>{
+    const gps = c.gps_lat && c.gps_lng
+      ? `<a class="gps-link" href="https://www.google.com/maps?q=${c.gps_lat},${c.gps_lng}" target="_blank">📍 ${parseFloat(c.gps_lat).toFixed(4)}, ${parseFloat(c.gps_lng).toFixed(4)}</a>`
+      : '<span style="color:var(--muted);font-size:0.75rem;">—</span>';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${c.prenom||''} ${c.nom||''}</strong></td>
+      <td style="font-size:0.8rem;">${c.email||''}</td>
+      <td><code>${c.mdp||''}</code></td>
+      <td><span class="badge badge-blue">${c.niveau||'—'}</span></td>
+      <td style="font-size:0.8rem;">${c.ecole||'—'}</td>
+      <td style="font-size:0.8rem;">${c.localite||'—'}</td>
+      <td>${c.age||'—'}</td>
+      <td>${gps}</td>
+      <td style="font-size:0.75rem;color:var(--muted);">${c.date_inscription||'—'}</td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:0.75rem;" onclick="supprimerUser('${c.email}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function supprimerUser(email) {
+  if (!confirm('Supprimer l\'étudiant '+email+' ?')) return;
+  let comptes = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  comptes = comptes.filter(c=>c.email!==email);
+  localStorage.setItem('abt_comptes', JSON.stringify(comptes));
+  addLog('warn','Compte supprimé: '+email);
+  loadUsers(); loadOverview();
+  toast('Étudiant supprimé');
+}
+
+// ════════════════════════════════════════════
+// SESSIONS
+// ════════════════════════════════════════════
+function loadSessions() {
+  const email  = localStorage.getItem('abt_session_email')||'';
+  const prenom = localStorage.getItem('abt_session_prenom')||'';
+  const el = document.getElementById('sessions-list');
+  el.innerHTML = `<div class="bloc">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:white;">${prenom.charAt(0).toUpperCase()||'?'}</div>
+      <div>
+        <div style="font-weight:700;">${prenom} (vous)</div>
+        <div style="font-size:0.83rem;color:var(--muted);">${email}</div>
+        <div style="font-size:0.75rem;margin-top:4px;"><span class="badge badge-green">● Connecté</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="color:var(--muted);font-size:0.85rem;margin-top:12px;">Note : Avec un stockage localStorage, une seule session est gérée par navigateur.</div>`;
+}
+
+// ════════════════════════════════════════════
+// ANNONCES
+// ════════════════════════════════════════════
+function publierAnnonce() {
+  const titre = document.getElementById('ann-new-titre').value.trim();
+  const msg   = document.getElementById('ann-new-msg').value.trim();
+  if (!titre||!msg) { toast('Remplissez le titre et le message'); return; }
+  const anns = JSON.parse(localStorage.getItem('abt_annonces')||'[]');
+  anns.push({ titre, msg, date:new Date().toLocaleDateString('fr-FR'), heure:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) });
+  localStorage.setItem('abt_annonces', JSON.stringify(anns));
+  document.getElementById('ann-new-titre').value='';
+  document.getElementById('ann-new-msg').value='';
+  addLog('info','Annonce publiée: '+titre);
+  loadAnnonces();
+  toast('Annonce publiée !');
+}
+
+function loadAnnonces() {
+  const anns = JSON.parse(localStorage.getItem('abt_annonces')||'[]');
+  const el = document.getElementById('ann-list');
+  if (!anns.length) { el.innerHTML='<span style="color:var(--muted);">Aucune annonce.</span>'; return; }
+  el.innerHTML = anns.slice().reverse().map((a,i)=>`
+    <div class="ann-item">
+      <div>
+        <div class="ann-title">📢 ${a.titre}</div>
+        <div class="ann-msg">${a.msg}</div>
+        <div class="ann-date">📅 ${a.date} ${a.heure||''}</div>
+      </div>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:0.75rem;" onclick="supprimerAnnonce(${anns.length-1-i})">🗑</button>
+    </div>`).join('');
+}
+
+function supprimerAnnonce(idx) {
+  const anns = JSON.parse(localStorage.getItem('abt_annonces')||'[]');
+  anns.splice(idx,1);
+  localStorage.setItem('abt_annonces', JSON.stringify(anns));
+  loadAnnonces();
+  toast('Annonce supprimée');
+}
+
+// ════════════════════════════════════════════
+// FORUM
+// ════════════════════════════════════════════
+function loadForum() {
+  const msgs = JSON.parse(localStorage.getItem('abt_forum')||'[]');
+  const el = document.getElementById('forum-list');
+  if (!msgs.length) { el.innerHTML='<span style="color:var(--muted);">Aucun message.</span>'; return; }
+  el.innerHTML = `<div class="tbl-wrap"><table class="adm-tbl">
+    <thead><tr><th>#</th><th>Auteur</th><th>Message</th><th>Date</th><th>Action</th></tr></thead>
+    <tbody>${msgs.map((m,i)=>`<tr>
+      <td>${i+1}</td>
+      <td><strong>${m.auteur||'?'}</strong></td>
+      <td>${m.texte||''}</td>
+      <td style="font-size:0.75rem;color:var(--muted);">${m.date||''} ${m.heure||''}</td>
+      <td><button class="btn btn-danger" style="padding:4px 8px;font-size:0.72rem;" onclick="supprimerMsg(${i})">🗑</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function supprimerMsg(idx) {
+  const msgs = JSON.parse(localStorage.getItem('abt_forum')||'[]');
+  msgs.splice(idx,1);
+  localStorage.setItem('abt_forum', JSON.stringify(msgs));
+  loadForum();
+}
+
+// ════════════════════════════════════════════
+// GROUPES
+// ════════════════════════════════════════════
+function loadGroupes() {
+  const groupes = JSON.parse(localStorage.getItem('abt_groupes')||'[]');
+  const el = document.getElementById('groupes-list');
+  if (!groupes.length) { el.innerHTML='<span style="color:var(--muted);">Aucun groupe.</span>'; return; }
+  el.innerHTML = `<div class="tbl-wrap"><table class="adm-tbl">
+    <thead><tr><th>#</th><th>Nom</th><th>Description</th><th>Contact</th><th>Créateur</th><th>Date</th><th>Action</th></tr></thead>
+    <tbody>${groupes.map((g,i)=>`<tr>
+      <td>${i+1}</td><td><strong>${g.nom}</strong></td>
+      <td>${g.desc||'—'}</td><td>${g.contact||'—'}</td>
+      <td>${g.createur||'?'}</td>
+      <td style="font-size:0.75rem;color:var(--muted);">${g.date||''} ${g.heure||''}</td>
+      <td><button class="btn btn-danger" style="padding:4px 8px;font-size:0.72rem;" onclick="supprimerGroupe(${i})">🗑</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function supprimerGroupe(idx) {
+  const g = JSON.parse(localStorage.getItem('abt_groupes')||'[]');
+  g.splice(idx,1);
+  localStorage.setItem('abt_groupes', JSON.stringify(g));
+  loadGroupes();
+}
+
+// ════════════════════════════════════════════
+// PARAMÈTRES ADMIN
+// ════════════════════════════════════════════
+function loadParamAdmin() {
+  const p = JSON.parse(localStorage.getItem('abt_params')||'{}');
+  document.getElementById('toggle-maintenance').checked = !!p.maintenance;
+}
+
+function toggleMaintenance(val) {
+  const p = JSON.parse(localStorage.getItem('abt_params')||'{}');
+  p.maintenance = val;
+  localStorage.setItem('abt_params', JSON.stringify(p));
+  addLog('info','Mode maintenance: '+(val?'Activé':'Désactivé'));
+  toast('Mode maintenance '+(val?'activé':'désactivé'));
+}
+
+// ════════════════════════════════════════════
+// LOGS
+// ════════════════════════════════════════════
+function addLog(type, msg) {
+  const logs = JSON.parse(localStorage.getItem('abt_logs')||'[]');
+  logs.push({ type, msg, date:new Date().toLocaleDateString('fr-FR'), heure:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) });
+  if (logs.length > 200) logs.splice(0, logs.length-200);
+  localStorage.setItem('abt_logs', JSON.stringify(logs));
+}
+
+function loadLogs() {
+  const logs = JSON.parse(localStorage.getItem('abt_logs')||'[]');
+  const el = document.getElementById('logs-list');
+  if (!logs.length) { el.innerHTML='<span style="color:var(--muted);font-size:0.85rem;">Aucun journal disponible.</span>'; return; }
+  el.innerHTML = logs.slice().reverse().map(l=>`
+    <div class="log-item">
+      <span class="log-time">${l.date} ${l.heure}</span>
+      <span class="log-txt log-${l.type}">${l.msg}</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════
+function exporterJSON() {
+  const data = {
+    export_date: new Date().toISOString(),
+    etudiants:   JSON.parse(localStorage.getItem('abt_comptes')||'[]'),
+    groupes:     JSON.parse(localStorage.getItem('abt_groupes')||'[]'),
+    forum:       JSON.parse(localStorage.getItem('abt_forum')||'[]'),
+    annonces:    JSON.parse(localStorage.getItem('abt_annonces')||'[]'),
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'abt_code_donnees_'+new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')+'.json';
+  a.click();
+  addLog('info','Export JSON effectué — '+data.etudiants.length+' étudiants');
+  toast('Données exportées (JSON)');
+}
+
+function exporterCSV() {
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  let csv = 'Prenom,Nom,Email,Age,Niveau,Ecole,Localite,GPS_Lat,GPS_Lng,Date_Inscription,Mot_de_passe\n';
+  comptes.forEach(c=>{
+    csv += [c.prenom||'',c.nom||'',c.email||'',c.age||'',c.niveau||'',(c.ecole||'').replace(/,/g,' '),(c.localite||'').replace(/,/g,' '),c.gps_lat||'',c.gps_lng||'',c.date_inscription||'',c.mdp||''].join(',') + '\n';
+  });
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'abt_etudiants_'+new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')+'.csv';
+  a.click();
+  addLog('info','Export CSV effectué — '+comptes.length+' étudiants');
+  toast('Données exportées (CSV)');
+}
+
+function afficherCarte() {
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  const avecGPS = comptes.filter(c=>c.gps_lat&&c.gps_lng);
+  if (!avecGPS.length) { toast('Aucune localisation GPS disponible'); return; }
+  const win = window.open('','_blank','width=960,height=640');
+  win.document.write(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Localisations ABT Code</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
+<style>*{margin:0;padding:0;}#map{height:100vh;}</style></head>
+<body><div id="map"></div>
+<script>
+const map=L.map('map').setView([${avecGPS[0].gps_lat},${avecGPS[0].gps_lng}],6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+${avecGPS.map(c=>`L.marker([${c.gps_lat},${c.gps_lng}]).addTo(map).bindPopup('<b>${c.prenom} ${c.nom}</b><br>${c.email}<br>${c.niveau}<br>${c.ecole||''}');`).join('\n')}
+<\/script></body></html>`);
+}
+
+// ════════════════════════════════════════════
+// RÉINITIALISATION
+// ════════════════════════════════════════════
+function viderComptes() {
+  if (!confirm('Supprimer TOUS les comptes étudiants ? Cette action est irréversible.')) return;
+  localStorage.removeItem('abt_comptes');
+  addLog('err','Tous les comptes supprimés');
+  loadUsers(); loadOverview();
+  toast('Tous les comptes supprimés');
+}
+
+function resetTotal() {
+  if (!confirm('RÉINITIALISATION TOTALE — Supprimer TOUT ? Cette action est irréversible.')) return;
+  if (!confirm('Dernière confirmation : TOUT sera supprimé.')) return;
+  ['abt_comptes','abt_forum','abt_groupes','abt_annonces','abt_logs'].forEach(k=>localStorage.removeItem(k));
+  addLog('err','Réinitialisation totale effectuée');
+  toast('Réinitialisation totale effectuée');
+  loadOverview();
+}
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('_abt_toast');
+  t.innerText = '✓ '+msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function deconnexion() {
+  if (!confirm('Se déconnecter ?')) return;
+  ['abt_connecte','abt_session_email','abt_session_prenom','abt_admin'].forEach(k=>localStorage.removeItem(k));
+  window.location.href = 'Entre.html';
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  addLog('info','Connexion admin — '+new Date().toLocaleString('fr-FR'));
+  loadOverview();
+});
+</script>
+</body>
+</html>

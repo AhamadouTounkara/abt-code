@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABT Code — Tableau de bord</title>
+<script src="settings.js"></script>
+<link rel="stylesheet" href="abt.css">
+<style>
+/* ── LAYOUT ── */
+body{overflow-x:hidden;}
+.layout{display:flex;min-height:calc(100vh - 58px);}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:2px;background:var(--bg3);padding:4px;border-radius:10px;}
+.nav-tab{padding:7px 14px;border-radius:7px;cursor:pointer;font-weight:700;font-size:0.83rem;color:var(--muted);transition:all 0.2s;white-space:nowrap;border:none;background:none;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{background:var(--bg2);color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+
+/* MAIN */
+.main{flex:1;padding:28px 24px 40px;overflow-y:auto;min-width:0;}
+.section{display:none;animation:fadeIn 0.2s ease;}
+.section.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:28px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,0.08),transparent 70%);}
+.hero h2{font-size:1.6rem;font-weight:800;margin-bottom:8px;}
+.hero p{color:var(--muted);margin-bottom:20px;font-size:0.92rem;}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 16px;text-align:center;}
+.stat-num{font-size:1.8rem;font-weight:800;color:var(--accent);}
+.stat-lbl{font-size:0.75rem;color:var(--muted);margin-top:4px;font-weight:600;}
+
+/* PROGRESSION */
+.prog-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:28px;}
+.prog-section h3{font-size:0.9rem;font-weight:700;margin-bottom:16px;}
+.prog-item{margin-bottom:14px;}
+.prog-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:0.85rem;}
+.prog-lbl{font-weight:600;}
+.prog-pct{color:var(--muted);font-size:0.78rem;}
+
+/* COURS */
+.lang-tabs{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px;}
+.lang-tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.85rem;border:2px solid var(--border);color:var(--muted);background:var(--bg2);transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.lang-tab:hover{border-color:var(--accent);color:var(--accent);}
+.lang-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(79,142,247,0.08);}
+.lang-panel{display:none;}
+.lang-panel.active{display:block;}
+.chap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.chap-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block;}
+.chap-card:hover{border-color:var(--accent);transform:translateY(-2px);text-decoration:none;}
+.chap-num{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.chap-title{font-size:0.9rem;font-weight:700;margin:4px 0;color:var(--text);}
+.chap-desc{font-size:0.78rem;color:var(--muted);}
+
+/* OUTILS */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.tool-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;text-decoration:none;transition:all 0.2s;}
+.tool-item:hover{border-color:var(--accent);text-decoration:none;}
+.tool-icon{font-size:1.6rem;flex-shrink:0;}
+.tool-name{font-weight:700;font-size:0.9rem;color:var(--text);}
+.tool-desc{font-size:0.78rem;color:var(--muted);}
+
+/* COMMUNAUTÉ */
+.comm-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.comm-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;}
+.comm-box h3{font-size:0.9rem;font-weight:700;border-bottom:1px solid var(--border);padding-bottom:10px;}
+.group-item{background:var(--bg3);border-radius:8px;padding:12px;font-size:0.85rem;}
+.group-name{font-weight:700;margin-bottom:3px;}
+.group-meta{font-size:0.75rem;color:var(--muted);}
+.msg-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;}
+.msg-item:last-child{border-bottom:none;}
+.msg-author{font-weight:700;color:var(--accent);}
+.msg-time{font-size:0.72rem;color:var(--muted);margin-left:6px;}
+.msg-text{color:var(--text);margin-top:3px;}
+.comm-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-size:0.85rem;width:100%;}
+.comm-input:focus{outline:none;border-color:var(--accent);}
+
+/* PARAMÈTRES */
+.params-grid{display:grid;gap:16px;}
+.param-bloc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;}
+.param-bloc h3{font-size:0.95rem;font-weight:700;margin-bottom:4px;}
+.param-bloc p{font-size:0.82rem;color:var(--muted);margin-bottom:14px;}
+.param-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.param-btn{padding:8px 14px;border:2px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--muted);cursor:pointer;font-weight:700;font-size:0.8rem;transition:all 0.2s;}
+.param-btn:hover{border-color:var(--accent);color:var(--accent);}
+.param-btn.active{border-color:var(--accent);background:rgba(79,142,247,0.1);color:var(--accent);}
+
+/* MOBILE */
+@media(max-width:900px){
+  .nav-tabs{display:none;}
+  .main{padding:16px 14px 70px;}
+  .stats{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .hero{padding:20px;}
+  .hero h2{font-size:1.3rem;}
+  .comm-layout{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<script>window.ABT?.checkLogin();</script>
+
+<!-- NAV -->
+<nav class="abt-nav">
+  <div class="abt-nav-logo"><span class="logo-abt">ABT</span><span class="logo-code"> Code</span></div>
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('accueil',this)">🏠 Accueil</button>
+    <button class="nav-tab" onclick="showSection('apprendre',this)">📚 Apprendre</button>
+    <button class="nav-tab" onclick="showSection('pratiquer',this)">⚡ Exercices</button>
+    <button class="nav-tab" onclick="showSection('outils',this)">🛠️ Outils</button>
+    <button class="nav-tab" onclick="showSection('communaute',this)">💬 Communauté</button>
+    <button class="nav-tab" onclick="showSection('parametres',this)">⚙️ Paramètres</button>
+  </div>
+  <div class="abt-nav-links">
+    <a href="abt_ia_page.html" class="btn-nav ia keep">✦ ABT IA</a>
+    <a href="abt_ide.html" class="btn-nav keep">💻 IDE</a>
+    <button class="btn-nav keep" id="btn-admin" style="display:none;" onclick="window.location.href='admin.html'">🔑 Admin</button>
+    <button class="btn-nav keep" onclick="deconnexion()" id="btn-deco">Déconnexion</button>
+  </div>
+</nav>
+
+<div class="main" id="main-content">
+
+<!-- ══ ACCUEIL ══ -->
+<div class="section active" id="sec-accueil">
+  <!-- Annonce admin -->
+  <div id="annonce-banner" style="display:none;background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:1.2rem;">📢</span>
+    <div style="flex:1;"><div id="ann-titre" style="font-weight:700;color:var(--accent);font-size:0.9rem;"></div><div id="ann-msg" style="color:var(--muted);font-size:0.83rem;margin-top:3px;"></div></div>
+    <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;">✕</button>
+  </div>
+
+  <div class="hero">
+    <h2 id="hero-title">Prêt à booster vos compétences ?</h2>
+    <p id="hero-desc">Découvrez des cours de Python, R, SQL, HTML/CSS et JavaScript adaptés aux étudiants africains.</p>
+    <div class="hero-btns">
+      <button class="btn btn-primary" onclick="showSection('apprendre',document.querySelectorAll('.nav-tab')[1])">📚 Commencer les cours</button>
+      <a href="abt_ide.html" class="btn btn-ghost">💻 Ouvrir l'IDE</a>
+      <a href="abt_ia_page.html" class="btn btn-ghost" style="border-color:rgba(167,139,250,0.4);color:var(--accent2);">✦ ABT IA</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">Chapitres Python</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">Chapitres R</div></div>
+    <div class="stat"><div class="stat-num">26</div><div class="stat-lbl">Exercices</div></div>
+    <div class="stat"><div class="stat-num" id="stat-membres">0</div><div class="stat-lbl">Étudiants inscrits</div></div>
+  </div>
+
+  <div class="prog-section">
+    <h3>📊 Ma progression</h3>
+    <div class="prog-item">
+      <div class="prog-item-head"><span class="prog-lbl">🐍 Python</span><span class="prog-pct" id="prog-py-txt">0 / 10 exercices</span></div>
+      <div class="progress"><div class="progress-fill" id="prog-py" style="width:0%"></div></div>
+    </div>
+    <div class="prog-item">
+      <div class="prog-item-head"><span class="prog-lbl">📊 R</span><span class="prog-pct" id="prog-r-txt">0 / 16 exercices</span></div>
+      <div class="progress"><div class="progress-fill" id="prog-r" style="width:0%;background:var(--accent2)"></div></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:12px;"><span style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Accès rapide</span></div>
+  <div class="grid grid-auto">
+    <a href="abt_ide.html" class="card c-green"><div class="card-icon">💻</div><h3>ABT-Code IDE</h3><p>Environnement de développement style VS Code — Python, R, SQL, HTML, CSS, JS, Java, PHP, Bash...</p><span class="card-tag">10 langages</span></a>
+    <a href="abt_ia_page.html" class="card c-purple"><div class="card-icon">✦</div><h3>ABT IA</h3><p>Assistant IA spécialisé en programmation. Génère du code, explique, débogue et donne des idées de projets.</p><span class="card-tag">IA Éducative</span></a>
+    <a href="exercices_python.html" class="card c-blue"><div class="card-icon">🐍</div><h3>Exercices Python</h3><p>10 exercices progressifs pour pratiquer Python après les cours.</p><span class="card-tag">10 exercices</span></a>
+    <a href="exercices_r.html" class="card c-orange"><div class="card-icon">📊</div><h3>Exercices R</h3><p>16 exercices R du débutant à l'avancé.</p><span class="card-tag">16 exercices</span></a>
+  </div>
+</div>
+
+<!-- ══ APPRENDRE ══ -->
+<div class="section" id="sec-apprendre">
+  <div class="section-header"><h1>📚 Apprendre à coder</h1><p>Cours structurés en chapitres progressifs</p></div>
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="showLang('python',this)">🐍 Python 3.13</button>
+    <button class="lang-tab" onclick="showLang('r',this)">📊 R 4.4</button>
+    <button class="lang-tab" onclick="showLang('sql',this)">🗄️ SQL</button>
+    <button class="lang-tab" onclick="showLang('web',this)">🌐 HTML & CSS</button>
+  </div>
+
+  <div class="lang-panel active" id="lang-python">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:2.5rem;">🐍</span>
+        <div><h2 style="font-size:1.2rem;">Python 3.13</h2><p style="color:var(--muted);font-size:0.85rem;">Algorithmes, data science, IA — Le langage le plus populaire au monde.</p></div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="badge badge-green">5 chapitres</span>
+          <span class="badge badge-blue">Débutant → Avancé</span>
+        </div>
+      </div>
+    </div>
+    <div class="chap-grid">
+      <a href="notion1_cour.html" class="chap-card" style="border-left:3px solid var(--accent3);"><div class="chap-num">Chapitre 1</div><div class="chap-title">Introduction à Python</div><div class="chap-desc">Variables, types, print(), input()</div></a>
+      <a href="notion2_exemple.html" class="chap-card" style="border-left:3px solid var(--accent3);"><div class="chap-num">Chapitre 2</div><div class="chap-title">Variables & Mémoire</div><div class="chap-desc">Allocation, types avancés, conversion</div></a>
+      <a href="notion3_exercice.html" class="chap-card" style="border-left:3px solid var(--accent3);"><div class="chap-num">Chapitre 3</div><div class="chap-title">Conditions</div><div class="chap-desc">if, elif, else, opérateurs logiques</div></a>
+      <a href="notion4_operateurs.html" class="chap-card" style="border-left:3px solid var(--accent3);"><div class="chap-num">Chapitre 4</div><div class="chap-title">Boucles</div><div class="chap-desc">for, while, range(), break, continue</div></a>
+      <a href="notion5_fonctions.html" class="chap-card" style="border-left:3px solid var(--accent3);"><div class="chap-num">Chapitre 5</div><div class="chap-title">Fonctions</div><div class="chap-desc">def, return, paramètres, récursion</div></a>
+      <a href="exercices_python.html" class="chap-card" style="border-left:3px solid var(--accent4);background:rgba(245,158,11,0.04);"><div class="chap-num">Pratique</div><div class="chap-title">🎯 Exercices Python</div><div class="chap-desc">10 exercices progressifs</div></a>
+    </div>
+  </div>
+
+  <div class="lang-panel" id="lang-r">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:2.5rem;">📊</span>
+        <div><h2 style="font-size:1.2rem;">R 4.4</h2><p style="color:var(--muted);font-size:0.85rem;">Statistiques, data science, visualisation — Indispensable pour la recherche.</p></div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;"><span class="badge badge-blue">5 chapitres</span><span class="badge badge-purple">Statistiques</span></div>
+      </div>
+    </div>
+    <div class="chap-grid">
+      <a href="r1_introduction.html" class="chap-card" style="border-left:3px solid var(--accent2);"><div class="chap-num">Chapitre 1</div><div class="chap-title">Introduction à R</div><div class="chap-desc">R, RStudio, opérateur &lt;-, cat()</div></a>
+      <a href="r2_vecteurs.html" class="chap-card" style="border-left:3px solid var(--accent2);"><div class="chap-num">Chapitre 2</div><div class="chap-title">Vecteurs & Objets</div><div class="chap-desc">c(), indexation, length(), sum()</div></a>
+      <a href="r3_operateurs.html" class="chap-card" style="border-left:3px solid var(--accent2);"><div class="chap-num">Chapitre 3</div><div class="chap-title">Opérateurs</div><div class="chap-desc">%%, %/%, ^, fonctions mathématiques</div></a>
+      <a href="r4_boucles.html" class="chap-card" style="border-left:3px solid var(--accent2);"><div class="chap-num">Chapitre 4</div><div class="chap-title">Boucles</div><div class="chap-desc">for, while, repeat, break, next</div></a>
+      <a href="r5_fonctions.html" class="chap-card" style="border-left:3px solid var(--accent2);"><div class="chap-num">Chapitre 5</div><div class="chap-title">Fonctions</div><div class="chap-desc">function(), return implicite, récursion</div></a>
+      <a href="exercices_r.html" class="chap-card" style="border-left:3px solid var(--accent4);background:rgba(245,158,11,0.04);"><div class="chap-num">Pratique</div><div class="chap-title">🎯 Exercices R</div><div class="chap-desc">16 exercices du débutant à l'avancé</div></a>
+    </div>
+  </div>
+
+  <div class="lang-panel" id="lang-sql">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:12px;">🗄️</div>
+      <h2>SQL — Bientôt disponible</h2>
+      <p style="color:var(--muted);margin:10px 0;">Les cours SQL arrivent prochainement. En attendant, pratiquez dans l'IDE.</p>
+      <a href="abt_ide.html" class="btn btn-primary" style="margin-top:14px;display:inline-flex;">💻 Pratiquer SQL dans l'IDE</a>
+    </div>
+  </div>
+
+  <div class="lang-panel" id="lang-web">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:12px;">🌐</div>
+      <h2>HTML & CSS — Bientôt disponible</h2>
+      <p style="color:var(--muted);margin:10px 0;">Les cours Web arrivent prochainement. En attendant, pratiquez dans l'IDE.</p>
+      <a href="abt_ide.html" class="btn btn-primary" style="margin-top:14px;display:inline-flex;">💻 Pratiquer HTML/CSS dans l'IDE</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EXERCICES ══ -->
+<div class="section" id="sec-pratiquer">
+  <div class="section-header"><h1>⚡ Commencer à coder</h1><p>Exercices pratiques et projets guidés</p></div>
+  <div class="grid grid-auto" style="margin-bottom:28px;">
+    <a href="exercices_python.html" class="card c-green"><div class="card-icon">🐍</div><h3>Exercices Python</h3><p>10 exercices progressifs du débutant à l'avancé. Validation automatique du code.</p><span class="card-tag">10 exercices</span></a>
+    <a href="exercices_r.html" class="card c-blue"><div class="card-icon">📊</div><h3>Exercices R</h3><p>16 exercices couvrant vecteurs, boucles, fonctions et statistiques.</p><span class="card-tag">16 exercices</span></a>
+    <div class="card c-orange" style="opacity:0.6;cursor:default;"><div class="card-icon">🏆</div><h3>Défis hebdomadaires</h3><p>Un défi de code par semaine pour progresser.</p><span class="card-tag">Bientôt</span></div>
+    <div class="card c-purple" style="opacity:0.6;cursor:default;"><div class="card-icon">📁</div><h3>Mini-projets guidés</h3><p>Calculatrice, analyseur de données, jeu de devinettes...</p><span class="card-tag">Bientôt</span></div>
+  </div>
+</div>
+
+<!-- ══ OUTILS ══ -->
+<div class="section" id="sec-outils">
+  <div class="section-header"><h1>🛠️ Outils utiles</h1><p>Ressources et outils pour coder efficacement</p></div>
+  <div class="tools-grid">
+    <a href="abt_ide.html" class="tool-item"><div class="tool-icon">💻</div><div><div class="tool-name">ABT-Code IDE</div><div class="tool-desc">Éditeur style VS Code — Python, R, SQL, HTML, CSS, JS, Java, PHP, Bash</div></div></a>
+    <a href="abt_ia_page.html" class="tool-item"><div class="tool-icon">✦</div><div><div class="tool-name">ABT IA</div><div class="tool-desc">Assistant IA éducatif pour le code</div></div></a>
+    <a href="https://docs.python.org/fr/3/" target="_blank" class="tool-item"><div class="tool-icon">📖</div><div><div class="tool-name">Docs Python 3</div><div class="tool-desc">Documentation officielle Python</div></div></a>
+    <a href="https://www.rdocumentation.org/" target="_blank" class="tool-item"><div class="tool-icon">📊</div><div><div class="tool-name">R Documentation</div><div class="tool-desc">Référence complète du langage R</div></div></a>
+    <a href="https://www.w3schools.com" target="_blank" class="tool-item"><div class="tool-icon">🌐</div><div><div class="tool-name">W3Schools</div><div class="tool-desc">Tutoriels HTML, CSS, JS, SQL...</div></div></a>
+    <a href="https://colab.research.google.com" target="_blank" class="tool-item"><div class="tool-icon">🔬</div><div><div class="tool-name">Google Colab</div><div class="tool-desc">Python en ligne sans installation</div></div></a>
+    <a href="https://stackoverflow.com" target="_blank" class="tool-item"><div class="tool-icon">💬</div><div><div class="tool-name">Stack Overflow</div><div class="tool-desc">Communauté de développeurs mondiale</div></div></a>
+    <a href="https://github.com" target="_blank" class="tool-item"><div class="tool-icon">🐙</div><div><div class="tool-name">GitHub</div><div class="tool-desc">Hébergez et partagez votre code</div></div></a>
+  </div>
+</div>
+
+<!-- ══ COMMUNAUTÉ ══ -->
+<div class="section" id="sec-communaute">
+  <div class="section-header"><h1>💬 Communauté ABT</h1><p>Groupes d'étudiants et forum général</p></div>
+  <div class="comm-layout">
+    <!-- GROUPES -->
+    <div>
+      <div class="comm-box" style="margin-bottom:16px;">
+        <h3>👥 Créer un groupe</h3>
+        <input type="text" id="grp-nom" class="comm-input" placeholder="Nom du groupe...">
+        <input type="text" id="grp-desc" class="comm-input" placeholder="Description courte...">
+        <input type="text" id="grp-contact" class="comm-input" placeholder="Contact (WhatsApp, Telegram...)">
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="creerGroupe()">Créer le groupe</button>
+      </div>
+      <div class="comm-box" style="max-height:320px;overflow-y:auto;">
+        <h3>Groupes actifs</h3>
+        <div id="groupes-list"><div style="color:var(--muted);font-size:0.85rem;">Aucun groupe pour l'instant.</div></div>
+      </div>
+    </div>
+    <!-- FORUM -->
+    <div class="comm-box" style="max-height:500px;">
+      <h3>📣 Forum général</h3>
+      <div id="forum-msgs" style="flex:1;overflow-y:auto;max-height:320px;display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="display:flex;gap:8px;margin-top:auto;">
+        <input type="text" id="forum-input" class="comm-input" placeholder="Votre message..." onkeydown="if(event.key==='Enter')envoyerMsg()">
+        <button class="btn btn-primary" style="flex-shrink:0;" onclick="envoyerMsg()">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PARAMÈTRES ══ -->
+<div class="section" id="sec-parametres">
+  <div class="section-header"><h1>⚙️ Paramètres</h1><p>Ces réglages s'appliquent à toutes les pages du site.</p></div>
+  <div class="params-grid">
+    <!-- THÈME -->
+    <div class="param-bloc">
+      <h3>🎨 Thème de couleur</h3>
+      <p>S'applique instantanément à tout le site.</p>
+      <div class="param-btns" id="p-themes"></div>
+    </div>
+    <!-- LANGUE -->
+    <div class="param-bloc">
+      <h3>🌍 Langue de l'interface</h3>
+      <p>Change la langue sur toutes les pages.</p>
+      <div class="param-btns" id="p-langs"></div>
+    </div>
+    <!-- POLICE -->
+    <div class="param-bloc">
+      <h3>🔤 Taille du texte</h3>
+      <p>Ajustez selon votre confort de lecture.</p>
+      <div class="param-btns" id="p-fonts"></div>
+      <div id="p-preview" style="margin-top:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--muted);font-size:var(--font-size);">
+        Aperçu — ABT Code vous aide à maîtriser la programmation pas à pas.
+      </div>
+    </div>
+    <!-- ESPACEMENT -->
+    <div class="param-bloc">
+      <h3>📏 Espacement des lignes</h3>
+      <p>Confort de lecture.</p>
+      <div class="param-btns" id="p-spacing"></div>
+    </div>
+    <!-- MOT DE PASSE -->
+    <div class="param-bloc">
+      <h3>🔑 Changer mon mot de passe</h3>
+      <p>Modifiez votre mot de passe de connexion.</p>
+      <div style="display:grid;gap:10px;">
+        <input type="password" id="mdp-actuel" class="form-input" placeholder="Mot de passe actuel">
+        <input type="password" id="mdp-nouveau" class="form-input" placeholder="Nouveau mot de passe (min. 6 car.)">
+        <input type="password" id="mdp-confirm" class="form-input" placeholder="Confirmer le nouveau mot de passe">
+        <button class="btn btn-primary" onclick="changerMdp()">Enregistrer</button>
+        <div id="mdp-msg" style="font-size:0.85rem;font-weight:700;min-height:18px;"></div>
+      </div>
+    </div>
+    <!-- RESET -->
+    <div class="param-bloc">
+      <h3>🔄 Réinitialisation</h3>
+      <p>Remet les paramètres à leur valeur par défaut.</p>
+      <button class="btn btn-danger" onclick="if(confirm('Réinitialiser tous les paramètres ?')){localStorage.removeItem('abt_settings');location.reload();}">🔄 Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MOB NAV -->
+<nav class="mob-nav">
+  <a href="#" class="mob-nav-item active" onclick="showSection('accueil',null);return false;"><span class="mn-icon">🏠</span>Accueil</a>
+  <a href="#" class="mob-nav-item" onclick="showSection('apprendre',null);return false;"><span class="mn-icon">📚</span>Cours</a>
+  <a href="#" class="mob-nav-item" onclick="showSection('pratiquer',null);return false;"><span class="mn-icon">⚡</span>Exercices</a>
+  <a href="abt_ide.html" class="mob-nav-item"><span class="mn-icon">💻</span>IDE</a>
+  <a href="#" class="mob-nav-item" onclick="showSection('communaute',null);return false;"><span class="mn-icon">💬</span>Comm.</a>
+  <a href="#" class="mob-nav-item" onclick="showSection('parametres',null);return false;"><span class="mn-icon">⚙️</span>Param.</a>
+</nav>
+
+<script>
+// ── NAV ──
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.mob-nav-item').forEach(t=>t.classList.remove('active'));
+  window.scrollTo(0,0);
+}
+
+function showLang(lang, el) {
+  document.querySelectorAll('.lang-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.lang-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('lang-'+lang)?.classList.add('active');
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  const user = window.ABT?.getUser() || {};
+  if (!user.connecte) { window.location.href='Entre.html'; return; }
+
+  // Afficher prénom
+  const prenom = user.prenom || 'Étudiant';
+  document.getElementById('hero-title').innerText = `Prêt à booster vos compétences, ${prenom} ? 👋`;
+
+  // Admin
+  if (localStorage.getItem('abt_admin')==='true') {
+    document.getElementById('btn-admin').style.display = 'block';
+  }
+
+  chargerStats();
+  chargerAnnonces();
+  chargerGroupes();
+  chargerForum();
+  buildParams();
+});
+
+// ── STATS ──
+function chargerStats() {
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  document.getElementById('stat-membres').innerText = comptes.length;
+  const pyScore = JSON.parse(localStorage.getItem('abt_exo_py')||'{}');
+  const rScore  = JSON.parse(localStorage.getItem('abt_exo_r')||'{}');
+  const pyDone  = Object.values(pyScore).filter(Boolean).length;
+  const rDone   = Object.values(rScore).filter(Boolean).length;
+  document.getElementById('prog-py').style.width = (pyDone/10*100)+'%';
+  document.getElementById('prog-r').style.width  = (rDone/16*100)+'%';
+  document.getElementById('prog-py-txt').innerText = pyDone+' / 10 exercices';
+  document.getElementById('prog-r-txt').innerText  = rDone+' / 16 exercices';
+}
+
+// ── ANNONCES ──
+function chargerAnnonces() {
+  const ann = JSON.parse(localStorage.getItem('abt_annonces')||'[]');
+  if (!ann.length) return;
+  const last = ann[ann.length-1];
+  const b = document.getElementById('annonce-banner');
+  document.getElementById('ann-titre').innerText = last.titre;
+  document.getElementById('ann-msg').innerText   = last.msg;
+  b.style.display = 'flex';
+}
+
+// ── COMMUNAUTÉ ──
+function creerGroupe() {
+  const nom     = document.getElementById('grp-nom').value.trim();
+  const desc    = document.getElementById('grp-desc').value.trim();
+  const contact = document.getElementById('grp-contact').value.trim();
+  if (!nom) { window.ABT?.toast('Entrez un nom de groupe'); return; }
+  const prenom = window.ABT?.getUser().prenom || 'Anonyme';
+  const groupes = JSON.parse(localStorage.getItem('abt_groupes')||'[]');
+  groupes.push({ nom, desc, contact, createur:prenom,
+    date:new Date().toLocaleDateString('fr-FR'),
+    heure:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) });
+  localStorage.setItem('abt_groupes', JSON.stringify(groupes));
+  document.getElementById('grp-nom').value='';
+  document.getElementById('grp-desc').value='';
+  document.getElementById('grp-contact').value='';
+  chargerGroupes();
+  window.ABT?.toast('Groupe créé !');
+}
+
+function chargerGroupes() {
+  const groupes = JSON.parse(localStorage.getItem('abt_groupes')||'[]');
+  const el = document.getElementById('groupes-list');
+  if (!groupes.length) { el.innerHTML='<div style="color:var(--muted);font-size:0.85rem;">Aucun groupe pour l\'instant.</div>'; return; }
+  el.innerHTML = groupes.map((g,i)=>`
+    <div class="group-item">
+      <div class="group-name">👥 ${g.nom}</div>
+      <div class="group-meta">${g.desc||''}</div>
+      <div class="group-meta">📞 ${g.contact||'—'} · 👤 ${g.createur} · 📅 ${g.date} ${g.heure||''}</div>
+    </div>`).join('');
+}
+
+function envoyerMsg() {
+  const inp = document.getElementById('forum-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const prenom = window.ABT?.getUser().prenom || 'Anonyme';
+  const msgs = JSON.parse(localStorage.getItem('abt_forum')||'[]');
+  msgs.push({ auteur:prenom, texte:txt,
+    date:new Date().toLocaleDateString('fr-FR'),
+    heure:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) });
+  localStorage.setItem('abt_forum', JSON.stringify(msgs));
+  inp.value='';
+  chargerForum();
+}
+
+function chargerForum() {
+  const msgs = JSON.parse(localStorage.getItem('abt_forum')||'[]');
+  const el = document.getElementById('forum-msgs');
+  if (!msgs.length) { el.innerHTML='<div style="color:var(--muted);font-size:0.85rem;">Aucun message. Soyez le premier !</div>'; return; }
+  el.innerHTML = msgs.slice(-30).map(m=>`
+    <div class="msg-item">
+      <span class="msg-author">${m.auteur}</span>
+      <span class="msg-time">📅 ${m.date||''} ${m.heure||''}</span>
+      <div class="msg-text">${m.texte}</div>
+    </div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── PARAMÈTRES ──
+function buildParams() {
+  const s = JSON.parse(localStorage.getItem('abt_settings')||'{}');
+  const THEMES = {dark:'🌙 Sombre',ocean:'🌊 Océan',forest:'🌿 Forêt',sunset:'🌅 Coucher',purple:'🔮 Galaxie',rose:'🌸 Rose',light:'☀️ Clair',contrast:'⚡ Contraste'};
+  const LANGS  = {fr:'🇫🇷 Français',en:'🇬🇧 English',ar:'🇩🇿 عربية',pt:'🇧🇷 Português',es:'🇪🇸 Español',sw:'🇰🇪 Kiswahili',ha:'🇳🇬 Hausa',bm:'🇲🇱 Bambara'};
+
+  // Thèmes
+  const tg = document.getElementById('p-themes');
+  Object.entries(THEMES).forEach(([id,nm])=>{
+    const active=(s.theme||'dark')===id;
+    const b=document.createElement('button');
+    b.className='param-btn'+(active?' active':'');
+    b.textContent=nm;
+    b.onclick=()=>{window.ABT?.setSetting('theme',id);setTimeout(()=>location.reload(),400);};
+    tg.appendChild(b);
+  });
+
+  // Langues
+  const lg = document.getElementById('p-langs');
+  Object.entries(LANGS).forEach(([code,nm])=>{
+    const active=(s.lang||'fr')===code;
+    const b=document.createElement('button');
+    b.className='param-btn'+(active?' active':'');
+    b.textContent=nm;
+    b.onclick=()=>{window.ABT?.setSetting('lang',code);setTimeout(()=>location.reload(),400);};
+    lg.appendChild(b);
+  });
+
+  // Polices
+  const fg = document.getElementById('p-fonts');
+  [13,15,16,18,20].forEach(sz=>{
+    const active=(parseInt(s.fontSize)||16)===sz;
+    const b=document.createElement('button');
+    b.className='param-btn'+(active?' active':'');
+    b.textContent=sz+'px';
+    b.onclick=()=>{
+      fg.querySelectorAll('.param-btn').forEach(x=>{x.classList.remove('active');});
+      b.classList.add('active');
+      document.body.style.setProperty('--font-size',sz+'px');
+      document.getElementById('p-preview').style.fontSize=sz+'px';
+      window.ABT?.setSetting('fontSize',sz);
+    };
+    fg.appendChild(b);
+  });
+
+  // Espacement
+  const sg = document.getElementById('p-spacing');
+  [{v:1.4,n:'Compact'},{v:1.6,n:'Normal'},{v:1.9,n:'Aéré'},{v:2.2,n:'Très aéré'}].forEach(sp=>{
+    const active=(parseFloat(s.lineHeight)||1.6)===sp.v;
+    const b=document.createElement('button');
+    b.className='param-btn'+(active?' active':'');
+    b.textContent=sp.n;
+    b.style.setProperty('--param-color','var(--accent2)');
+    b.onclick=()=>{
+      sg.querySelectorAll('.param-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      document.body.style.setProperty('--line-height',sp.v);
+      window.ABT?.setSetting('lineHeight',sp.v);
+    };
+    sg.appendChild(b);
+  });
+}
+
+// ── MOT DE PASSE ──
+function changerMdp() {
+  const actuel = document.getElementById('mdp-actuel').value;
+  const nouveau = document.getElementById('mdp-nouveau').value;
+  const confirm2 = document.getElementById('mdp-confirm').value;
+  const msg = document.getElementById('mdp-msg');
+  const email = window.ABT?.getUser().email || '';
+
+  if (!actuel||!nouveau||!confirm2) { msg.style.color='#fc8181';msg.innerText='Remplissez tous les champs.';return; }
+  if (nouveau.length<6) { msg.style.color='#fc8181';msg.innerText='Le nouveau mot de passe doit faire au moins 6 caractères.';return; }
+  if (nouveau!==confirm2) { msg.style.color='#fc8181';msg.innerText='Les mots de passe ne correspondent pas.';return; }
+
+  const comptes=JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  const idx=comptes.findIndex(c=>c.email===email);
+  if (idx<0) { msg.style.color='#fc8181';msg.innerText='Compte introuvable.';return; }
+  if (comptes[idx].mdp!==actuel) { msg.style.color='#fc8181';msg.innerText='Mot de passe actuel incorrect.';return; }
+
+  comptes[idx].mdp=nouveau;
+  localStorage.setItem('abt_comptes',JSON.stringify(comptes));
+  msg.style.color='#68d391';msg.innerText='✅ Mot de passe modifié avec succès !';
+  document.getElementById('mdp-actuel').value='';
+  document.getElementById('mdp-nouveau').value='';
+  document.getElementById('mdp-confirm').value='';
+  window.ABT?.toast('Mot de passe mis à jour !');
+}
+
+// ── DÉCONNEXION ──
+function deconnexion(){
+  if(!confirm('Se déconnecter ?'))return;
+  ['abt_connecte','abt_session_email','abt_session_prenom','abt_admin'].forEach(k=>localStorage.removeItem(k));
+  window.location.href='Entre.html';
+}
+</script>
+<script src="abt_ai.js"></script>
+</body>
+</html>

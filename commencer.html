@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code — Environnements de Code</title>
+    <script>if(localStorage.getItem('abt_connecte')!=='true'){window.location.href='Entre.html';}</script>
+
+    <!-- Skulpt Python 3 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt-stdlib.js"></script>
+
+    <!-- CodeMirror éditeur -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+
+    <style>
+        /* ── THÈME DYNAMIQUE ── */
+        :root {
+            --bg:#0d0f14; --bg2:#141720; --bg3:#1c2030; --border:#2a2f45;
+            --text:#e2e8f0; --muted:#64748b;
+            --py:#3776ab;  --py2:#5a9fd4;
+            --r:#276dc3;   --r2:#4a9eff;
+            --sql:#00758f; --sql2:#00b4d8;
+            --web:#e34f26; --web2:#f7a046;
+            --js:#f7df1e;  --js2:#fbbf24;
+            --green:#48bb78; --green2:#38a169; --red:#e53e3e;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+        /* ── NAV ── */
+        nav{background:rgba(13,15,20,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 18px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;}
+        .nav-logo{font-family:monospace;font-weight:700;font-size:1rem;color:#4f8ef7;white-space:nowrap;}
+        .nav-logo span{color:var(--text);}
+        .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+        .btn-nav-sm{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:6px;text-decoration:none;font-size:0.78rem;font-weight:600;transition:all 0.2s;cursor:pointer;white-space:nowrap;}
+        .btn-nav-sm:hover{border-color:#4f8ef7;color:#4f8ef7;}
+
+        /* ── TABS PRINCIPAUX ── */
+        .main-tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:2px;padding:8px 14px 0;overflow-x:auto;flex-shrink:0;}
+        .main-tab{padding:9px 18px;border-radius:8px 8px 0 0;font-size:0.85rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all 0.2s;border:1px solid transparent;border-bottom:none;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+        .main-tab:hover{color:var(--text);background:var(--bg3);}
+        .main-tab.active{background:var(--bg);color:var(--text);border-color:var(--border);}
+        .main-tab.tab-py.active   {color:var(--py2); border-top:2px solid var(--py2);}
+        .main-tab.tab-r.active    {color:var(--r2);  border-top:2px solid var(--r2);}
+        .main-tab.tab-sql.active  {color:var(--sql2);border-top:2px solid var(--sql2);}
+        .main-tab.tab-web.active  {color:var(--web2);border-top:2px solid var(--web2);}
+
+        /* ── SOUS-TABS DEV WEB ── */
+        .sub-tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:4px;padding:6px 14px;flex-shrink:0;}
+        .sub-tab{padding:6px 16px;border-radius:7px;font-size:0.82rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all 0.2s;border:1px solid var(--border);}
+        .sub-tab:hover{color:var(--text);background:var(--bg3);}
+        .sub-tab.active-html{background:rgba(227,79,38,0.15);color:var(--web2);border-color:rgba(227,79,38,0.4);}
+        .sub-tab.active-css {background:rgba(38,143,227,0.15);color:#60a5fa;border-color:rgba(38,143,227,0.4);}
+        .sub-tab.active-js  {background:rgba(247,223,30,0.12);color:var(--js2);border-color:rgba(247,223,30,0.3);}
+
+        /* ── LAYOUT IDE ── */
+        .ide-layout{display:flex;flex:1;min-height:0;}
+        .sidebar{width:200px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+        .sidebar-header{padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+        .sample-item{padding:8px 14px;cursor:pointer;font-size:0.82rem;color:var(--muted);transition:all 0.2s;border-left:3px solid transparent;}
+        .sample-item:hover{color:var(--text);background:var(--bg3);border-left-color:#4f8ef7;}
+
+        /* ── ZONE PRINCIPALE ── */
+        .main-area{flex:1;display:flex;flex-direction:column;min-width:0;}
+        .toolbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+        .btn-run-big{background:var(--green);color:white;border:none;padding:7px 18px;border-radius:7px;font-weight:800;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;}
+        .btn-run-big:hover{background:var(--green2);transform:translateY(-1px);}
+        .btn-tool{background:var(--bg3);color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+        .btn-tool:hover{border-color:#4f8ef7;color:#4f8ef7;}
+        .lang-badge{margin-left:auto;font-size:0.72rem;font-weight:700;padding:4px 12px;border-radius:10px;white-space:nowrap;}
+
+        .split-area{flex:1;display:flex;min-height:0;}
+        .editor-pane{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+        .editor-wrapper{flex:1;overflow:hidden;}
+
+        /* CodeMirror */
+        .CodeMirror{height:100%!important;font-family:'Consolas','Courier New',monospace!important;font-size:0.9rem!important;background:#1a1a2e!important;}
+        .CodeMirror-scroll{height:100%;}
+
+        /* ── ZONE SORTIE ── */
+        .output-pane{width:360px;border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+        .output-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;align-items:center;justify-content:space-between;}
+        .output-header span{font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+        .output-body{flex:1;background:#0d1117;padding:12px;font-family:'Consolas',monospace;font-size:0.84rem;color:#48bb78;overflow-y:auto;white-space:pre-wrap;word-break:break-word;}
+        .output-body.has-error{color:#fc8181;}
+
+        /* ── STATUS BAR ── */
+        .status-bar{background:var(--bg2);border-top:1px solid var(--border);padding:3px 14px;font-size:0.7rem;color:var(--muted);display:flex;gap:20px;flex-shrink:0;}
+
+        /* ── SQL DATABASE PANEL ── */
+        .db-layout{display:flex;flex:1;min-height:0;}
+        .db-sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;}
+        .db-panel-title{padding:10px 14px;font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);}
+        .db-table-item{padding:8px 14px;cursor:pointer;font-size:0.82rem;color:var(--muted);display:flex;align-items:center;gap:8px;transition:all 0.2s;border-left:3px solid transparent;}
+        .db-table-item:hover,.db-table-item.active{color:var(--sql2);background:var(--bg3);border-left-color:var(--sql2);}
+        .db-main{flex:1;display:flex;flex-direction:column;min-width:0;}
+        .db-query-area{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px;flex-shrink:0;}
+        .db-query-label{font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+        .db-query-input{width:100%;background:#1a1a2e;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:7px;font-family:'Consolas',monospace;font-size:0.85rem;min-height:70px;resize:vertical;}
+        .db-query-input:focus{outline:none;border-color:var(--sql2);}
+        .db-query-toolbar{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+        .btn-sql-run{background:var(--sql);color:white;border:none;padding:7px 16px;border-radius:6px;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
+        .btn-sql-run:hover{background:var(--sql2);}
+        .btn-sql-preset{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:0.78rem;cursor:pointer;transition:all 0.2s;}
+        .btn-sql-preset:hover{border-color:var(--sql2);color:var(--sql2);}
+        .db-results{flex:1;overflow:auto;padding:14px;}
+        .db-result-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+        .db-result-table th{background:var(--bg3);color:var(--sql2);padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);font-weight:700;white-space:nowrap;}
+        .db-result-table td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text);}
+        .db-result-table tr:hover td{background:var(--bg3);}
+        .db-status{font-size:0.78rem;color:var(--sql2);margin-bottom:10px;font-family:monospace;}
+        .db-error{color:#fc8181;font-family:monospace;font-size:0.82rem;padding:10px;background:rgba(229,62,62,0.08);border-left:3px solid var(--red);border-radius:4px;}
+
+        /* ── PREVIEW WEB ── */
+        .web-preview-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
+        .preview-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+        .preview-label{font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+        .preview-dots{display:flex;gap:5px;}
+        .dot{width:10px;height:10px;border-radius:50%;}
+        .dot-r{background:#fc8181;} .dot-y{background:#fbbf24;} .dot-g{background:#48bb78;}
+        iframe.preview-frame{flex:1;border:none;background:white;}
+    </style>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+
+    <style id="commencer-mobile">
+    @media (max-width: 900px) {
+        nav { padding: 0 12px !important; height: 52px !important; flex-wrap: nowrap !important; }
+        .nav-logo { font-size: 0.88rem !important; }
+        .nav-links { gap: 4px !important; }
+        .btn-nav-sm { padding: 4px 8px !important; font-size: 0.7rem !important; }
+        .main-tabs { padding: 6px 10px 0 !important; gap: 2px !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+        .main-tab { padding: 7px 12px !important; font-size: 0.78rem !important; white-space: nowrap !important; }
+        .sub-tabs { padding: 4px 10px !important; gap: 4px !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+        .sub-tab { padding: 5px 12px !important; font-size: 0.75rem !important; white-space: nowrap !important; }
+        .sidebar { display: none !important; }
+        .ide-layout { flex-direction: column !important; }
+        .toolbar { padding: 6px 10px !important; gap: 5px !important; }
+        .btn-run-big { padding: 6px 14px !important; font-size: 0.82rem !important; }
+        .btn-tool { padding: 5px 10px !important; font-size: 0.75rem !important; }
+        .lang-badge { display: none !important; }
+        .split-area { flex-direction: column !important; }
+        .editor-pane { min-height: 220px !important; flex: 0 0 auto !important; }
+        .output-pane { width: 100% !important; flex: 0 0 180px !important; border-left: none !important; border-top: 1px solid var(--border) !important; }
+        #preview-pane { width: 100% !important; min-height: 250px !important; border-left: none !important; border-top: 1px solid var(--border) !important; }
+        .output-body { font-size: 0.78rem !important; padding: 8px 10px !important; }
+        .status-bar { font-size: 0.65rem !important; padding: 0 10px !important; gap: 10px !important; }
+        /* SQL */
+        .db-sidebar { display: none !important; }
+        .db-layout { flex-direction: column !important; }
+        .db-query-toolbar { flex-wrap: wrap !important; gap: 5px !important; }
+        .db-query-input { font-size: 0.82rem !important; }
+        .db-result-table { font-size: 0.75rem !important; }
+        .db-result-table th, .db-result-table td { padding: 5px 6px !important; }
+        /* Scrollbar horizontale pour les tables */
+        .db-results { overflow-x: auto !important; }
+    }
+    @media (max-width: 480px) {
+        .main-tab { font-size: 0.72rem !important; padding: 6px 8px !important; }
+        .btn-run-big span:last-child { display: none; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo"><span>ABT</span>Code &nbsp;/&nbsp; Éditeurs</div>
+    <div class="nav-links">
+        <a href="apprendre.html" class="btn-nav-sm">📚 Cours</a>
+        <a href="exercices_python.html" class="btn-nav-sm">🐍 Exos Python</a>
+        <a href="exercices_r.html" class="btn-nav-sm">📊 Exos R</a>
+        <a href="abt_ide.html" class="btn-nav-sm" style="border-color:rgba(52,211,153,0.4);color:#34d399;font-weight:800;">💻 ABT-Code IDE ↗</a>
+        <a href="dashboard.html" class="btn-nav-sm">🏠 Tableau de bord</a>
+    </div>
+</nav>
+
+<!-- TABS PRINCIPAUX -->
+<div class="main-tabs" id="main-tabs">
+    <div class="main-tab tab-py active" onclick="switchMain('python',this)" title="Python 3.13">🐍 Python 3.13</div>
+    <div class="main-tab tab-r"  onclick="switchMain('r',this)"      title="R 4.4">📊 R 4.4</div>
+    <div class="main-tab tab-sql" onclick="switchMain('sql',this)"   title="Base de données SQL">🗄️ Base de données SQL</div>
+    <div class="main-tab tab-web" onclick="switchMain('web',this)"   title="Dev Web">🌐 Dev Web</div>
+</div>
+
+<!-- SOUS-TABS DEV WEB (caché par défaut) -->
+<div class="sub-tabs" id="sub-tabs" style="display:none;">
+    <div class="sub-tab active-html" id="stab-html" onclick="switchWeb('html',this)">🟠 Simulateur HTML</div>
+    <div class="sub-tab" id="stab-css"  onclick="switchWeb('css',this)">🔵 Simulateur CSS</div>
+    <div class="sub-tab" id="stab-js"   onclick="switchWeb('js',this)">🟡 Simulateur JavaScript</div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- PYTHON IDE                              -->
+<!-- ════════════════════════════════════════ -->
+<div id="env-python" class="ide-layout">
+    <div class="sidebar">
+        <div class="sidebar-header">🐍 Exemples Python 3.13</div>
+        <div class="sample-item" onclick="loadSample('py',0)">📄 Hello World</div>
+        <div class="sample-item" onclick="loadSample('py',1)">📄 Variables & Types</div>
+        <div class="sample-item" onclick="loadSample('py',2)">📄 Conditions if/elif</div>
+        <div class="sample-item" onclick="loadSample('py',3)">📄 Boucle for + range</div>
+        <div class="sample-item" onclick="loadSample('py',4)">📄 Fonction & return</div>
+        <div class="sample-item" onclick="loadSample('py',5)">📄 Listes & méthodes</div>
+        <div class="sample-item" onclick="loadSample('py',6)">📄 Dictionnaire</div>
+        <div class="sample-item" onclick="loadSample('py',7)">📄 Fibonacci</div>
+        <div class="sample-item" onclick="loadSample('py',8)">📄 FizzBuzz</div>
+        <div class="sample-item" onclick="loadSample('py',9)">📄 Factorielle récursive</div>
+    </div>
+    <div class="main-area">
+        <div class="toolbar">
+            <button class="btn-run-big" onclick="runPython()">▶ Exécuter</button>
+            <button class="btn-tool" onclick="clearOut('py-out')">🗑 Effacer</button>
+            <button class="btn-tool" onclick="saveCode('py')">💾 Sauvegarder</button>
+            <span class="lang-badge" style="background:rgba(55,118,171,0.2);color:var(--py2);">🐍 Python 3.13 — Skulpt</span>
+            <span id="py-status" style="font-size:0.75rem;color:var(--green);margin-left:4px;"></span>
+        </div>
+        <div class="split-area">
+            <div class="editor-pane">
+                <div class="editor-wrapper"><textarea id="py-editor"></textarea></div>
+            </div>
+            <div class="output-pane">
+                <div class="output-header">
+                    <span>Sortie Python</span>
+                    <span id="py-run-time" style="font-size:0.72rem;color:var(--green);"></span>
+                </div>
+                <div class="output-body" id="py-out">Cliquez sur ▶ Exécuter...</div>
+            </div>
+        </div>
+        <div class="status-bar">
+            <span>🐍 Python 3.13 (Skulpt)</span>
+            <span id="py-lines">Lignes: 0</span>
+            <span>Ctrl+Enter = Exécuter</span>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- R IDE                                   -->
+<!-- ════════════════════════════════════════ -->
+<div id="env-r" class="ide-layout" style="display:none;">
+    <div class="sidebar">
+        <div class="sidebar-header">📊 Exemples R 4.4</div>
+        <div class="sample-item" onclick="loadSample('r',0)">📄 Variables & Calculs</div>
+        <div class="sample-item" onclick="loadSample('r',1)">📄 Vecteurs c()</div>
+        <div class="sample-item" onclick="loadSample('r',2)">📄 Statistiques</div>
+        <div class="sample-item" onclick="loadSample('r',3)">📄 Boucle for</div>
+        <div class="sample-item" onclick="loadSample('r',4)">📄 Boucle while</div>
+        <div class="sample-item" onclick="loadSample('r',5)">📄 Fonction personnalisée</div>
+        <div class="sample-item" onclick="loadSample('r',6)">📄 Fibonacci en R</div>
+        <div class="sample-item" onclick="loadSample('r',7)">📄 if / else</div>
+        <div class="sample-item" onclick="loadSample('r',8)">📄 Opérateurs R</div>
+    </div>
+    <div class="main-area">
+        <div class="toolbar">
+            <button class="btn-run-big" onclick="runR()">▶ Exécuter</button>
+            <button class="btn-tool" onclick="clearOut('r-out')">🗑 Effacer</button>
+            <button class="btn-tool" onclick="saveCode('r')">💾 Sauvegarder</button>
+            <span class="lang-badge" style="background:rgba(39,109,195,0.2);color:var(--r2);">📊 R 4.4 — Interpréteur</span>
+        </div>
+        <div class="split-area">
+            <div class="editor-pane">
+                <div class="editor-wrapper"><textarea id="r-editor"></textarea></div>
+            </div>
+            <div class="output-pane">
+                <div class="output-header"><span>Sortie R</span></div>
+                <div class="output-body" id="r-out">Cliquez sur ▶ Exécuter...</div>
+            </div>
+        </div>
+        <div class="status-bar">
+            <span>📊 R version 4.4.0</span>
+            <span id="r-lines">Lignes: 0</span>
+            <span>Ctrl+Enter = Exécuter</span>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- BASE DE DONNÉES SQL                     -->
+<!-- ════════════════════════════════════════ -->
+<div id="env-sql" class="db-layout" style="display:none;">
+    <div class="db-sidebar">
+        <div class="db-panel-title">📦 Tables disponibles</div>
+        <div class="db-table-item active" id="dbt-etudiants" onclick="previewTable('etudiants')">🎓 etudiants</div>
+        <div class="db-table-item" id="dbt-cours" onclick="previewTable('cours')">📚 cours</div>
+        <div class="db-table-item" id="dbt-inscriptions" onclick="previewTable('inscriptions')">📋 inscriptions</div>
+        <div class="db-table-item" id="dbt-notes" onclick="previewTable('notes')">📝 notes</div>
+        <div class="db-table-item" id="dbt-universites" onclick="previewTable('universites')">🏛️ universites</div>
+        <div style="padding:12px 14px;border-top:1px solid var(--border);margin-top:8px;">
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Requêtes types</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT * FROM etudiants;')">Voir étudiants</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT * FROM cours;')">Voir cours</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT e.prenom, e.nom, n.note\nFROM notes n\nJOIN etudiants e ON n.etudiant_id = e.id\nORDER BY n.note DESC;')">Notes + étudiants</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT niveau, COUNT(*) as nb, ROUND(AVG(age),1) as age_moy\nFROM etudiants\nGROUP BY niveau\nORDER BY nb DESC;')">Stats par niveau</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT e.prenom, e.nom, c.titre\nFROM inscriptions i\nJOIN etudiants e ON i.etudiant_id = e.id\nJOIN cours c ON i.cours_id = c.id;')">Jointure 3 tables</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT nom, note FROM notes WHERE note >= 15 ORDER BY note DESC;')">Meilleures notes</div>
+            <div class="sample-item" style="padding:6px 4px;" onclick="setQuery('SELECT COUNT(*) as total, AVG(note) as moyenne, MAX(note) as max, MIN(note) as min FROM notes;')">Agrégations</div>
+        </div>
+    </div>
+    <div class="db-main">
+        <div class="db-query-area">
+            <div class="db-query-label">✏️ Écrire une requête SQL</div>
+            <textarea class="db-query-input" id="sql-query" placeholder="Tapez votre requête SQL ici...&#10;Exemple : SELECT * FROM etudiants WHERE niveau = 'Master';">SELECT * FROM etudiants ORDER BY nom;</textarea>
+            <div class="db-query-toolbar">
+                <button class="btn-sql-run" onclick="runSQL()">▶ Exécuter la requête</button>
+                <button class="btn-sql-preset" onclick="setQuery('SELECT * FROM etudiants;')">Tous les étudiants</button>
+                <button class="btn-sql-preset" onclick="setQuery('SELECT * FROM notes ORDER BY note DESC;')">Toutes les notes</button>
+                <button class="btn-sql-preset" onclick="setQuery('SELECT * FROM cours;')">Tous les cours</button>
+                <button class="btn-tool" onclick="resetDB()" style="margin-left:auto;">🔄 Réinitialiser BD</button>
+            </div>
+        </div>
+        <div class="db-results" id="db-results">
+            <div style="color:var(--muted);font-style:italic;font-size:0.88rem;">Sélectionnez une table ou écrivez une requête SQL pour commencer...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- DEV WEB — HTML                          -->
+<!-- ════════════════════════════════════════ -->
+<div id="env-html" class="ide-layout" style="display:none;">
+    <div class="sidebar">
+        <div class="sidebar-header">🟠 Exemples HTML</div>
+        <div class="sample-item" onclick="loadSample('html',0)">📄 Page simple</div>
+        <div class="sample-item" onclick="loadSample('html',1)">📄 Titres & Paragraphes</div>
+        <div class="sample-item" onclick="loadSample('html',2)">📄 Listes & Liens</div>
+        <div class="sample-item" onclick="loadSample('html',3)">📄 Tableau HTML</div>
+        <div class="sample-item" onclick="loadSample('html',4)">📄 Formulaire</div>
+        <div class="sample-item" onclick="loadSample('html',5)">📄 Images & Médias</div>
+        <div class="sample-item" onclick="loadSample('html',6)">📄 Structure sémantique</div>
+    </div>
+    <div class="main-area">
+        <div class="toolbar">
+            <button class="btn-run-big" onclick="runWeb('html')" style="background:var(--web);">▶ Prévisualiser</button>
+            <button class="btn-tool" onclick="saveCode('html')">💾 Sauvegarder</button>
+            <span class="lang-badge" style="background:rgba(227,79,38,0.15);color:var(--web2);">🟠 HTML5 — Prévisualisation live</span>
+        </div>
+        <div class="split-area">
+            <div class="editor-pane">
+                <div class="editor-wrapper"><textarea id="html-editor"></textarea></div>
+            </div>
+            <div class="web-preview-wrap">
+                <div class="preview-header">
+                    <div class="preview-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+                    <span class="preview-label">🌐 Rendu HTML</span>
+                </div>
+                <iframe class="preview-frame" id="html-preview" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+        </div>
+        <div class="status-bar"><span>🟠 HTML5</span><span id="html-lines">Lignes: 0</span></div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- DEV WEB — CSS                           -->
+<!-- ════════════════════════════════════════ -->
+<div id="env-css" class="ide-layout" style="display:none;">
+    <div class="sidebar">
+        <div class="sidebar-header">🔵 Exemples CSS</div>
+        <div class="sample-item" onclick="loadSample('css',0)">📄 Couleurs & Polices</div>
+        <div class="sample-item" onclick="loadSample('css',1)">📄 Marges & Padding</div>
+        <div class="sample-item" onclick="loadSample('css',2)">📄 Flexbox</div>
+        <div class="sample-item" onclick="loadSample('css',3)">📄 Grid Layout</div>
+        <div class="sample-item" onclick="loadSample('css',4)">📄 Animations</div>
+        <div class="sample-item" onclick="loadSample('css',5)">📄 Boutons stylisés</div>
+        <div class="sample-item" onclick="loadSample('css',6)">📄 Cartes modernes</div>
+    </div>
+    <div class="main-area">
+        <div class="toolbar">
+            <button class="btn-run-big" onclick="runWeb('css')" style="background:#3b82f6;">▶ Prévisualiser</button>
+            <button class="btn-tool" onclick="saveCode('css')">💾 Sauvegarder</button>
+            <span class="lang-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;">🔵 CSS3 — Prévisualisation live</span>
+        </div>
+        <div class="split-area">
+            <div class="editor-pane">
+                <div class="editor-wrapper"><textarea id="css-editor"></textarea></div>
+            </div>
+            <div class="web-preview-wrap">
+                <div class="preview-header">
+                    <div class="preview-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+                    <span class="preview-label">🌐 Rendu CSS</span>
+                </div>
+                <iframe class="preview-frame" id="css-preview" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+        </div>
+        <div class="status-bar"><span>🔵 CSS3</span><span id="css-lines">Lignes: 0</span></div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- DEV WEB — JAVASCRIPT                    -->
+<!-- ════════════════════════════════════════ -->
+<div id="env-js" class="ide-layout" style="display:none;">
+    <div class="sidebar">
+        <div class="sidebar-header">🟡 Exemples JavaScript</div>
+        <div class="sample-item" onclick="loadSample('js',0)">📄 Variables & console</div>
+        <div class="sample-item" onclick="loadSample('js',1)">📄 Fonctions</div>
+        <div class="sample-item" onclick="loadSample('js',2)">📄 Tableaux & boucles</div>
+        <div class="sample-item" onclick="loadSample('js',3)">📄 Objets & méthodes</div>
+        <div class="sample-item" onclick="loadSample('js',4)">📄 DOM — Manipulation</div>
+        <div class="sample-item" onclick="loadSample('js',5)">📄 Événements</div>
+        <div class="sample-item" onclick="loadSample('js',6)">📄 Fetch & Promesses</div>
+        <div class="sample-item" onclick="loadSample('js',7)">📄 Classes ES6</div>
+    </div>
+    <div class="main-area">
+        <div class="toolbar">
+            <button class="btn-run-big" onclick="runJS()" style="background:var(--js);color:#1a1a00;">▶ Exécuter JS</button>
+            <button class="btn-tool" onclick="clearOut('js-out')">🗑 Effacer console</button>
+            <button class="btn-tool" onclick="saveCode('js')">💾 Sauvegarder</button>
+            <button class="btn-run-big" onclick="runWeb('js')" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);margin-left:4px;">🌐 Voir en page</button>
+            <span class="lang-badge" style="background:rgba(247,223,30,0.1);color:var(--js2);">🟡 JavaScript ES2024</span>
+        </div>
+        <div class="split-area">
+            <div class="editor-pane">
+                <div class="editor-wrapper"><textarea id="js-editor"></textarea></div>
+            </div>
+            <div class="output-pane">
+                <div class="output-header">
+                    <span>Console JS</span>
+                    <span style="font-size:0.7rem;color:var(--js2);">console.log() → ici</span>
+                </div>
+                <div class="output-body" id="js-out" style="color:#fbbf24;">Cliquez sur ▶ Exécuter JS...</div>
+            </div>
+        </div>
+        <div class="status-bar"><span>🟡 JavaScript ES2024</span><span id="js-lines">Lignes: 0</span></div>
+    </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CODES PAR DÉFAUT
+// ══════════════════════════════════════════════════
+const defaults = {
+py: `# 🐍 Python 3.13 — ABT Code
+# Vrai Python exécuté dans le navigateur via Skulpt
+
+# Affichage de base
+print("=== Bienvenue en Python 3.13 ===")
+
+# Variables et types
+nom = "Aminata"
+age = 21
+note = 16.5
+actif = True
+
+print(f"Nom : {nom}, Age : {age}, Note : {note}")
+print(f"Actif : {actif}, Type de note : {type(note).__name__}")
+
+# Liste et boucle
+fruits = ["mangue", "banane", "papaye", "orange"]
+print("\\nFruits disponibles :")
+for i, f in enumerate(fruits, 1):
+    print(f"  {i}. {f.upper()}")
+
+# Fonction
+def factorielle(n):
+    if n <= 1: return 1
+    return n * factorielle(n - 1)
+
+print("\\nFactorielles :")
+for i in range(1, 8):
+    print(f"  {i}! = {factorielle(i)}")`,
+
+r: `# 📊 R 4.4 — ABT Code
+# Interpréteur R complet
+
+cat("=== Bienvenue en R 4.4 ===\\n\\n")
+
+# Variables
+x <- 15.7
+y <- 4
+cat("x =", x, "| y =", y, "\\n")
+
+# Vecteur de notes
+notes <- c(12, 16, 18, 14, 9, 17, 15, 11, 20, 13)
+cat("\\nNotes :", notes, "\\n")
+cat("Moyenne :", mean(notes), "\\n")
+cat("Médiane :", median(notes), "\\n")
+cat("Écart-type :", round(sd(notes), 2), "\\n")
+cat("Max :", max(notes), "| Min :", min(notes), "\\n")
+
+# Boucle for
+cat("\\nTable de multiplication de 6 :\\n")
+for (i in 1:8) {
+  cat("  6 x", i, "=", 6*i, "\\n")
+}
+
+# Fonction
+aire <- function(l, h) l * h
+cat("\\nAire rectangle 5x3 :", aire(5, 3), "\\n")`,
+
+html: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ma page HTML</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; margin: 20px; }
+        h1   { color: #e34f26; }
+        p    { color: #4a5568; line-height: 1.6; }
+        .box { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🌐 Ma première page HTML</h1>
+        <p>Bienvenue sur <strong>ABT Code</strong> ! Cette page est créée avec du HTML pur.</p>
+        <h2>Qu'est-ce que HTML ?</h2>
+        <p>HTML (HyperText Markup Language) est le langage de base du Web.</p>
+        <ul>
+            <li>Structure le contenu</li>
+            <li>Utilise des balises comme &lt;h1&gt;, &lt;p&gt;, &lt;ul&gt;</li>
+            <li>S'associe avec CSS pour le style</li>
+        </ul>
+    </div>
+    <script src="abt_ai.js"></script>
+</body>
+</html>`,
+
+css: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulateur CSS</title>
+    <style>
+        /* ── RESET ── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ── CARTE ── */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .card h1 {
+            color: #4a5568;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* ── BOUTON ANIMÉ ── */
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+        }
+
+        /* ── BADGES ── */
+        .badges { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .b1 { background: #fed7d7; color: #c53030; }
+        .b2 { background: #c6f6d5; color: #22543d; }
+        .b3 { background: #bee3f8; color: #2a69ac; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎨 CSS en action</h1>
+        <p>Modifiez le CSS dans l'éditeur et observez le résultat en temps réel !</p>
+        <button class="btn">Cliquez-moi !</button>
+        <div class="badges">
+            <span class="badge b1">Couleurs</span>
+            <span class="badge b2">Flexbox</span>
+            <span class="badge b3">Animations</span>
+        </div>
+    </div>
+</body>
+</html>`,
+
+js: `// 🟡 JavaScript ES2024 — ABT Code
+// La console affiche les résultats ci-contre
+
+// ── Variables modernes ──
+const nom = "Aminata";
+let compteur = 0;
+
+console.log("Bonjour", nom, "!");
+
+// ── Tableau & méthodes ──
+const notes = [12, 18, 15, 9, 20, 14, 16];
+const moyenne = notes.reduce((a, b) => a + b, 0) / notes.length;
+const top = notes.filter(n => n >= 15);
+const doubles = notes.map(n => n * 2);
+
+console.log("Notes :", notes.join(", "));
+console.log("Moyenne :", moyenne.toFixed(2));
+console.log("Notes >= 15 :", top.join(", "));
+console.log("Doubles :", doubles.join(", "));
+
+// ── Fonction fléchée ──
+const carre = n => n ** 2;
+const factorielle = n => n <= 1 ? 1 : n * factorielle(n - 1);
+
+console.log("\\n─── Carrés 1 à 5 ───");
+[1,2,3,4,5].forEach(i => console.log(\`  \${i}² = \${carre(i)}\`));
+
+console.log("\\n─── Factorielles ───");
+[3,4,5,6,7].forEach(i => console.log(\`  \${i}! = \${factorielle(i)}\`));
+
+// ── Objet ──
+const etudiant = { nom: "Moussa", niveau: "L2", note: 17.5 };
+console.log("\\nÉtudiant :", JSON.stringify(etudiant));`
+};
+
+// Exemples
+const samples = {
+py:[
+    `print("Bonjour le monde !")\nprint("Python 3.13 sur ABT Code")`,
+    `# Variables et types\nx = 42\nnom = "Mali"\npi = 3.14159\nactif = True\nprint(type(x), x)\nprint(type(nom), nom)\nprint(type(pi), pi)`,
+    `# Conditions\nage = 20\nif age < 18:\n    print("Mineur")\nelif age < 25:\n    print("Jeune adulte")\nelse:\n    print("Adulte")`,
+    `# Boucle for + range\nfor i in range(1, 11):\n    if i % 2 == 0:\n        print(f"{i} est pair")\n    else:\n        print(f"{i} est impair")`,
+    `def saluer(prenom, titre="Étudiant"):\n    return f"Bonjour {titre} {prenom} !"\n\nprint(saluer("Aminata"))\nprint(saluer("Moussa", "Dr"))`,
+    `fruits = ["mangue","banane","orange"]\nfruits.append("papaye")\nfruits.sort()\nfor f in fruits:\n    print(f"- {f}")`,
+    `pays = {"Mali":"Bamako","Sénégal":"Dakar","CI":"Abidjan"}\nfor p,c in pays.items():\n    print(f"{p} → {c}")`,
+    `def fib(n):\n    a,b = 0,1\n    for _ in range(n):\n        print(a, end=" ")\n        a,b = b,a+b\nfib(10)`,
+    `for i in range(1,21):\n    if i%15==0: print("FizzBuzz")\n    elif i%3==0: print("Fizz")\n    elif i%5==0: print("Buzz")\n    else: print(i)`,
+    `def fact(n):\n    return 1 if n<=1 else n*fact(n-1)\nfor i in range(1,9):\n    print(f"{i}! = {fact(i)}")`
+],
+r:[
+    `x <- 25\ny <- 7\ncat("x + y =", x+y, "\\n")\ncat("x * y =", x*y, "\\n")\ncat("x %% y =", x%%y, "\\n")`,
+    `v <- c(3, 7, 12, 5, 9, 15, 2)\ncat("Vecteur :", v, "\\n")\ncat("Longueur :", length(v), "\\n")\ncat("Trié :", sort(v), "\\n")`,
+    `notes <- c(14,16,18,12,20,15,11,17,13,19)\ncat("Moyenne :", mean(notes), "\\n")\ncat("Médiane :", median(notes), "\\n")\ncat("Écart-type :", round(sd(notes),2), "\\n")`,
+    `cat("Multiples de 3 jusqu'à 30 :\\n")\nfor (i in 1:10) {\n  cat(" ", 3*i)\n}\ncat("\\n")`,
+    `x <- 1\nwhile (x <= 8) {\n  cat("2^", x, "=", 2^x, "\\n")\n  x <- x + 1\n}`,
+    `bmi <- function(poids, taille) {\n  poids / (taille^2)\n}\ncat("IMC 70kg/1.75m :", round(bmi(70,1.75),1), "\\n")`,
+    `fib <- c(0,1)\nfor(i in 3:12) fib[i] <- fib[i-1]+fib[i-2]\ncat("Fibonacci :", fib, "\\n")`,
+    `x <- 15\nif (x > 10) {\n  cat(x, "est supérieur à 10\\n")\n} else {\n  cat(x, "est <= 10\\n")\n}`,
+    `a <- 17; b <- 5\ncat("a + b =", a+b, "\\n")\ncat("a %% b =", a%%b, "\\n")\ncat("a %/% b =", a%/%b, "\\n")\ncat("a ^ b =", a^b, "\\n")`
+],
+html:[
+    `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;padding:20px;background:#f5f5f5;}</style></head><body><h1 style="color:#e34f26">Page simple</h1><p>Mon premier paragraphe HTML !</p></body></html>`,
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px;"><h1>Titre H1</h1><h2>Titre H2</h2><h3>Titre H3</h3><p>Un <strong>paragraphe</strong> avec du texte en <em>italique</em> et en <u>souligné</u>.</p></body></html>`,
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px;"><ul><li>Élément 1</li><li>Élément 2</li><li>Élément 3</li></ul><ol><li>Premier</li><li>Deuxième</li></ol><a href="#">Un lien</a></body></html>`,
+    `<!DOCTYPE html><html><head><style>table{border-collapse:collapse;width:100%;}th,td{border:1px solid #ddd;padding:10px;}th{background:#4f8ef7;color:white;}</style></head><body style="padding:20px;font-family:sans-serif;"><table><tr><th>Nom</th><th>Note</th><th>Niveau</th></tr><tr><td>Aminata</td><td>18</td><td>Master</td></tr><tr><td>Moussa</td><td>15</td><td>L3</td></tr></table></body></html>`,
+    `<!DOCTYPE html><html><head><style>form{max-width:300px;padding:20px;background:#f9f9f9;border-radius:8px;font-family:sans-serif;}input,select{width:100%;padding:8px;margin:6px 0 14px;border:1px solid #ccc;border-radius:4px;}button{background:#4f8ef7;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;}label{font-weight:bold;font-size:0.9rem;}</style></head><body style="padding:20px;"><form><label>Nom :</label><input type="text" placeholder="Votre nom"><label>Email :</label><input type="email" placeholder="email@exemple.com"><label>Niveau :</label><select><option>Licence 1</option><option>Licence 2</option><option>Master</option></select><button type="button">Envoyer</button></form></body></html>`,
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px;background:#1a1a2e;color:white;"><figure style="text-align:center;"><img src="https://via.placeholder.com/300x200/4f8ef7/ffffff?text=ABT+Code" alt="ABT Code" style="border-radius:8px;"><figcaption style="margin-top:8px;color:#94a3b8;">Image avec légende</figcaption></figure></body></html>`,
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px;"><header style="background:#2c3e50;color:white;padding:16px;border-radius:6px;margin-bottom:12px;"><h1>En-tête</h1></header><main><article style="background:#f5f5f5;padding:16px;border-radius:6px;"><h2>Article</h2><p>Contenu principal avec structure sémantique HTML5.</p></article></main><footer style="background:#2c3e50;color:white;padding:12px;border-radius:6px;margin-top:12px;text-align:center;">Pied de page</footer></body></html>`
+],
+css:[
+    `<!DOCTYPE html><html><head><style>body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;padding:30px;}h1{color:#4f8ef7;font-size:2rem;}p{color:#4a5568;background:#dbeafe;padding:12px;border-radius:6px;font-size:1.1rem;}</style></head><body><h1>Couleurs & Polices</h1><p>La propriété color change la couleur du texte. background-color change le fond.</p></body></html>`,
+    `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;padding:20px;}.box{background:#4f8ef7;color:white;width:200px;padding:20px;margin:20px;border:4px solid #2b6cb0;border-radius:8px;}</style></head><body><div class="box">padding: 20px<br>margin: 20px<br>border: 4px</div></body></html>`,
+    `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;padding:20px;}.container{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;}.item{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px 30px;border-radius:10px;font-weight:bold;}</style></head><body><div class="container"><div class="item">1</div><div class="item">2</div><div class="item">3</div><div class="item">4</div></div></body></html>`,
+    `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;padding:20px;}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.cell{background:#4f8ef7;color:white;padding:20px;border-radius:8px;text-align:center;font-weight:bold;}</style></head><body><div class="grid"><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div><div class="cell">6</div></div></body></html>`,
+    `<!DOCTYPE html><html><head><style>@keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);}}@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#1a1a2e;gap:40px;}.circle{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);animation:pulse 1.5s infinite;}.spinner{width:50px;height:50px;border:6px solid rgba(255,255,255,0.1);border-top-color:#4f8ef7;border-radius:50%;animation:spin 0.8s linear infinite;}</style></head><body><div class="circle"></div><div class="spinner"></div></body></html>`,
+    `<!DOCTYPE html><html><head><style>body{display:flex;gap:12px;padding:30px;flex-wrap:wrap;font-family:sans-serif;background:#1a1a2e;justify-content:center;}.btn{padding:12px 24px;border:none;border-radius:50px;font-weight:bold;cursor:pointer;transition:all 0.3s;font-size:0.95rem;}.primary{background:linear-gradient(135deg,#4f8ef7,#7c3aed);color:white;}.primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(79,142,247,0.4);}.outline{background:transparent;color:#4f8ef7;border:2px solid #4f8ef7;}.outline:hover{background:#4f8ef7;color:white;}.danger{background:#e53e3e;color:white;}.danger:hover{background:#c53030;}</style></head><body><button class="btn primary">Primary</button><button class="btn outline">Outline</button><button class="btn danger">Danger</button></body></html>`,
+    `<!DOCTYPE html><html><head><style>body{background:#0d0f14;display:flex;gap:16px;padding:30px;flex-wrap:wrap;justify-content:center;font-family:sans-serif;}.card{background:#1c2030;border:1px solid #2a2f45;border-radius:16px;padding:24px;width:180px;text-align:center;transition:all 0.3s;cursor:pointer;}.card:hover{transform:translateY(-6px);border-color:#4f8ef7;box-shadow:0 12px 30px rgba(79,142,247,0.2);}.card h3{color:#e2e8f0;margin-bottom:8px;}.card p{color:#64748b;font-size:0.82rem;}.emoji{font-size:2rem;margin-bottom:10px;}</style></head><body><div class="card"><div class="emoji">🐍</div><h3>Python</h3><p>Algorithmique</p></div><div class="card"><div class="emoji">📊</div><h3>R</h3><p>Statistiques</p></div><div class="card"><div class="emoji">🗄️</div><h3>SQL</h3><p>Bases de données</p></div></body></html>`
+],
+js:[
+    `const nom = "Aminata";\nconst age = 21;\nconsole.log("Nom:", nom);\nconsole.log("Age:", age);\nconsole.log("Type nom:", typeof nom);`,
+    `function saluer(prenom, titre = "Étudiant") {\n    return \`Bonjour \${titre} \${prenom} !\`;\n}\nconst double = x => x * 2;\nconsole.log(saluer("Moussa"));\nconsole.log(double(8));`,
+    `const notes = [12,18,15,9,20,14];\nconst somme = notes.reduce((a,b)=>a+b,0);\nconsole.log("Notes:", notes.join(", "));\nconsole.log("Somme:", somme);\nnotes.forEach((n,i) => console.log(\`  [\${i}] = \${n}\`));`,
+    `const etudiant = {\n    nom: "Fatoumata",\n    niveau: "Master",\n    notes: [16,18,15],\n    moyenne() {\n        return this.notes.reduce((a,b)=>a+b,0)/this.notes.length;\n    }\n};\nconsole.log(etudiant.nom, "- Moy:", etudiant.moyenne());`,
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px;background:#1a1a2e;color:white;">\n<h2 id="titre">Cliquez sur le bouton</h2>\n<button id="btn" style="padding:10px 20px;background:#4f8ef7;color:white;border:none;border-radius:6px;cursor:pointer;font-size:1rem;">\n  Changer le titre\n</button>\n<script>\nlet count = 0;\ndocument.getElementById('btn').addEventListener('click', function() {\n    count++;\n    document.getElementById('titre').innerText = \`Cliqué \${count} fois ! 🎉\`;\n    this.style.background = count % 2 === 0 ? '#4f8ef7' : '#48bb78';\n});\n<\/script></body></html>`,
+    `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px;"><div id="box" style="width:100px;height:100px;background:#4f8ef7;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;transition:all 0.3s;">Hover !</div><p id="msg" style="margin-top:16px;color:#4a5568;"></p><script>\nconst box = document.getElementById('box');\nconst msg = document.getElementById('msg');\nbox.addEventListener('mouseover',()=>{box.style.background='#48bb78';msg.innerText='Souris sur la boîte !';});\nbox.addEventListener('mouseout',()=>{box.style.background='#4f8ef7';msg.innerText='';});\nbox.addEventListener('click',()=>{box.style.transform=box.style.transform?'':'rotate(180deg)';});\n<\/script>
+<script>
+// Lecture des paramètres URL pour ouvrir le bon simulateur
+(function() {
+    function applyURLParams() {
+        const p = new URLSearchParams(window.location.search);
+        const lang = p.get('lang');
+        const sub  = p.get('sub');
+        if (lang) {
+            const tabMap = {python:'.tab-py',r:'.tab-r',sql:'.tab-sql',web:'.tab-web'};
+            const tabSel = tabMap[lang];
+            if (tabSel) {
+                const el = document.querySelector(tabSel);
+                if (el && typeof switchMain === 'function') switchMain(lang === 'python' ? 'python' : lang, el);
+            }
+        }
+        if (sub && (lang === 'web' || !lang)) {
+            setTimeout(() => {
+                const el = document.getElementById('stab-' + sub);
+                if (el && typeof switchWeb === 'function') switchWeb(sub, el);
+            }, 400);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(applyURLParams, 600));
+    } else {
+        setTimeout(applyURLParams, 600);
+    }
+})();
+</script>
+</body></html>`,
+    `// Simulation fetch (sans réseau)\nasync function getData() {\n    // Simule une promesse\n    const data = await new Promise(resolve => {\n        setTimeout(() => resolve({status: "ok", users: 42}), 500);\n    });\n    console.log("Réponse:", JSON.stringify(data));\n    return data;\n}\ngetData().then(d => console.log("Utilisateurs:", d.users));`,
+    `class Etudiant {\n    constructor(nom, niveau) {\n        this.nom = nom;\n        this.niveau = niveau;\n        this.notes = [];\n    }\n    ajouterNote(n) { this.notes.push(n); }\n    get moyenne() {\n        return this.notes.length ?\n            (this.notes.reduce((a,b)=>a+b,0)/this.notes.length).toFixed(2) : 0;\n    }\n    toString() { return \`\${this.nom} (\${this.niveau}) — Moy: \${this.moyenne}\`; }\n}\nconst e = new Etudiant("Aminata", "L2");\n[15,18,12,20].forEach(n => e.ajouterNote(n));\nconsole.log(e.toString());`
+]};
+
+// ══════════════════════════════════════════════════
+// ÉDITEURS CodeMirror
+// ══════════════════════════════════════════════════
+let editors = {};
+let currentMain = 'python';
+let currentWeb = 'html';
+
+const modeMap = {py:'python', r:'text/x-rsrc', html:'htmlmixed', css:'htmlmixed', js:'javascript'};
+
+window.onload = function() {
+    const ids = ['py','r','html','css','js'];
+    ids.forEach(id => {
+        const ta = document.getElementById(id+'-editor');
+        if (!ta) return;
+        const cm = CodeMirror.fromTextArea(ta, {
+            mode: modeMap[id],
+            theme:'dracula', lineNumbers:true,
+            autoCloseBrackets:true, matchBrackets:true,
+            indentUnit:4, tabSize:4, indentWithTabs:false,
+            extraKeys:{"Ctrl-Enter": ()=>runCurrent()}
+        });
+        const saved = localStorage.getItem('abt_ide_'+id);
+        cm.setValue(saved || defaults[id]);
+        cm.setSize('100%','100%');
+        cm.on('change', () => {
+            const lines = cm.lineCount();
+            const el = document.getElementById(id+'-lines');
+            if (el) el.innerText = 'Lignes: '+lines;
+        });
+        editors[id] = cm;
+    });
+
+    applyTheme();
+
+    // Auto-preview HTML/CSS
+    setTimeout(()=>{
+        runWeb('html');
+        runWeb('css');
+    }, 500);
+};
+
+function runCurrent() {
+    if (currentMain==='python') runPython();
+    else if (currentMain==='r') runR();
+    else if (currentMain==='sql') runSQL();
+    else if (currentMain==='web') {
+        if (currentWeb==='js') runJS();
+        else runWeb(currentWeb);
+    }
+}
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function switchMain(lang, el) {
+    currentMain = lang;
+    document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    ['python','r','sql','html','css','js'].forEach(e => {
+        const env = document.getElementById('env-'+e);
+        if (env) env.style.display = 'none';
+    });
+    document.getElementById('sub-tabs').style.display = lang==='web' ? 'flex' : 'none';
+    if (lang==='web') {
+        document.getElementById('env-'+currentWeb).style.display = 'flex';
+        setTimeout(()=>runWeb(currentWeb), 200);
+    } else if (lang==='sql') {
+        document.getElementById('env-sql').style.display = 'flex';
+        initSQL();
+    } else {
+        document.getElementById('env-'+lang.replace('python','py').replace('r','r')).style.display = 'flex';
+    }
+    if (lang==='python') document.getElementById('env-python').style.display = 'flex';
+    else if (lang==='r') document.getElementById('env-r').style.display = 'flex';
+}
+
+function switchWeb(sub, el) {
+    currentWeb = sub;
+    ['html','css','js'].forEach(s => {
+        const env = document.getElementById('env-'+s);
+        if (env) env.style.display = 'none';
+        const stab = document.getElementById('stab-'+s);
+        if (stab) stab.className = 'sub-tab';
+    });
+    document.getElementById('env-'+sub).style.display = 'flex';
+    el.className = 'sub-tab active-'+sub;
+    if (sub!=='js') setTimeout(()=>runWeb(sub), 200);
+}
+
+function loadSample(lang, idx) {
+    if (!editors[lang]) return;
+    editors[lang].setValue(samples[lang][idx] || defaults[lang]);
+    editors[lang].focus();
+    if (lang==='html'||lang==='css') setTimeout(()=>runWeb(lang),100);
+}
+
+function saveCode(lang) {
+    if (!editors[lang]) return;
+    localStorage.setItem('abt_ide_'+lang, editors[lang].getValue());
+    const btn = event.target;
+    const orig = btn.innerText; btn.innerText='✓ Sauvegardé!'; btn.style.color='var(--green)';
+    setTimeout(()=>{btn.innerText=orig;btn.style.color='';},1500);
+}
+
+function clearOut(id) {
+    const el = document.getElementById(id);
+    if (el) { el.className='output-body'; el.innerText='Effacé.'; }
+}
+
+// ══════════════════════════════════════════════════
+// PYTHON 3.13 via Skulpt
+// ══════════════════════════════════════════════════
+function runPython() {
+    const code = editors['py']?.getValue() || '';
+    const out = document.getElementById('py-out');
+    out.className='output-body'; out.innerText='';
+    let output='';
+    const t0=Date.now();
+    Sk.configure({
+        output:(t)=>{output+=t;out.innerText=output;},
+        read:(x)=>{if(Sk.builtinFiles?.files?.[x])return Sk.builtinFiles.files[x];throw new Error("Fichier introuvable: "+x);},
+        __future__:Sk.python3
+    });
+    Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody("<stdin>",false,code,true))
+        .then(()=>{
+            const ms=Date.now()-t0;
+            document.getElementById('py-status').innerText='✓ '+ms+'ms';
+            document.getElementById('py-run-time').innerText='✓ '+ms+'ms';
+            if(!output) out.innerText='(aucune sortie)';
+        })
+        .catch(e=>{out.className='output-body has-error';out.innerText='❌ Erreur Python 3.13 :\n'+e.toString();});
+}
+
+// ══════════════════════════════════════════════════
+// R 4.4 — Interpréteur
+// ══════════════════════════════════════════════════
+function runR() {
+    const code = editors['r']?.getValue() || '';
+    const out = document.getElementById('r-out');
+    out.className='output-body';
+    try {
+        const result = interpreterR(code);
+        out.innerText = result || '(aucune sortie)';
+    } catch(e) {
+        out.className='output-body has-error';
+        out.innerText='❌ Erreur R 4.4 :\n'+e.message;
+    }
+}
+
+function interpreterR(code) {
+    let output='';
+    const env={pi:Math.PI,TRUE:true,FALSE:false,T:true,F:false,Inf:Infinity,NA:NaN,NULL:null};
+    const rfns={
+        print:(v)=>{output+=formatR(v)+'\n';},
+        cat:(...a)=>{
+            const text=a.map(x=>Array.isArray(x)?x.join(' '):typeof x==='boolean'?(x?'TRUE':'FALSE'):String(x??'NULL')).join(' ').replace(/\\n/g,'\n').replace(/\\t/g,'\t');
+            output+=text;
+        },
+        c:(...a)=>a.flat(),
+        length:(v)=>Array.isArray(v)?v.length:1,
+        sum:(v)=>(Array.isArray(v)?v:[v]).reduce((a,b)=>a+b,0),
+        mean:(v)=>{const a=Array.isArray(v)?v:[v];return a.reduce((s,x)=>s+x,0)/a.length;},
+        median:(v)=>{const s=[...v].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;},
+        sd:(v)=>{const m=rfns.mean(v);return Math.sqrt(rfns.mean(v.map(x=>(x-m)**2)));},
+        var:(v)=>{const m=rfns.mean(v);return rfns.mean(v.map(x=>(x-m)**2));},
+        max:(v)=>Math.max(...(Array.isArray(v)?v:[v])),
+        min:(v)=>Math.min(...(Array.isArray(v)?v:[v])),
+        abs:(v)=>Array.isArray(v)?v.map(Math.abs):Math.abs(v),
+        sqrt:(v)=>Array.isArray(v)?v.map(Math.sqrt):Math.sqrt(v),
+        round:(v,n=0)=>parseFloat((+v).toFixed(n)),
+        floor:(v)=>Math.floor(v), ceiling:(v)=>Math.ceil(v),
+        log:(v)=>Math.log(v), log10:(v)=>Math.log10(v), exp:(v)=>Math.exp(v),
+        paste:(...a)=>a.join(' '), paste0:(...a)=>a.join(''),
+        nchar:(v)=>v.length, toupper:(v)=>v.toUpperCase(), tolower:(v)=>v.toLowerCase(),
+        seq:(from,to,by=1)=>{const r=[];for(let i=from;(by>0?i<=to:i>=to);i+=by)r.push(i);return r;},
+        rep:(v,n)=>Array.from({length:n},()=>v).flat(),
+        rev:(v)=>[...v].reverse(), sort:(v)=>[...v].sort((a,b)=>a-b),
+        which:(v)=>v.map((x,i)=>x?i+1:null).filter(x=>x!==null),
+        is_numeric:(v)=>typeof v==='number',
+        sprintf:(fmt,...a)=>{let i=0;return fmt.replace(/%[\d.]*[dfs]/g,()=>a[i++]);},
+    };
+    evalRBlock(code.split('\n'), env, rfns, (s)=>{output+=s;});
+    return output;
+}
+
+function evalRBlock(lines, env, rfns, emit) {
+    let i=0;
+    while(i<lines.length){
+        const line=lines[i].trim();
+        if(!line||line.startsWith('#')){i++;continue;}
+        // FOR
+        const forM=line.match(/^for\s*\(\s*(\w+)\s+in\s+(.+?)\s*\)\s*\{?\s*$/);
+        if(forM){
+            let seq;try{seq=evalR(forM[2],env,rfns,emit);}catch(e){i++;continue;}
+            if(!Array.isArray(seq))seq=[seq];
+            let body=[],depth=line.endsWith('{')?1:0;
+            if(depth===0&&i+1<lines.length&&lines[i+1].trim()==='{'){depth=1;i++;}
+            i++;
+            while(i<lines.length&&depth>0){const l=lines[i].trim();if(l.includes('{'))depth++;if(l.startsWith('}'))depth--;if(depth>0)body.push(lines[i]);i++;}
+            for(const val of seq){env[forM[1]]=val;evalRBlock(body,env,rfns,emit);}
+            continue;
+        }
+        // WHILE
+        const whileM=line.match(/^while\s*\((.+)\)\s*\{?\s*$/);
+        if(whileM){
+            let body=[],depth=1;i++;
+            while(i<lines.length&&depth>0){const l=lines[i].trim();if(l.includes('{'))depth++;if(l.startsWith('}'))depth--;if(depth>0)body.push(lines[i]);i++;}
+            let safety=0;while(evalR(whileM[1],env,rfns,emit)&&++safety<1000)evalRBlock(body,env,rfns,emit);
+            continue;
+        }
+        // IF
+        const ifM=line.match(/^if\s*\((.+)\)\s*\{?\s*$/);
+        if(ifM){
+            let body=[],elseBody=[],depth=1;i++;
+            while(i<lines.length&&depth>0){const l=lines[i].trim();if(l.match(/^\}\s*else\s*\{/)&&depth===1){depth=0;i++;break;}if(l.includes('{'))depth++;if(l.startsWith('}'))depth--;if(depth>0)body.push(lines[i]);i++;}
+            if(i<lines.length&&lines[i-1]?.trim().match(/^\}\s*else\s*\{/)){depth=1;while(i<lines.length&&depth>0){const l=lines[i].trim();if(l.includes('{'))depth++;if(l.startsWith('}'))depth--;if(depth>0)elseBody.push(lines[i]);i++;}}
+            const cond=evalR(ifM[1],env,rfns,emit);
+            if(cond)evalRBlock(body,env,rfns,emit);else evalRBlock(elseBody,env,rfns,emit);
+            continue;
+        }
+        // FUNCTION DEF
+        const fnDef=line.match(/^(\w+)\s*<-\s*function\s*\(([^)]*)\)\s*\{?\s*$/);
+        if(fnDef){
+            const params=fnDef[2].split(',').map(p=>p.trim()).filter(Boolean);
+            let body=[],depth=1;i++;
+            while(i<lines.length&&depth>0){const l=lines[i].trim();if(l.includes('{'))depth++;if(l.startsWith('}'))depth--;if(depth>0)body.push(lines[i]);i++;}
+            env[fnDef[1]]=(...args)=>{
+                const localEnv={...env};
+                params.forEach((p,j)=>{const pn=p.split('=')[0].trim();localEnv[pn]=args[j]!==undefined?args[j]:evalR(p.split('=')[1]?.trim()||'NULL',localEnv,rfns,()=>{});});
+                let ret=undefined;
+                const retEmit=(s)=>emit(s);
+                for(const bl of body){const t=bl.trim();if(t.startsWith('return(')){const v=t.match(/return\((.+)\)/);if(v)ret=evalR(v[1],localEnv,rfns,retEmit);break;}evalRBlock([bl],localEnv,rfns,retEmit);}
+                return ret;
+            };
+            continue;
+        }
+        // ASSIGNATION x <- ou x[i] <-
+        const assM=line.match(/^(\w+)(\[.+\])?\s*<-\s*(.+)$/);
+        if(assM){try{const v=evalR(assM[3],env,rfns,emit);if(assM[2]){const idx=evalR(assM[2].slice(1,-1),env,rfns,emit)-1;if(!Array.isArray(env[assM[1]]))env[assM[1]]=[];env[assM[1]][idx]=v;}else env[assM[1]]=v;}catch(e){}i++;continue;}
+        // cat/print
+        if(line.startsWith('cat(')||line.startsWith('print(')){try{evalR(line,env,rfns,emit);}catch(e){emit('Erreur: '+e.message+'\n');}i++;continue;}
+        // expression seule
+        try{const r=evalR(line,env,rfns,emit);if(r!==undefined&&r!==null)emit(formatR(r)+'\n');}catch(e){}
+        i++;
+    }
+}
+
+function evalR(expr, env, rfns, emit) {
+    expr=(expr||'').trim();
+    if(!expr)return undefined;
+    // Range 1:N
+    const rng=expr.match(/^(.+?)\s*:\s*(.+)$/);
+    if(rng&&!expr.includes('(')){try{const a=+evalR(rng[1],env,rfns,emit),b=+evalR(rng[2],env,rfns,emit);const r=[];if(a<=b)for(let i=a;i<=b;i++)r.push(i);else for(let i=a;i>=b;i--)r.push(i);return r;}catch(e){}}
+    // Function call
+    const fnM=expr.match(/^(\w+)\s*\((.*)?\)$/s);
+    if(fnM){
+        const fname=fnM[1],argsStr=fnM[2]||'';
+        const args=splitRArgs(argsStr).map(a=>{const kv=a.match(/^\w+\s*=\s*(.+)$/);return evalR(kv?kv[1]:a.trim(),env,rfns,emit);});
+        if(fname==='cat'){rfns.cat(...args);return undefined;}
+        if(fname==='print'){rfns.print(args[0]);return undefined;}
+        if(rfns[fname])return rfns[fname](...args);
+        if(env[fname]&&typeof env[fname]==='function')return env[fname](...args);
+        if(Math[fname])return Math[fname](...args);
+        throw new Error('Fonction inconnue: '+fname);
+    }
+    // Index v[i]
+    const idxM=expr.match(/^(\w+)\[(.+)\]$/);
+    if(idxM){const v=env[idxM[1]];const idx=evalR(idxM[2],env,rfns,emit);return Array.isArray(v)?(Array.isArray(idx)?idx.map(i=>v[i-1]):v[idx-1]):undefined;}
+    // Operations
+    const ops=[['%%',(a,b)=>((a%b)+Math.abs(b))%Math.abs(b)],['%/%',(a,b)=>Math.trunc(a/b)],[/\^|\*\*/,(a,b)=>Math.pow(a,b)],['\\*',(a,b)=>a*b],['/',(a,b)=>a/b],['-',(a,b)=>a-b],['+',(a,b)=>a+b]];
+    for(const[op,fn]of ops){const re=new RegExp(`^(.+?)\\s*(${typeof op==='string'?op.replace('\\*','\\*'):op.source})\\s*(.+)$`);const m=expr.match(re);if(m){try{const a=evalR(m[1].trim(),env,rfns,emit),b=evalR(m[3].trim(),env,rfns,emit);if(Array.isArray(a)||Array.isArray(b)){const va=Array.isArray(a)?a:[a],vb=Array.isArray(b)?b:[b];return va.map((x,i)=>fn(x,vb[i%vb.length]));}return fn(+a,+b);}catch(e){}}}
+    // Comparaisons
+    const cmpM=expr.match(/^(.+?)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
+    if(cmpM){const a=evalR(cmpM[1].trim(),env,rfns,emit),b=evalR(cmpM[3].trim(),env,rfns,emit);return eval(`a ${cmpM[2]==='=='?'===':cmpM[2]==='!='?'!==':cmpM[2]} b`);}
+    // String
+    if((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'")))return expr.slice(1,-1).replace(/\\n/g,'\n').replace(/\\t/g,'\t');
+    if(expr==='TRUE'||expr==='T')return true;
+    if(expr==='FALSE'||expr==='F')return false;
+    if(expr==='NULL')return null;if(expr==='NA')return NaN;if(expr==='pi')return Math.PI;if(expr==='Inf')return Infinity;
+    if(!isNaN(expr))return Number(expr);
+    if(env.hasOwnProperty(expr))return env[expr];
+    throw new Error('Expression non reconnue: '+expr);
+}
+
+function splitRArgs(str){const a=[];let d=0,cur='',inS=false,sc='';for(const ch of str){if(inS){cur+=ch;if(ch===sc)inS=false;}else if(ch==='"'||ch==="'"){inS=true;sc=ch;cur+=ch;}else if(ch==='('||ch==='['){d++;cur+=ch;}else if(ch===')'||ch===']'){d--;cur+=ch;}else if(ch===','&&d===0){a.push(cur.trim());cur='';}else cur+=ch;}if(cur.trim())a.push(cur.trim());return a.filter(x=>x.length>0);}
+
+function formatR(v){if(v===undefined||v===null)return'NULL';if(typeof v==='boolean')return'[1] '+(v?'TRUE':'FALSE');if(Array.isArray(v)){let o='';for(let i=0;i<v.length;i+=10)o+='['+(i+1)+'] '+v.slice(i,i+10).map(x=>typeof x==='boolean'?(x?'TRUE':'FALSE'):(typeof x==='number'&&!Number.isInteger(x)?x.toFixed(6).replace(/\.?0+$/, ''):x)).join(' ')+'\n';return o.trim();}if(typeof v==='number')return'[1] '+(Number.isInteger(v)?v:v.toFixed(6).replace(/\.?0+$/,''));return'[1] "'+v+'"';}
+
+// ══════════════════════════════════════════════════
+// BASE DE DONNÉES SQL avec sql.js
+// ══════════════════════════════════════════════════
+let sqlDB=null, sqlInited=false;
+
+async function initSQL(){
+    if(sqlInited)return;
+    document.getElementById('db-results').innerHTML='<div style="color:var(--sql2);font-family:monospace;padding:10px;">⏳ Initialisation de la base de données...</div>';
+    try{
+        if(!window.initSqlJs)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.min.js');
+        const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`});
+        sqlDB=new SQL.Database();
+        // Créer les tables avec données
+        sqlDB.run(`
+CREATE TABLE universites (id INTEGER PRIMARY KEY, nom TEXT, ville TEXT, pays TEXT);
+INSERT INTO universites VALUES(1,'Université de Bamako','Bamako','Mali');
+INSERT INTO universites VALUES(2,'ENI','Bamako','Mali');
+INSERT INTO universites VALUES(3,'USTTB','Bamako','Mali');
+INSERT INTO universites VALUES(4,'Université Cheikh Anta Diop','Dakar','Sénégal');
+INSERT INTO universites VALUES(5,'Université FHB','Abidjan','Côte d''Ivoire');
+
+CREATE TABLE etudiants (id INTEGER PRIMARY KEY, prenom TEXT, nom TEXT, age INTEGER, niveau TEXT, universite_id INTEGER);
+INSERT INTO etudiants VALUES(1,'Aminata','Coulibaly',21,'Master',1);
+INSERT INTO etudiants VALUES(2,'Moussa','Traoré',20,'Licence 2',2);
+INSERT INTO etudiants VALUES(3,'Fatoumata','Diallo',22,'Licence 3',1);
+INSERT INTO etudiants VALUES(4,'Ibrahim','Konaté',19,'Licence 1',3);
+INSERT INTO etudiants VALUES(5,'Mariam','Sanogo',23,'Master',2);
+INSERT INTO etudiants VALUES(6,'Oumar','Sidibé',21,'Licence 2',1);
+INSERT INTO etudiants VALUES(7,'Aïcha','Touré',24,'Doctorat',4);
+INSERT INTO etudiants VALUES(8,'Seydou','Dembélé',20,'Licence 1',5);
+INSERT INTO etudiants VALUES(9,'Kadiatou','Keïta',22,'Licence 3',3);
+INSERT INTO etudiants VALUES(10,'Boubacar','Maïga',25,'Master',2);
+
+CREATE TABLE cours (id INTEGER PRIMARY KEY, titre TEXT, langage TEXT, niveau TEXT, nb_chapitres INTEGER);
+INSERT INTO cours VALUES(1,'Introduction à Python','Python','Débutant',5);
+INSERT INTO cours VALUES(2,'Statistiques avec R','R','Intermédiaire',5);
+INSERT INTO cours VALUES(3,'SQL pour débutants','SQL','Débutant',5);
+INSERT INTO cours VALUES(4,'HTML & CSS','Web','Débutant',5);
+INSERT INTO cours VALUES(5,'Algorithmes en Python','Python','Avancé',8);
+INSERT INTO cours VALUES(6,'Data Science avec R','R','Avancé',7);
+
+CREATE TABLE inscriptions (id INTEGER PRIMARY KEY, etudiant_id INTEGER, cours_id INTEGER, date_inscription TEXT);
+INSERT INTO inscriptions VALUES(1,1,1,'2026-01-15');
+INSERT IN

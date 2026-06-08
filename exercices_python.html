@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code — Exercices Python</title>
+    <script>if(localStorage.getItem('abt_connecte')!=='true'){window.location.href='Entre.html';}</script>
+    <style>
+        :root{--bg:#0d0f14;--bg2:#141720;--bg3:#1c2030;--border:#2a2f45;--py:#3776ab;--py2:#5a9fd4;--green:#48bb78;--green2:#38a169;--text:#e2e8f0;--muted:#64748b;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh;}
+        nav{background:rgba(13,15,20,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+        .nav-logo{font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--py2);}
+        .nav-logo span{color:var(--text);}
+        .btn-back-nav{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:7px;text-decoration:none;font-size:0.85rem;font-weight:600;transition:all 0.2s;}
+        .btn-back-nav:hover{border-color:var(--py);color:var(--py2);}
+        .nav-right{display:flex;align-items:center;gap:14px;}
+        .score-badge{background:rgba(72,187,120,0.1);border:1px solid rgba(72,187,120,0.3);color:var(--green);padding:5px 14px;border-radius:20px;font-size:0.82rem;font-weight:700;}
+        .hero{background:linear-gradient(135deg,#0a1628,#0d1f3c,#0d0f14);border-bottom:1px solid var(--border);padding:40px 28px;text-align:center;}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(55,118,171,0.15);border:1px solid rgba(55,118,171,0.4);color:var(--py2);border-radius:20px;padding:5px 16px;font-size:0.8rem;font-weight:700;margin-bottom:18px;letter-spacing:1px;}
+        .hero h1{font-size:2.2rem;font-weight:700;margin-bottom:10px;}
+        .hero h1 span{color:var(--py2);}
+        .hero p{color:var(--muted);font-size:1rem;max-width:600px;margin:0 auto 24px;}
+        .progress-global{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 24px;margin:0 28px 28px;display:flex;align-items:center;gap:20px;}
+        .prog-bar-outer{flex:1;background:var(--bg3);border-radius:20px;height:10px;overflow:hidden;}
+        .prog-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--py),var(--py2));transition:width 0.5s ease;}
+        .prog-text{color:var(--muted);font-size:0.88rem;white-space:nowrap;}
+        .prog-num{font-size:1.1rem;font-weight:700;color:var(--green);white-space:nowrap;}
+        .filters{display:flex;gap:8px;padding:0 28px 20px;flex-wrap:wrap;}
+        .filter-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:20px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;}
+        .filter-btn.active,.filter-btn:hover{border-color:var(--py);color:var(--py2);background:rgba(55,118,171,0.1);}
+        .exo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;padding:0 28px 40px;}
+        .exo-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.25s;cursor:pointer;}
+        .exo-card:hover{border-color:var(--py);transform:translateY(-3px);box-shadow:0 8px 30px rgba(55,118,171,0.15);}
+        .exo-card.done{border-color:rgba(72,187,120,0.4);background:rgba(72,187,120,0.04);}
+        .exo-header{padding:18px 20px 14px;display:flex;align-items:flex-start;gap:14px;}
+        .exo-num{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.95rem;flex-shrink:0;border:2px solid;}
+        .exo-num.done-num{background:rgba(72,187,120,0.15);border-color:rgba(72,187,120,0.5);color:var(--green);}
+        .exo-num.todo-num{background:rgba(55,118,171,0.1);border-color:rgba(55,118,171,0.3);color:var(--py2);}
+        .exo-meta{flex:1;}.exo-title{font-weight:700;font-size:0.95rem;margin-bottom:5px;}
+        .exo-tags{display:flex;gap:6px;flex-wrap:wrap;}
+        .tag{font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px;}
+        .tag-niveau-1{background:rgba(52,211,153,0.12);color:#34d399;}
+        .tag-niveau-2{background:rgba(251,191,36,0.12);color:#fbbf24;}
+        .tag-niveau-3{background:rgba(244,114,182,0.12);color:#f472b6;}
+        .tag-chapitre{background:rgba(55,118,171,0.12);color:var(--py2);}
+        .exo-check{color:var(--green);font-size:1.2rem;}
+        .exo-body{display:none;padding:0 20px 18px;border-top:1px solid var(--border);}
+        .exo-card.open .exo-body{display:block;}
+        .exo-enonce{color:#94a3b8;font-size:0.9rem;line-height:1.6;margin:14px 0 12px;}
+        .mini-sim{background:#1a252f;border-radius:8px;padding:14px;margin-bottom:12px;}
+        .mini-sim pre{color:#f8f8f2;font-family:'Consolas',monospace;font-size:0.88rem;line-height:1.5;}
+        .sim-controls{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+        .sim-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:0.85rem;width:120px;font-family:'Consolas',monospace;}
+        .sim-input:focus{outline:none;border-color:var(--py);}
+        .btn-exec{background:var(--green);color:white;border:none;padding:7px 14px;border-radius:6px;font-weight:700;cursor:pointer;font-size:0.82rem;}
+        .btn-exec:hover{background:var(--green2);}
+        .console-mini{background:#0d1117;border-left:3px solid var(--py2);padding:10px 14px;border-radius:4px;font-family:'Consolas',monospace;font-size:0.85rem;color:#48bb78;white-space:pre-line;min-height:36px;}
+        .reponse-row{display:flex;gap:8px;margin-top:10px;}
+        .rep-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-family:'Consolas',monospace;font-size:0.88rem;}
+        .rep-input:focus{outline:none;border-color:var(--py);}
+        .btn-valider{background:var(--py);color:white;border:none;padding:9px 18px;border-radius:7px;font-weight:700;cursor:pointer;font-size:0.85rem;}
+        .btn-valider:hover{background:var(--py2);}
+        .fb{margin-top:8px;padding:10px 14px;border-radius:6px;font-size:0.85rem;font-weight:600;display:none;}
+        .fb.ok{background:rgba(72,187,120,0.12);color:#68d391;border-left:3px solid var(--green);display:block;}
+        .fb.ko{background:rgba(239,68,68,0.1);color:#fc8181;border-left:3px solid #e53e3e;display:block;}
+        .kw{color:#f92672;font-weight:bold;}.fn{color:#66d9ef;}.cm{color:#75715e;font-style:italic;}.nm{color:#ae81ff;}.st{color:#e6db74;}
+    </style>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+
+    <style id="exo-mobile">
+    @media (max-width: 768px) {
+        nav { padding: 0 12px !important; height: 52px !important; }
+        .nav-right { gap: 5px !important; }
+        .btn-back-nav { padding: 4px 8px !important; font-size: 0.72rem !important; }
+        .score-badge { font-size: 0.72rem !important; padding: 3px 8px !important; }
+        .hero { padding: 20px 14px !important; }
+        .hero h1 { font-size: 1.5rem !important; }
+        .hero p { font-size: 0.85rem !important; }
+        .progress-global { padding: 12px 14px !important; margin: 0 14px 16px !important; gap: 10px !important; }
+        .filters { padding: 0 14px 12px !important; gap: 5px !important; }
+        .filter-btn { padding: 5px 10px !important; font-size: 0.75rem !important; }
+        .exo-grid { padding: 0 14px 80px !important; }
+        .exo-header { padding: 14px 14px 10px !important; gap: 10px !important; }
+        .exo-body { padding: 0 14px 14px !important; }
+        .exo-title { font-size: 0.88rem !important; }
+        .mini-sim { padding: 10px !important; }
+        .mini-sim pre { font-size: 0.78rem !important; }
+        .console-mini { font-size: 0.78rem !important; padding: 8px !important; }
+        .reponse-row { flex-direction: column !important; gap: 6px !important; }
+        .rep-input { font-size: 0.88rem !important; }
+        .btn-valider { width: 100% !important; padding: 10px !important; }
+        .sim-controls { flex-wrap: wrap !important; gap: 6px !important; }
+        .sim-input { width: 100% !important; max-width: 200px !important; }
+    }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="nav-logo"><span>ABT</span>Code &nbsp;/&nbsp; Exercices Python</div>
+    <div class="nav-right">
+        <span class="score-badge" id="score-badge">0 / 10 réussis</span>
+        <a href="notion1_cour.html" class="btn-back-nav">📚 Revoir le cours Python</a>
+        <a href="abt_ide.html" class="btn-back-nav" style="border-color:rgba(52,211,153,0.4);color:#34d399;">💻 IDE</a>
+        <a href="abt_ia_page.html" class="btn-back-nav" style="border-color:rgba(167,139,250,0.4);color:#a78bfa;">✦ ABT IA</a>
+        <a href="dashboard.html" class="btn-back-nav">🏠 Tableau de bord</a>
+    </div>
+</nav>
+<div class="hero">
+    <div class="hero-badge">🐍 PYTHON — EXERCICES PRATIQUES</div>
+    <h1>Exercices <span>Python</span></h1>
+    <p>Exercices progressifs couvrant tous les chapitres du cours Python. Cliquez pour développer et répondre.</p>
+</div>
+<div class="progress-global">
+    <span class="prog-text">Progression :</span>
+    <div class="prog-bar-outer"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+    <span class="prog-num" id="prog-label">0 / 10</span>
+</div>
+<div class="filters">
+    <button class="filter-btn active" onclick="filtrer('tous',this)">Tous (10)</button>
+    <button class="filter-btn" onclick="filtrer('ch1',this)">Ch.1 Introduction</button>
+    <button class="filter-btn" onclick="filtrer('ch2',this)">Ch.2 Variables</button>
+    <button class="filter-btn" onclick="filtrer('ch3',this)">Ch.3 Conditions</button>
+    <button class="filter-btn" onclick="filtrer('ch4',this)">Ch.4 Boucles</button>
+    <button class="filter-btn" onclick="filtrer('ch5',this)">Ch.5 Fonctions</button>
+</div>
+<div class="exo-grid" id="exo-grid"></div>
+<script>
+const TOTAL = 10;
+const exercices = [
+  {id:1,titre:"Afficher un message",chapitre:"ch1",niveau:"facile",
+   enonce:"En Python, quelle fonction affiche du texte à l'écran ? Tapez le nom de la fonction (sans parenthèses).",
+   code:`<span class="fn">?</span>(<span class="st">"Bonjour ABT Code !"</span>)`,
+   reponse:["print"],hint:"La fonction d'affichage Python s'appelle print"},
+  {id:2,titre:"Déclaration de variable",chapitre:"ch2",niveau:"facile",
+   enonce:"Déclarez une variable <code>age</code> avec la valeur <code>20</code> en Python. Tapez l'instruction complète (sans espaces autour du =).",
+   code:`<span class="cm"># Exemple : x = 5</span>\nage <span class="kw">=</span> <span class="nm">?</span>`,
+   reponse:["age=20","age = 20"],hint:"En Python, l'assignation utilise = (pas <- comme en R)"},
+  {id:3,titre:"Type de données",chapitre:"ch2",niveau:"facile",
+   enonce:"Quelle fonction Python retourne le <b>type</b> d'une variable ? Tapez uniquement le nom.",
+   code:`x <span class="kw">=</span> <span class="nm">42</span>\n<span class="fn">?</span>(x)  <span class="cm"># retourne &lt;class 'int'&gt;</span>`,
+   reponse:["type"],hint:"La fonction qui révèle le type d'un objet s'appelle type"},
+  {id:4,titre:"Condition if",chapitre:"ch3",niveau:"facile",
+   enonce:"En Python, quel mot-clé introduit une <b>condition</b> ? Tapez uniquement ce mot-clé.",
+   code:`<span class="kw">?</span> x > <span class="nm">0</span>:\n    <span class="fn">print</span>(<span class="st">"positif"</span>)`,
+   reponse:["if"],hint:"Le mot-clé conditionnel Python est le même que dans la plupart des langages"},
+  {id:5,titre:"Boucle for Python",chapitre:"ch4",niveau:"facile",
+   enonce:"Tapez <b>exactement</b> (sans espaces) la première ligne d'une boucle Python qui parcourt les entiers de 0 à 4 avec <code>range(5)</code> et une variable <code>i</code>.",
+   code:`<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">5</span>):\n    <span class="fn">print</span>(i)`,
+   reponse:["foriinrange(5):"],hint:"for i in range(5): — sans espaces : foriinrange(5):"},
+  {id:6,titre:"Définir une fonction",chapitre:"ch5",niveau:"moyen",
+   enonce:"Quel mot-clé Python permet de <b>définir une fonction</b> ? (différent de R !)",
+   code:`<span class="kw">?</span> saluer(nom):\n    <span class="kw">return</span> <span class="st">"Bonjour "</span> + nom`,
+   reponse:["def"],hint:"En Python on utilise def (en R on utilise function)"},
+  {id:7,titre:"Simulateur — range()",chapitre:"ch4",niveau:"moyen",
+   enonce:"Testez le simulateur. Que retourne <code>list(range(3, 8))</code> en Python ?",
+   code:`<span class="fn">list</span>(<span class="fn">range</span>(<span class="nm" id="ca7">3</span>, <span class="nm" id="cb7">8</span>))`,
+   hasInput:true,inputA:true,inputB:true,labelA:"début:",labelB:"fin:",defA:3,defB:8,
+   simFn:(a,b)=>{const r=[];for(let i=parseInt(a);i<parseInt(b);i++)r.push(i);return `> list(range(${a}, ${b}))\n[${r.join(', ')}]`;},
+   reponse:["[3,4,5,6,7]","[3, 4, 5, 6, 7]"],hint:"range(3,8) génère 3,4,5,6,7 (la borne de fin est exclue)"},
+  {id:8,titre:"Indentation Python",chapitre:"ch3",niveau:"moyen",
+   enonce:"En Python, comment appelle-t-on l'espace obligatoire avant les instructions dans un bloc (if, for, def...) ?",
+   code:`<span class="kw">if</span> x > <span class="nm">0</span>:\n    <span class="cm"># ↑ ces 4 espaces sont obligatoires</span>\n    <span class="fn">print</span>(x)`,
+   reponse:["indentation","l'indentation"],hint:"L'indentation (espaces en début de ligne) est obligatoire en Python"},
+  {id:9,titre:"Longueur d'une liste",chapitre:"ch2",niveau:"moyen",
+   enonce:"Quelle fonction Python retourne le nombre d'éléments d'une liste ? (même nom qu'en R !)",
+   code:`ma_liste <span class="kw">=</span> [<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>]\n<span class="fn">?</span>(ma_liste)  <span class="cm"># retourne 4</span>`,
+   reponse:["len"],hint:"En Python c'est len() (pas length() comme en R)"},
+  {id:10,titre:"Simulateur — Fonction Python",chapitre:"ch5",niveau:"avance",
+   enonce:"Testez cette fonction Python. Quel est le résultat de <code>f(6)</code> si <code>f</code> calcule n! (factorielle) ?",
+   code:`<span class="kw">def</span> <span class="fn">f</span>(n):\n    r <span class="kw">=</span> <span class="nm">1</span>\n    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, n+<span class="nm">1</span>):\n        r <span class="kw">=</span> r * i\n    <span class="kw">return</span> r\n<span class="fn">f</span>(<span class="nm" id="cv10">6</span>)`,
+   hasInput:true,inputA:true,inputB:false,labelA:"n =",defA:6,
+   simFn:(n)=>{let r=1;for(let i=1;i<=parseInt(n);i++)r*=i;return `> f(${n})\n${r}`;},
+   reponse:["720"],hint:"6! = 1×2×3×4×5×6 = 720"}
+];
+
+let scores = JSON.parse(localStorage.getItem('abt_exo_py')||'{}');
+
+function sauver(){
+  localStorage.setItem('abt_exo_py',JSON.stringify(scores));
+  const n=Object.keys(scores).filter(k=>scores[k]).length;
+  document.getElementById('score-badge').innerText=n+' / '+TOTAL+' réussis';
+  document.getElementById('prog-fill').style.width=(n/TOTAL*100)+'%';
+  document.getElementById('prog-label').innerText=n+' / '+TOTAL;
+  exercices.forEach(e=>{
+    const card=document.getElementById('card-'+e.id);
+    if(!card)return;
+    if(scores[e.id]){card.classList.add('done');card.querySelector('.exo-num').className='exo-num done-num';card.querySelector('.exo-check').innerText='✅';}
+  });
+}
+
+function niveauTag(n){if(n==='facile')return'<span class="tag tag-niveau-1">🟢 Facile</span>';if(n==='moyen')return'<span class="tag tag-niveau-2">🟡 Moyen</span>';return'<span class="tag tag-niveau-3">🔴 Avancé</span>';}
+function chapTag(c){const m={'ch1':'Ch.1','ch2':'Ch.2','ch3':'Ch.3','ch4':'Ch.4','ch5':'Ch.5'};return'<span class="tag tag-chapitre">'+m[c]+'</span>';}
+
+function buildCard(e){
+  const done=!!scores[e.id];
+  let simHtml='';
+  if(e.hasInput){
+    simHtml=`<div class="sim-controls">
+      <input type="${typeof e.defA==='string'?'text':'number'}" id="sim-a-${e.id}" class="sim-input" value="${e.defA}" style="width:${typeof e.defA==='string'?'180px':'80px'}">
+      ${e.inputB?`<input type="number" id="sim-b-${e.id}" class="sim-input" value="${e.defB}" style="width:80px">`:''}
+      <button class="btn-exec" onclick="runSim(${e.id})">▶ Exécuter</button>
+    </div>
+    <div class="console-mini" id="console-${e.id}">Cliquez sur Exécuter...</div>`;
+  }
+  return `<div class="exo-card ${done?'done':''}" id="card-${e.id}" data-ch="${e.chapitre}" data-nv="${e.niveau}" onclick="toggleCard(${e.id},event)">
+    <div class="exo-header">
+      <div class="exo-num ${done?'done-num':'todo-num'}">${e.id}</div>
+      <div class="exo-meta"><div class="exo-title">${e.titre}</div><div class="exo-tags">${chapTag(e.chapitre)}${niveauTag(e.niveau)}</div></div>
+      <div class="exo-check">${done?'✅':'›'}</div>
+    </div>
+    <div class="exo-body">
+      <p class="exo-enonce">${e.enonce}</p>
+      <div class="mini-sim"><pre>${e.code}</pre>${simHtml}</div>
+      <div class="reponse-row">
+        <input type="text" class="rep-input" id="rep-${e.id}" placeholder="Votre réponse..." onkeydown="if(event.key==='Enter') valider(${e.id})">
+        <button class="btn-valider" onclick="valider(${e.id})">Valider ✓</button>
+      </div>
+      <div class="fb" id="fb-${e.id}"></div>
+    </div>
+  </div>`;
+}
+
+function render(f){
+  const filtered=f==='tous'?exercices:exercices.filter(e=>e.chapitre===f||e.niveau===f);
+  document.getElementById('exo-grid').innerHTML=filtered.map(buildCard).join('');
+  sauver();
+}
+function toggleCard(id,event){
+  if(['rep-input','btn-valider','btn-exec','sim-input'].some(c=>event.target.classList.contains(c)))return;
+  document.getElementById('card-'+id).classList.toggle('open');
+}
+function runSim(id){
+  const e=exercices.find(x=>x.id===id);if(!e||!e.simFn)return;
+  const a=document.getElementById('sim-a-'+id)?.value||'';
+  const b=document.getElementById('sim-b-'+id)?.value||'';
+  document.getElementById('console-'+id).innerText=e.inputB?e.simFn(a,b):e.simFn(a);
+}
+function valider(id){
+  const e=exercices.find(x=>x.id===id);
+  const rep=document.getElementById('rep-'+id).value.trim().replace(/\s+/g,'');
+  const fb=document.getElementById('fb-'+id);
+  const ok=e.reponse.some(r=>r.replace(/\s+/g,'')===rep);
+  if(ok){fb.className='fb ok';fb.innerText='🎉 Correct ! → '+e.hint;scores[id]=true;sauver();setTimeout(()=>document.getElementById('card-'+id).classList.remove('open'),1500);}
+  else{fb.className='fb ko';fb.innerText='❌ Pas tout à fait. Indice : '+e.hint;}
+}
+function filtrer(f,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render(f);}
+render('tous');
+</script>
+    <script src="abt_ai.js"></script>
+</body>
+</html>

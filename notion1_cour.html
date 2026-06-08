@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code - Chapitre 1 : Introduction Exhaustive à Python</title>
+    <style>
+        /* DESIGN SYSTEM GLOBAL DE LA PLATEFORME ABT CODE */
+        :root {
+            --purple-main: #805AD5;
+            --purple-light: #f3e8ff;
+            --purple-dark: #6b46c1;
+            --blue-main: #3182ce;
+            --blue-light: #ebf8ff;
+            --blue-dark: #2b6cb0;
+            --orange-main: #dd6b20;
+            --orange-light: #fffaf0;
+            --orange-dark: #c05621;
+            --green-success: #48bb78;
+            --green-dark: #38a169;
+            --bg-body: #f4f6f9;
+            --text-main: #2c3e50;
+            --text-muted: #4a5568;
+            --border-gray: #cbd5e0;
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; 
+            color: #333; 
+            margin: 0; 
+            padding: 20px; 
+        }
+
+        .container { 
+            max-width: 950px; 
+            margin: 2rem auto; 
+        }
+
+        /* BARRE DE STATUT SUPÉRIEURE */
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .progress-indicator { 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+        }
+
+        .color-theorie { color: var(--purple-main); }
+        .color-exemple { color: var(--blue-main); }
+        .color-exercice { color: var(--orange-main); }
+
+        .btn-home { 
+            background: #cbd5e0; 
+            color: var(--text-muted); 
+            padding: 8px 16px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            font-size: 0.9rem; 
+            transition: all 0.2s; 
+        }
+        .btn-home:hover { background: #b2bfcc; color: white; }
+
+        /* ARCHITECTURE DES ÉCRANS */
+        .screen-card { 
+            background: white; 
+            padding: 50px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+        }
+        
+        .border-theorie { border-top: 6px solid var(--purple-main); }
+        .border-exemple { border-top: 6px solid var(--blue-main); }
+        .border-exercice { border-top: 6px solid var(--orange-main); }
+
+        h1 { margin-top: 0; font-size: 2.2rem; color: var(--text-main); }
+        h2 { color: var(--text-main); font-size: 1.5rem; margin-top: 35px; border-bottom: 2px solid #edf2f7; padding-bottom: 8px; }
+        p, ul, ol { font-size: 1.1rem; line-height: 1.8; color: var(--text-muted); }
+        li { margin-bottom: 12px; }
+        
+        .quote-box { background-color: #f7fafc; border-left: 4px solid #718096; font-style: italic; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
+        .warning-box { background-color: #fffaf0; border-left: 4px solid var(--orange-main); padding: 20px; border-radius: 6px; margin: 25px 0; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 30px 0; font-size: 1.05rem; }
+        th, td { border: 1px solid var(--border-gray); padding: 14px 18px; text-align: left; }
+        th { background-color: #edf2f7; color: var(--text-main); font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        
+        /* ZONE INTERACTIVE D'EXÉCUTION (SIMULATEUR) */
+        .interactive-simulator { background: #2c3e50; border-radius: 8px; padding: 20px; margin: 25px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .simulator-header { color: #fff; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .param-control { background: #34495e; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; color: #ecf0f1; }
+        .param-input { width: 80px; padding: 6px; border: none; border-radius: 4px; font-size: 1rem; text-align: center; }
+        .btn-run { background: var(--green-success); color: white; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+        .btn-run:hover { background: var(--green-dark); }
+
+        pre { color: #f8f8f2; padding: 0; margin: 0; font-family: 'Consolas', 'Courier New', monospace; font-size: 1.05rem; line-height: 1.6; }
+        .comment { color: #75715e; font-style: italic; }
+        .string { color: #e6db74; }
+        .keyword { color: #f92672; font-weight: bold; }
+        .builtin { color: #66d9ef; }
+        
+        .output-console { background: #1a252f; border-left: 5px solid var(--blue-main); padding: 15px 20px; font-family: 'Consolas', monospace; border-radius: 4px; margin-top: 15px; color: #48bb78; font-size: 1.05rem; min-height: 40px; white-space: pre-line; }
+        
+        /* FORMULAIRES DE DÉFI */
+        .input-box { width: 100%; padding: 15px; font-size: 1.15rem; border: 2px solid var(--border-gray); border-radius: 8px; margin: 20px 0; box-sizing: border-box; }
+        .feedback { margin-top: 15px; padding: 15px; border-radius: 6px; font-weight: bold; display: none; font-size: 1.1rem; }
+        .feedback.correct { background: #c6f6d5; color: #22543d; display: block; border-left: 4px solid var(--green-success); }
+        .feedback.incorrect { background: #fed7d7; color: #742a2a; display: block; border-left: 4px solid #e53e3e; }
+
+        /* BOUTONS DE NAVIGATION */
+        .btn-nav { color: white; padding: 14px 28px; font-weight: bold; border-radius: 8px; text-decoration: none; display: inline-block; float: right; margin-top: 20px; cursor: pointer; border: none; font-size: 1.05rem; transition: all 0.2s; }
+        .btn-theorie { background: var(--purple-main); }
+        .btn-exemple { background: var(--blue-main); }
+        .btn-exercice { background: var(--orange-main); }
+        .btn-suivant { background: var(--green-success); display: none; }
+        .btn-suivant:hover { background: var(--green-dark); }
+        
+        .btn-back { background: #cbd5e0; color: var(--text-muted); padding: 14px 28px; font-weight: bold; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 20px; border: none; font-size: 1.05rem; }
+        .btn-back:hover { background: #b2bfcc; color: white; }
+        
+        .clearfix { clear: both; }
+    </style>
+    <script>
+        if (localStorage.getItem('abt_connecte') !== 'true') {
+            window.location.href = 'Entre.html';
+        }
+    </script>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+
+    <style id="cours-responsive">
+    /* Responsive cours */
+    @media (max-width: 768px) {
+        body { padding: 10px !important; }
+        .container { margin: 0.5rem auto !important; }
+        .screen-card { padding: 18px 14px !important; border-radius: 8px !important; }
+        .screen-card h1 { font-size: 1.3rem !important; line-height: 1.3 !important; }
+        .top-bar {
+            flex-wrap: wrap !important; gap: 6px !important;
+            padding: 10px 12px !important;
+        }
+        .btn-nav, .btn-back {
+            padding: 10px 16px !important; font-size: 0.85rem !important;
+            float: none !important; display: inline-block !important;
+        }
+        .clearfix::after { content: ''; display: table; clear: both; }
+        .interactive-simulator pre { font-size: 0.78rem !important; overflow-x: auto; }
+        .output-console { font-size: 0.82rem !important; }
+        .param-row { flex-direction: column !important; align-items: flex-start !important; }
+        .param-input { width: 100% !important; }
+        .input-box { font-size: 0.95rem !important; }
+        /* Navigation buttons side by side on mobile */
+        .btn-nav, .btn-back { margin: 6px 4px !important; }
+        table { font-size: 0.8rem !important; }
+        table th, table td { padding: 6px 8px !important; }
+        .info-box { padding: 12px !important; font-size: 0.88rem !important; }
+    }
+    @media (max-width: 480px) {
+        .screen-card h1 { font-size: 1.15rem !important; }
+        .btn-nav { width: calc(50% - 8px) !important; text-align: center !important; margin: 4px !important; }
+        .btn-back { width: calc(50% - 8px) !important; text-align: center !important; margin: 4px !important; }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div id="ecran-theorie" class="screen-card border-theorie">
+            <div class="top-bar">
+                <div class="progress-indicator color-theorie">Chapitre 1 : Introduction Générale (Écran 1 : Théorie)</div>
+                <a href="exercices_python.html" class="btn-home" style="background:#3776ab;color:white;margin-right:6px;">🎯 Exercices Python</a><a href="abt_ia_page.html" class="btn-home" style="background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);">✦ ABT IA</a>
+                    <a href="index.html" class="btn-home">🏠 Menu Principal</a>
+                    <a href="abt_ide.html" class="btn-home" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);">💻 IDE</a>
+                    </div>
+            
+            <h1>1.1 Les Fondations Historiques et Logiques du Langage Python</h1>
+            
+            <h2>1. Genèse, Histoire et Créateur</h2>
+            <p>Le langage de programmation <b>Python</b> est le fruit de l'imagination et du travail d'un unique ingénieur et programmeur d'origine hollandaise : <b>Guido van Rossum</b>. Sa conception a débuté à la toute fin de l'année 1989 au sein du centre de recherche informatique hollandais appelé le <i>Centrum Wiskunde & Informatica (CWI)</i> situé aux Pays-Bas.</p>
+            
+            <p>L'objectif initial de Van Rossum était de créer un langage de script moderne, capable de succéder à un langage pédagogique nommé ABC, tout en offrant des fonctionnalités avancées d'interaction avec le système d'exploitation Amoeba. La toute première version officielle de distribution publique (la version 0.9.0) fut partagée à la communauté informatique internationale au début de l'année <b>1991</b>.</p>
+            
+            <div class="quote-box">
+                <b>Le saviez-vous ?</b> Contrairement à une croyance populaire tenace, le nom du langage n'a aucun lien de parenté direct avec le reptile de la famille des pythons. Guido van Rossum a choisi ce terme car il était un grand fan de la célèbre série télévisée humoristique de la BBC des années 1970 nommée <b>"Monty Python's Flying Circus"</b>.
+            </div>
+
+            <h2>2. Le Zen de Python : Une Philosophie de Code Unique</h2>
+            <p>Ce qui différencie fondamentalement Python des autres alternatives industrielles (comme le C, le C++ ou le Java), c'est l'existence d'une charte philosophique et éthique très stricte concernant l'écriture du code source. Ce manifeste est connu sous le nom de <b>Zen de Python</b>.</p>
+            <ul>
+                <li><b>Le beau est préférable au laid :</b> L'architecture visuelle d'un algorithme doit être plaisante à observer.</li>
+                <li><b>L'explicite est préférable à l'implicite :</b> Rien ne doit être deviné par magie, chaque action informatique doit être clairement écrite.</li>
+                <li><b>La lisibilité compte :</b> Un code source passe 90 % de son cycle de vie à être relu par d'autres ingénieurs.</li>
+            </ul>
+
+            <h2>3. Caractéristiques Techniques Avancées</h2>
+            <p>Un programme central, appelé <b>l'interpréteur</b>, analyse et convertit votre code source ligne après ligne, de haut en bas, en temps réel. Cette caractéristique offre une flexibilité immense car elle permet de tester des micro-portions de scripts instantanément sans aucune attente de compilation.</p>
+
+            <h2>4. Écosystème Global pour les Statistiques et l'Économie</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom de la Bibliothèque</th>
+                        <th>Rôle Technique Principal</th>
+                        <th>Cas Pratique Métier (Économie & Stats)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>NumPy</b></td>
+                        <td>Calculs numériques matriciels optimisés à haute vitesse.</td>
+                        <td>Modélisation de matrices de comptabilité sociale, algèbre linéaire.</td>
+                    </tr>
+                    <tr>
+                        <td><b>Pandas</b></td>
+                        <td>Manipulation fine de structures de données tabulaires (DataFrames).</td>
+                        <td>Analyse de séries temporelles, gestion de bases de données économiques.</td>
+                    </tr>
+                    <tr>
+                        <td><b>Matplotlib</b></td>
+                        <td>Génération de graphiques scientifiques bidimensionnels.</td>
+                        <td>Tracé d'histogrammes de distribution de revenus, courbes de Lorenz.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button class="btn-nav btn-exemple" onclick="voirExemple()">Accéder à l'Écran Exemples Interactifs ➔</button>
+            <div class="clearfix"></div>
+        </div>
+
+        <div id="ecran-exemple" class="screen-card border-exemple" style="display: none;">
+            <div class="top-bar">
+                <div class="progress-indicator color-exemple">Chapitre 1 : Introduction Générale (Écran 2 : Exemples Modifiables)</div>
+                <a href="index.html" class="btn-home">🏠 Menu Principal</a>
+                    </div>
+            
+            <h1>1.2 Premier contact avec l'affichage et la structure d'indentation</h1>
+            <p>Modifiez la valeur numérique ci-dessous pour tester le comportement de la condition et voir l'impact direct sur les affichages de l'interpréteur virtuel.</p>
+            
+            <div class="interactive-simulator">
+                <div class="simulator-header">
+                    <span>💻 Éditeur ABT Code (Simulateur d'Indentation)</span>
+                    <button class="btn-run" onclick="executerCodeExemple1()">▶ Lancer le Code Python</button>
+                </div>
+                
+                <div class="param-control">
+                    <label for="valeur-test">Définir le nombre à tester :</label>
+                    <input type="number" id="valeur-test" class="param-input" value="12">
+                    <span>(Saisissez un chiffre supérieur ou inférieur à 10)</span>
+                </div>
+
+                <pre><span class="comment"># Les instructions print s'exécutent en fonction de votre valeur</span>
+valeur = <span id="code-valeur-dynamique" class="string" style="font-weight: bold;">12</span>
+
+<span class="keyword">if</span> valeur > 10:
+    <span class="comment"># Ligne indentée (4 espaces vers la droite) :</span>
+    <span class="builtin">print</span>(<span class="string">"Console : Le test est validé ! Votre nombre est bien supérieur à 10."</span>)
+    <span class="builtin">print</span>(<span class="string">"Console : Ce sous-bloc s'affiche grâce à l'indentation."</span>)
+
+<span class="comment"># Ligne non indentée (Retour au bord gauche initial) :</span>
+<span class="builtin">print</span>(<span class="string">"Console : Cette ligne s'écrit toujours, car elle est HORS du bloc."</span>)</pre>
+
+                <div class="simulator-header" style="margin-top: 20px; margin-bottom: 5px; font-size: 0.9rem; color: #a0aec0;">Sortie de la Console Interprétée :</div>
+                <div id="console-output-ch1" class="output-console">Cliquez sur "Lancer le Code Python" pour exécuter...</div>
+            </div>
+
+            <button class="btn-back" onclick="voirTheorie()">⬅ Retour à la Théorie</button>
+            <button class="btn-nav btn-exercice" onclick="voirExercice()">Passer à l'Exercice de Validation ➔</button>
+            <div class="clearfix"></div>
+        </div>
+
+        <div id="ecran-exercice" class="screen-card border-exercice" style="display: none;">
+            <div class="top-bar">
+                <div class="progress-indicator color-exercice">Chapitre 1 : Introduction Générale (Écran 3 : Défi)</div>
+                <a href="index.html" class="btn-home">🏠 Menu Principal</a>
+                    </div>
+            
+            <h1>1.3 Examen de Validation du Module 1</h1>
+            <p>Pour valider officiellement ce premier bloc de compétences et débloquer le fichier suivant, vous devez répondre correctement au défi ci-dessous.</p>
+            
+            <p><b>Énoncé du Défi :</b> En quelle année la toute première version officielle publique du langage informatique Python (version 0.9.0) a-t-elle été publiée et partagée par son auteur Guido van Rossum ?</p>
+            
+            <input type="text" id="reponse-ch1" class="input-box" placeholder="Saisissez l'année exacte (ex: 1995)..." onkeydown="if(event.key === 'Enter') validerExercice1()">
+            
+            <div id="msg-ch1" class="feedback"></div>
+            
+            <button id="btn-retour-ch1" class="btn-back" onclick="retourExemple()">⬅ Revoir les Exemples</button>
+            <button id="btn-valider-ch1" class="btn-nav btn-exercice" onclick="validerExercice1()">Soumettre ma Réponse</button>
+            
+            <a href="notion2_exemple.html" id="btn-suivant-ch1" class="btn-nav btn-suivant">Ouvrir le Chapitre 2 (Les Variables) ➔</a>
+            <div class="clearfix"></div>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = function() {
+            document.getElementById('valeur-test').addEventListener('input', function() {
+                document.getElementById('code-valeur-dynamique').innerText = this.value;
+            });
+        }
+
+        function executerCodeExemple1() {
+            const valeur = parseFloat(document.getElementById('valeur-test').value);
+            const consoleZone = document.getElementById('console-output-ch1');
+            
+            if (isNaN(valeur)) {
+                consoleZone.style.color = "#fc8181";
+                consoleZone.innerText = "Error: Veuillez saisir un nombre valide.";
+                return;
+            }
+
+            consoleZone.style.color = "#48bb78"; 
+            let resultatText = "";
+
+            if (valeur > 10) {
+                resultatText += "Console : Le test est validé ! Votre nombre est bien supérieur à 10.\n";
+                resultatText += "Console : Ce sous-bloc s'affiche grâce à l'indentation.\n";
+            }
+            resultatText += "Console : Cette ligne s'écrit toujours, car elle est HORS du bloc.";
+            consoleZone.innerText = resultatText;
+        }
+
+        function voirExemple() {
+            document.getElementById('ecran-theorie').style.display = 'none';
+            document.getElementById('ecran-exemple').style.display = 'block';
+            window.scrollTo(0,0);
+            executerCodeExemple1();
+        }
+        function voirTheorie() {
+            document.getElementById('ecran-exemple').style.display = 'none';
+            document.getElementById('ecran-theorie').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+        function voirExercice() {
+            document.getElementById('ecran-exemple').style.display = 'none';
+            document.getElementById('ecran-exercice').style.display = 'block';
+            window.scrollTo(0,0);
+            setTimeout(() => { document.getElementById('reponse-ch1').focus(); }, 100);
+        }
+        function retourExemple() {
+            document.getElementById('ecran-exercice').style.display = 'none';
+            document.getElementById('ecran-exemple').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+
+        // --- VALIDATION SANS VERROUILLAGE DU CHAMP ---
+        function validerExercice1() {
+            const reponseUtilisateur = document.getElementById('reponse-ch1').value.trim();
+            const zoneFeedback = document.getElementById('msg-ch1');
+            const btnSuivant = document.getElementById('btn-suivant-ch1');
+            
+            if (reponseUtilisateur === "1991") {
+                // Succès : On affiche le bandeau vert et le bouton Suivant
+                zoneFeedback.className = "feedback correct";
+                zoneFeedback.innerText = "🎉 Félicitations ! Votre réponse est parfaitement exacte. Vous pouvez maintenant passer à l'étape suivante.";
+                
+                btnSuivant.style.display = 'inline-block'; // Affiche le bouton vert d'étape suivante
+            } else {
+                // Échec : On affiche le bandeau rouge, mais la case reste active pour corriger
+                zoneFeedback.className = "feedback incorrect";
+                zoneFeedback.innerText = "❌ Réponse incorrecte. Indice : C'est en 1991. Modifiez votre saisie et réessayez !";
+                
+                btnSuivant.style.display = 'none'; // Cache le bouton si l'utilisateur remodifie avec une mauvaise réponse
+            }
+        }
+    </script>
+    <script src="abt_ai.js"></script>
+</body>
+</html>

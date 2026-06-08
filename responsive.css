@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════
+   ABT CODE — RESPONSIVE GLOBAL
+   S'applique à toutes les pages
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── RESET DE BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+img, video { max-width: 100%; height: auto; }
+
+/* ── BREAKPOINTS
+   Mobile  : < 600px
+   Tablet  : 600px – 900px
+   Desktop : > 900px
+──────────────────── */
+
+/* ══ DASHBOARD ══ */
+@media (max-width: 900px) {
+    /* Navigation tabs → menu hamburger */
+    .nav-tabs { display: none !important; }
+    nav { padding: 0 14px !important; }
+    .nav-logo { font-size: 1rem !important; }
+    .nav-user span { display: none; }
+    .btn-deconnexion { padding: 5px 10px !important; font-size: 0.75rem !important; }
+
+    /* Hero section */
+    .hero { padding: 28px 20px !important; }
+    .hero h1 { font-size: 1.6rem !important; }
+    .hero p { font-size: 0.9rem !important; }
+    .hero-btns { flex-direction: column; gap: 8px !important; }
+    .btn-hero-primary, .btn-hero-secondary { width: 100%; text-align: center; }
+
+    /* Statistiques */
+    .quick-stats { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+
+    /* Grille cartes */
+    .cards-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+    .card { padding: 16px !important; }
+    .card h3 { font-size: 0.95rem !important; }
+    .card p { font-size: 0.82rem !important; }
+
+    /* Main content */
+    .main { padding: 16px !important; }
+    .section-header h1 { font-size: 1.4rem !important; }
+
+    /* Menu mobile visible */
+    .mobile-menu { display: flex !important; }
+    body { padding-bottom: 70px !important; }
+}
+
+@media (max-width: 500px) {
+    .cards-grid { grid-template-columns: 1fr !important; }
+    .quick-stats { grid-template-columns: repeat(2, 1fr) !important; }
+    .stat-card .stat-num { font-size: 1.4rem !important; }
+}
+
+/* ══ PAGES DE COURS ══ */
+@media (max-width: 900px) {
+    .screen-card { padding: 20px 16px !important; }
+    .screen-card h1 { font-size: 1.4rem !important; }
+    .screen-card h2 { font-size: 1.1rem !important; }
+    .screen-card p, .screen-card ul, .screen-card ol { font-size: 0.95rem !important; }
+    .top-bar { flex-wrap: wrap; gap: 8px; padding: 10px 14px !important; }
+    .progress-indicator { font-size: 0.85rem !important; }
+    .btn-home { padding: 6px 10px !important; font-size: 0.78rem !important; }
+    .btn-nav { padding: 10px 18px !important; font-size: 0.9rem !important; }
+    .btn-back { padding: 10px 18px !important; font-size: 0.9rem !important; }
+    .input-box { font-size: 1rem !important; padding: 12px !important; }
+    .interactive-simulator { padding: 14px !important; }
+    pre { font-size: 0.82rem !important; }
+    .output-console { font-size: 0.88rem !important; }
+    .param-control { padding: 10px !important; }
+    .param-row { flex-wrap: wrap; gap: 8px !important; }
+}
+
+/* ══ APPRENDRE.HTML ══ */
+@media (max-width: 900px) {
+    .lang-tabs { gap: 6px !important; padding: 0 14px 24px !important; }
+    .lang-tab { padding: 9px 14px !important; font-size: 0.82rem !important; }
+    .lang-header { flex-direction: column !important; gap: 16px !important; padding: 20px !important; }
+    .lang-stats { flex-wrap: wrap; gap: 10px !important; }
+    .lang-content { padding: 0 14px 40px !important; }
+    .chap-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .chap-card { padding: 14px !important; }
+    .hero { padding: 32px 16px !important; }
+    .hero h1 { font-size: 1.6rem !important; }
+}
+@media (max-width: 500px) {
+    .chap-grid { grid-template-columns: 1fr !important; }
+    .lang-tabs { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap !important; }
+}
+
+/* ══ EXERCICES ══ */
+@media (max-width: 900px) {
+    .exo-grid { grid-template-columns: 1fr !important; padding: 0 14px 40px !important; }
+    .filters { padding: 0 14px 16px !important; }
+    .hero { padding: 28px 16px !important; }
+    .progress-global { margin: 0 14px 20px !important; }
+    .nav-right { gap: 6px !important; }
+    .btn-back-nav { padding: 5px 10px !important; font-size: 0.75rem !important; }
+    .score-badge { font-size: 0.75rem !important; padding: 4px 10px !important; }
+}
+
+/* ══ PARAMÈTRES ══ */
+@media (max-width: 900px) {
+    .page-wrap { padding: 20px 14px 60px !important; }
+    .page-hero h1 { font-size: 1.5rem !important; }
+    .themes-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; gap: 8px !important; }
+    .langs-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 8px !important; }
+    .bloc { padding: 18px !important; }
+    .font-btns { gap: 6px !important; }
+    .font-btn { padding: 8px 12px !important; font-size: inherit !important; }
+    .profil-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+    .mdp-form { grid-template-columns: 1fr !important; gap: 8px !important; }
+    nav { padding: 0 14px !important; }
+}
+
+/* ══ ADMIN ══ */
+@media (max-width: 900px) {
+    .admin-layout { flex-direction: column !important; }
+    .adm-sidebar { width: 100% !important; display: none; }
+    .adm-sidebar.open { display: block !important; }
+    .adm-content { padding: 16px !important; }
+    .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    .adm-table { font-size: 0.75rem !important; }
+    .adm-table th, .adm-table td { padding: 7px 8px !important; }
+    nav { padding: 0 14px !important; }
+    .themes-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ══ ACCUEIL / CONNEXION ══ */
+@media (max-width: 600px) {
+    .form-container { padding: 20px 16px !important; margin: 10px !important; }
+    .form-container h2 { font-size: 1.3rem !important; }
+}
+
+/* ══ ABT-CODE IDE ══ */
+@media (max-width: 1024px) {
+    .titlebar-menu { display: none !important; }
+    .titlebar-center { display: none !important; }
+    .sidebar { width: 180px !important; }
+}
+@media (max-width: 768px) {
+    .sidebar { display: none !important; }
+    .activity-bar { display: none !important; }
+    .output-pane, #output-pane { width: 100% !important; position: fixed !important;
+        bottom: 0 !important; left: 0 !important; right: 0 !important;
+        height: 200px !important; border-top: 2px solid var(--border) !important;
+        border-left: none !important; z-index: 50 !important; }
+    .split-area { flex-direction: column !important; }
+    .code-pane { min-height: 0 !important; flex: 1 !important; }
+    .editor-toolbar { flex-wrap: wrap !important; gap: 6px !important; padding: 6px !important; }
+    .toolbar-badge { display: none !important; }
+    .btn-titlebar.dash { font-size: 0.72rem !important; padding: 2px 7px !important; }
+    .editor-tabs { overflow-x: auto !important; }
+    .editor-tab { min-width: 80px !important; padding: 0 10px !important; font-size: 0.75rem !important; }
+    /* IDE body doit avoir padding bottom pour la console fixe */
+    #editor-zone { padding-bottom: 200px !important; }
+}
+
+/* ══ COMMUNAUTÉ ══ */
+@media (max-width: 900px) {
+    .community-layout { grid-template-columns: 1fr !important; }
+    .comm-panel { padding: 16px !important; }
+}
+
+/* ══ TABLES RESPONSIVE ══ */
+@media (max-width: 600px) {
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+
+/* ══ UTILS MOBILES ══ */
+@media (max-width: 900px) {
+    /* Masquer les textes longs dans les nav links */
+    .nav-links a span.hide-mobile { display: none !important; }
+
+    /* Scrollbar fine sur mobile */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    /* Touch targets minimum 44px */
+    button, a, input[type="submit"], .nav-tab, .lang-tab, .filter-btn {
+        min-height: 36px;
+    }
+    .mobile-menu { padding-bottom: env(safe-area-inset-bottom, 10px) !important; }
+}
+
+/* ══ AMELIORATIONS TACTILES ══ */
+@media (hover: none) {
+    /* Pas d'effets hover sur tactile */
+    .card:hover { transform: none !important; }
+    .btn-hero-primary:hover { transform: none !important; }
+    .chap-card:hover { transform: none !important; }
+    .exo-card:hover { transform: none !important; }
+}

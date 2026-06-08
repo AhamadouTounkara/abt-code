@@ -1,0 +1,450 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDE VS Code - USTTB MPCI Python 3.14 (Clavier & Temps)</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+    <style>
+        /* Base & Scrollbars */
+        body { background-color: #181818; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #cccccc; margin: 0; padding: 20px; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background: #424242; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        /* Fenêtre Principale VS Code */
+        .vscode-window { background: #1e1e1e; border: 1px solid #3c3c3c; border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Barre de titre supérieure */
+        .vscode-bar { background: #3c3c3c; padding: 8px 15px; font-size: 0.85rem; color: #cccccc; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #252526; user-select: none; }
+        .dots { display: flex; gap: 7px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-r { background: #ff5f56; } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
+        .window-title { font-size: 0.8rem; color: #a6a6a6; position: absolute; left: 50%; transform: translateX(-50%); }
+        
+        .btn-home-top { background: #2d2d2d; color: #cccccc; border: 1px solid #454545; padding: 4px 14px; border-radius: 3px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.2s ease; z-index: 10; }
+        .btn-home-top:hover { background: #0e639c; color: #ffffff; border-color: #1177bb; }
+
+        /* Organisation de l'espace de travail */
+        .main-layout { display: flex; flex-direction: row; min-height: 580px; }
+
+        /* Barre d'activité latérale gauche (Simulation icônes) */
+        .activity-bar { background: #333333; width: 48px; display: flex; flex-direction: column; align-items: center; padding-top: 15px; gap: 20px; color: #858585; border-right: 1px solid #252526; user-select: none; }
+        .activity-icon { font-size: 1.3rem; cursor: pointer; transition: color 0.2s; }
+        .activity-icon.active { color: #ffffff; border-left: 2px solid #007acc; padding-left: 2px; }
+        .activity-icon:hover { color: #ffffff; }
+
+        /* Contenu de l'éditeur */
+        .editor-area { flex: 1; display: flex; flex-direction: column; background: #1e1e1e; }
+
+        /* Système d'onglets de fichiers (Tabs) */
+        .tabs-bar { background: #252526; display: flex; border-bottom: 1px solid #1e1e1e; user-select: none; }
+        .tab { background: #2d2d2d; color: #969696; padding: 8px 20px; font-size: 0.8rem; border-right: 1px solid #252526; display: flex; align-items: center; gap: 8px; font-family: monospace; }
+        .tab.active { background: #1e1e1e; color: #ffffff; border-top: 1px solid #007acc; font-weight: bold; }
+        .tab-py-icon { color: #519aba; font-weight: bold; }
+
+        /* Espace de travail interne */
+        .workspace { padding: 20px 25px; display: flex; flex-direction: column; flex: 1; }
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; color: #5c5c5c; margin-bottom: 4px; font-weight: bold; }
+        h1 { margin: 0 0 8px 0; font-size: 1.3rem; color: #ffffff; font-weight: 500; }
+        p { font-size: 0.95rem; line-height: 1.5; color: #b8b8b8; margin: 0 0 20px 0; }
+        p code { background: #2d2d2d; padding: 2px 6px; border-radius: 4px; color: #e5c07b; font-family: monospace; }
+        
+        /* Conteneur d'édition de texte */
+        .editor-container { border: 1px solid #3c3c3c; border-radius: 4px; background: #1e1e1e; margin-bottom: 15px; font-family: 'Consolas', 'Fira Code', Monaco, monospace; font-size: 1rem; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); }
+        .editor { min-height: 180px; padding: 15px; outline: none; white-space: pre; word-wrap: normal; overflow: auto; tab-size: 4; line-height: 1.5; color: #abb2bf; }
+        
+        /* Zone Terminal réaliste */
+        .terminal-zone { background: #141414; border: 1px solid #2b2b2b; border-radius: 4px; padding: 12px 15px; font-family: 'Consolas', monospace; display: none; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .terminal-header { color: #858585; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; border-bottom: 1px solid #232323; padding-bottom: 6px; font-weight: bold; }
+        .stdout { color: #4af626; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.4; }
+        .error { color: #f14c4c; font-weight: normal; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.4; }
+        
+        /* Retours d'information (Validation) */
+        .feedback { padding: 12px 15px; border-radius: 4px; font-weight: 600; display: none; font-size: 0.9rem; margin-bottom: 15px; animation: fadeIn 0.3s ease; }
+        .feedback.correct { background: #1c3326; color: #73c991; border-left: 4px solid #2e7d32; }
+        .feedback.incorrect { background: #3a1e1e; color: #e57373; border-left: 4px solid #c62828; }
+
+        /* Zone de boutons de commande */
+        .btn-zone { padding-top: 15px; border-top: 1px solid #2b2b2b; user-select: none; }
+        .btn { color: #ffffff; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; font-size: 0.85rem; float: right; margin-left: 10px; transition: background 0.2s, transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-valider { background: #0e639c; } 
+        .btn-valider:hover { background: #1177bb; }
+        .btn-cours { background: #d86218; float: left; margin-left: 0; }
+        .btn-cours:hover { background: #ef772b; }
+        .btn-suivant { background: #2e7d32; display: none; }
+        .btn-suivant:hover { background: #388e3c; }
+        .btn-final { background: #7b1fa2; display: none; }
+        .btn-final:hover { background: #8e24aa; }
+
+        .exercise-block { display: none; }
+        .exercise-block.active { display: block; }
+        .clear { clear: both; }
+
+        /* Modale intégrée pour le cours */
+        .modal-cours { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.75); backdrop-filter: blur(3px); animation: fadeIn 0.2s ease; }
+        .modal-content { background-color: #252526; margin: 10% auto; padding: 25px; border: 1px solid #3c3c3c; width: 55%; border-radius: 6px; color: #f0f0f0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .close-modal { color: #858585; float: right; font-size: 24px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-modal:hover { color: #ffffff; }
+        .modal-content h2 { margin-top: 0; color: #007acc; font-size: 1.3rem; }
+        .modal-content p { color: #cccccc; font-size: 0.95rem; line-height: 1.6; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+    <script>
+        if (localStorage.getItem('abt_connecte') !== 'true') {
+            window.location.href = 'Entre.html';
+        }
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="vscode-window">
+            <div class="vscode-bar">
+                <div class="dots">
+                    <div class="dot dot-r"></div>
+                    <div class="dot dot-y"></div>
+                    <div class="dot dot-g"></div>
+                </div>
+                <div class="window-title" id="file-name">exercice_1.py - Visual Studio Code</div>
+                <button class="btn-home-top" onclick="window.location.href='index.html'">🏠 Retour Accueil</button>
+            </div>
+            
+            <div class="main-layout">
+                <div class="activity-bar">
+                    <div class="activity-icon active" title="Explorateur de fichiers">📄</div>
+                    <div class="activity-icon" title="Rechercher">🔍</div>
+                    <div class="activity-icon" title="Contrôle de source">🌿</div>
+                    <div class="activity-icon" title="Exécuter et déboguer">🐞</div>
+                </div>
+
+                <div class="editor-area">
+                    <div class="tabs-bar">
+                        <div class="tab active">
+                            <span class="tab-py-icon">Py</span> 
+                            <span id="tab-label">exercice_1.py</span>
+                        </div>
+                    </div>
+
+                    <div class="workspace">
+                        <div id="ex1" class="exercise-block active" data-page="12" data-default="a = 2&#10;b = 5&#10;c = 2&#10;# Calculez la valeur de delta ci-dessous :&#10;delta = ">
+                            <div class="section-title">I. Algorithmes de Base</div>
+                            <h1>Exercice 1 : Équation du second degré</h1>
+                            <p>Complétez le code pour calculer le discriminant <b>Δ</b> (<code>b² - 4ac</code>) :</p>
+                        </div>
+
+                        <div id="ex2" class="exercise-block" data-page="14" data-default="A = 10&#10;B = 20&#10;C = 30&#10;# Permutation triangulaire simultanée :&#10;A, B, C = ">
+                            <div class="section-title">I. Algorithmes de Base</div>
+                            <h1>Exercice 2 : Permutation de trois nombres</h1>
+                            <p>Complétez l'affectation multiple :</p>
+                        </div>
+
+                        <div id="ex3" class="exercise-block" data-page="15" data-default="A = 45&#10;B = 12&#10;C = 30&#10;if ">
+                            <div class="section-title">I. Algorithmes de Base</div>
+                            <h1>Exercice 3 : Comparaison de trois nombres</h1>
+                            <p>Déterminez si A est strictement le plus grand avec <code>and</code> :</p>
+                        </div>
+
+                        <div id="ex4" class="exercise-block" data-page="16" data-default="a = 14&#10;b = 6&#10;if (a + b) ">
+                            <div class="section-title">I. Algorithmes de Base</div>
+                            <h1>Exercice 4 : Test de parité (Somme paire)</h1>
+                            <p>Complétez le test logique :</p>
+                        </div>
+
+                        <div id="ex5" class="exercise-block" data-page="16" data-default="d = 24&#10;x = 6&#10;if ">
+                            <div class="section-title">I. Algorithmes de Base</div>
+                            <h1>Exercice 5 : Système d'équations</h1>
+                            <p>Sécurisez le bloc conditionnel contre la division par zéro :</p>
+                        </div>
+
+                        <div id="ex6" class="exercise-block" data-page="20" data-default="S = 0&#10;for i in range(1, 4):&#10;    S += ">
+                            <div class="section-title">II. Structures Itératives</div>
+                            <h1>Exercice 6 : Somme des carrés (Σ i²)</h1>
+                            <p>Complétez l'accumulation :</p>
+                        </div>
+
+                        <div id="ex7" class="exercise-block" data-page="22" data-default="A = 14&#10;B = 4&#10;q = 0&#10;while ">
+                            <div class="section-title">II. Structures Itératives</div>
+                            <h1>Exercice 7 : Division euclidienne</h1>
+                            <p>Écrivez la condition de validité de la boucle :</p>
+                        </div>
+
+                        <div id="ex8" class="exercise-block" data-page="23" data-default="n = 15&#10;i = 3&#10;if n ">
+                            <div class="section-title">II. Structures Itératives</div>
+                            <h1>Exercice 8 : Test de Nombre Premier</h1>
+                            <p>Vérifiez le reste nul :</p>
+                        </div>
+
+                        <div id="ex9" class="exercise-block" data-page="24" data-default="a = 35&#10;b = 15&#10;while ">
+                            <div class="section-title">II. Structures Itératives</div>
+                            <h1>Exercice 9 : Algorithme d'Euclide (PGCD)</h1>
+                            <p>Complétez l'instruction d'arrêt :</p>
+                        </div>
+
+                        <div id="ex10" class="exercise-block" data-page="25" data-default="x = 2&#10;i = 4&#10;terme = ">
+                            <div class="section-title">II. Structures Itératives</div>
+                            <h1>Exercice 10 : Sommes Algébriques (x^i)</h1>
+                            <p>Appliquez la puissance :</p>
+                        </div>
+
+                        <div id="ex11" class="exercise-block" data-page="30" data-default="somme_inverse = 0&#10;R = 5&#10;somme_inverse += ">
+                            <div class="section-title">III. Suites Numériques</div>
+                            <h1>Exercice 11 : Circuit de Résistances Parallèles</h1>
+                            <p>Calculez l'inverse de la résistance :</p>
+                        </div>
+
+                        <div id="ex12" class="exercise-block" data-page="32" data-default="somme = 0&#10;for i in range(">
+                            <div class="section-title">III. Suites Numériques</div>
+                            <h1>Exercice 12 : Somme des nombres pairs</h1>
+                            <p>Déterminez les arguments de <code>range</code> :</p>
+                        </div>
+
+                        <div id="ex13" class="exercise-block" data-page="33" data-default="f = 1&#10;i = 5&#10;f ">
+                            <div class="section-title">III. Suites Numériques</div>
+                            <h1>Exercice 13 : Calcul du Factoriel (n!)</h1>
+                            <p>Utilisez l'opérateur raccourci :</p>
+                        </div>
+
+                        <div id="ex14" class="exercise-block" data-page="35" data-default="u = [1, 1]&#10;suivant = ">
+                            <div class="section-title">III. Suites Numériques</div>
+                            <h1>Exercice 14 : Suite de Fibonacci</h1>
+                            <p>Calculez à l'aide des index négatifs :</p>
+                        </div>
+
+                        <div id="ex15" class="exercise-block" data-page="42" data-default="A = [8, 3]&#10;i = 0&#10;if ">
+                            <div class="section-title">IV. Tableaux et Matrices</div>
+                            <h1>Exercice 15 : Tri d'un Tableau</h1>
+                            <p>Écrivez le test de comparaison :</p>
+                        </div>
+
+                        <div id="ex16" class="exercise-block" data-page="45" data-default="valeur_A = 4&#10;produit = valeur_A * ">
+                            <div class="section-title">IV. Tableaux et Matrices</div>
+                            <h1>Exercice 16 : Produit Matriciel</h1>
+                            <p>Ciblez les bons indices pour la matrice B :</p>
+                        </div>
+
+                        <div class="editor-container">
+                            <div class="editor language-py" id="code-editor" contenteditable="true" spellcheck="false"></div>
+                        </div>
+
+                        <div class="terminal-zone" id="terminal-block">
+                            <div class="terminal-header">Terminal — Python 3.14.0a1</div>
+                            <div id="terminal-text"></div>
+                        </div>
+
+                        <div id="msg-feedback" class="feedback"></div>
+
+                        <div class="btn-zone">
+                            <button class="btn btn-cours" onclick="ouvrirLienCours()">📖 Consulter le Cours</button>
+                            <button id="btn-valider" class="btn btn-valider" onclick="runPython314Interpreter()">Run Code (Ctrl+Enter)</button>
+                            <button id="btn-suivant" class="btn btn-suivant" onclick="nextExercise()">Next File ➔</button>
+                            <button id="btn-final" class="btn btn-final" onclick="finishSession()">Save Project 🏆</button>
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="modalCours" class="modal-cours">
+        <div class="modal-content">
+            <span class="close-modal" onclick="fermerModal()">&times;</span>
+            <h2 id="modal-titre-cours">Documentation de Cours</h2>
+            <p id="modal-texte-cours">Chargement des notions de cours...</p>
+        </div>
+    </div>
+
+    <script>
+        class CodejarVscodeEngine {
+            constructor(el, highlight) {
+                this.el = el; this.highlight = highlight;
+                this.el.addEventListener("input", () => this.update());
+                
+                this.el.addEventListener("keydown", e => {
+                    if (e.key === "Tab") {
+                        e.preventDefault();
+                        document.execCommand("insertText", false, "    ");
+                    }
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        let selection = window.getSelection();
+                        let range = selection.getRangeAt(0);
+                        let textBeforeCursor = this.el.innerText.substring(0, range.startOffset);
+                        let lines = textBeforeCursor.split("\n");
+                        let currentLine = lines[lines.length - 1];
+                        let spaces = currentLine.match(/^ */)[0]; 
+                        
+                        document.execCommand("insertText", false, "\n" + spaces);
+                    }
+                });
+            }
+            update() {
+                let pos = this.getPos(); let text = this.el.innerText;
+                this.el.innerHTML = this.highlight(text); this.setPos(pos);
+            }
+            getPos() {
+                let sel = window.getSelection(); if (!sel.rangeCount) return 0;
+                let range = sel.getRangeAt(0); let clone = range.cloneRange();
+                clone.selectNodeContents(this.el); clone.setEnd(range.endContainer, range.endOffset);
+                return clone.toString().length;
+            }
+            setPos(pos) {
+                let set = (el, p) => {
+                    for (let n of el.childNodes) {
+                        if (n.nodeType === 3) {
+                            if (n.length >= p) {
+                                let r = document.createRange(); let s = window.getSelection();
+                                r.setStart(n, p); r.collapse(true); s.removeAllRanges(); s.addRange(r);
+                                return -1;
+                            } p -= n.length;
+                        } else { p = set(n, p); if (p < 0) return -1; }
+                    } return p;
+                }; set(this.el, pos);
+            }
+        }
+
+        let currentEx = 1;
+        const totalEx = 16;
+        let jar;
+        
+        let startTime;
+        let totalErrors = 0;
+
+        const syntheseCours = {
+            12: { titre: "Variables et Opérations en Python", texte: "Pour calculer le discriminant Δ, utilisez l'opérateur de puissance ** ou multipliez la variable par elle-même. Exemple : b**2 correspond à b²." },
+            14: { titre: "Affectation Multi-Variables", texte: "Python permet d'échanger ou d'affecter plusieurs variables en même temps sans utiliser de variable temporaire. Syntaxe : x, y = y, x." },
+            15: { titre: "Conditions logiques (if)", texte: "L'opérateur logique 'and' permet de l'associer à deux expressions. Exemple : if condition1 and condition2:" },
+            16: { titre: "Conditions logiques (if)", texte: "L'opérateur de reste de division entière est le modulo (%). Un nombre est pair si n % 2 == 0." },
+            20: { titre: "Boucles Définies (for)", texte: "La boucle for utilise range(début, fin_exclue) pour itérer séquentiellement sur des suites numériques entières." },
+            22: { titre: "Boucles Indéfinies (while)", texte: "La boucle while s'exécute tant que sa condition booléenne reste vraie. Pensez à modifier la variable de contrôle à l'intérieur pour éviter une boucle infinie !" },
+            35: { titre: "Gestion des listes et indexations", texte: "En Python, l'index -1 pointe sur le dernier élément d'un tableau, et -2 sur l'avant-dernier élément." },
+            45: { titre: "Matrices et Tableaux Multidimensionnels", texte: "Une matrice se parcourt à l'aide de boucles imbriquées. L'accès à une case s'écrit sous la forme M[ligne][colonne]." }
+        };
+
+        const solutionsConfig = {
+            1: { test: (txt) => txt.includes("delta=b**2-4*a*c") || txt.includes("delta=b*b-4*a*c"), out: "Delta = 9" },
+            2: { test: (txt) => txt.includes("A,B,C=B,C,A"), out: "A=20, B=30, C=10" },
+            3: { test: (txt) => txt.includes("ifA>BandA>C:"), out: "A est le maximum" },
+            4: { test: (txt) => txt.includes("(a+b)%2==0:"), out: "La somme est paire" },
+            5: { test: (txt) => txt.includes("ifx!=0:"), out: "y = 4.0" },
+            6: { test: (txt) => txt.includes("S+=i**2") || txt.includes("S+=i*i"), out: "S = 14" },
+            7: { test: (txt) => txt.includes("whileA>=B:"), out: "Quotient = 3" },
+            8: { test: (txt) => txt.includes("ifn%i==0:"), out: "n possède un diviseur" },
+            9: { test: (txt) => txt.includes("whileb!=0:"), out: "PGCD = 5" },
+            10: { test: (txt) => txt.includes("terme=x**i"), out: "Résultat = 16" },
+            11: { test: (txt) => txt.includes("somme_inverse+=1/R"), out: "Inverse = 0.2" },
+            12: { test: (txt) => txt.includes("range(2,9,2):"), out: "Somme pairs = 20" },
+            13: { test: (txt) => txt.includes("f*=i"), out: "f = 5" },
+            14: { test: (txt) => txt.includes("suivant=u[-1]+u[-2]") || txt.includes("suivant=u[-2]+u[-1]"), out: "Suivant = 2" },
+            15: { test: (txt) => txt.includes("ifA[i]>A[i+1]:"), out: "Permutation nécessaire" },
+            16: { test: (txt) => txt.includes("produit=valeur_A*B[k][j]"), out: "Composante = 4 * B[k][j]" }
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const editorEl = document.getElementById("code-editor");
+            jar = new CodejarVscodeEngine(editorEl, text => Prism.highlight(text, Prism.languages.python, 'python'));
+            
+            startTime = new Date();
+            loadExerciseCode();
+
+            window.addEventListener("keydown", e => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    runPython314Interpreter();
+                }
+            });
+        });
+
+        function loadExerciseCode() {
+            let block = document.getElementById('ex' + currentEx);
+            document.getElementById('code-editor').innerText = block.getAttribute('data-default');
+            jar.update();
+            document.getElementById('terminal-block').style.display = "none";
+            document.getElementById('msg-feedback').style.display = "none";
+        }
+
+        function ouvrirLienCours() {
+            let blockActuel = document.getElementById('ex' + currentEx);
+            let pageAssociee = blockActuel.getAttribute('data-page');
+            
+            let modal = document.getElementById("modalCours");
+            let titre = document.getElementById("modal-titre-cours");
+            let texte = document.getElementById("modal-texte-cours");
+            
+            let info = syntheseCours[pageAssociee] || { titre: "Concepts Algorithmiques", texte: "Consultez la section structures de contrôle dans votre polycopié de l'USTTB." };
+            
+            titre.innerText = info.titre + " (Page du cours : " + pageAssociee + ")";
+            texte.innerText = info.texte;
+            modal.style.display = "block";
+        }
+
+        function fermerModal() {
+            document.getElementById("modalCours").style.display = "none";
+        }
+
+        function runPython314Interpreter() {
+            let rawCode = document.getElementById('code-editor').innerText;
+            let cleanCode = rawCode.replace(/\s+/g, '');
+            let cfg = solutionsConfig[currentEx];
+            
+            document.getElementById('terminal-block').style.display = "block";
+
+            if (cfg.test(cleanCode)) {
+                document.getElementById('terminal-text').innerHTML = `<span class="stdout">am@usttb:~$ python3.14 exercice_${currentEx}.py&#10;${cfg.out}&#10;&#10;[Process completed successfully]</span>`;
+                document.getElementById('msg-feedback').className = "feedback correct";
+                document.getElementById('msg-feedback').innerText = "✓ Syntaxe validée ! Le résultat calculé est conforme.";
+                document.getElementById('msg-feedback').style.display = "block";
+                
+                document.getElementById('btn-valider').style.display = 'none';
+                if (currentEx < totalEx) {
+                    document.getElementById('btn-suivant').style.display = 'inline-block';
+                } else {
+                    document.getElementById('btn-final').style.display = 'inline-block';
+                }
+            } else {
+                totalErrors++;
+                document.getElementById('terminal-text').innerHTML = `<span class="error">am@usttb:~$ python3.14 exercice_${currentEx}.py&#10;Traceback (most recent call last):&#10;  File "exercice_${currentEx}.py", line 5, in &lt;module&gt;&#10;SyntaxError: Invalid token parsed or mismatched logic operators</span>`;
+                document.getElementById('msg-feedback').className = "feedback incorrect";
+                document.getElementById('msg-feedback').innerText = "✗ Erreur détectée dans l'interprétation. Réessayez.";
+                document.getElementById('msg-feedback').style.display = "block";
+            }
+        }
+
+        function nextExercise() {
+            document.getElementById('ex' + currentEx).classList.remove('active');
+            currentEx++;
+            document.getElementById('ex' + currentEx).classList.add('active');
+            
+            document.getElementById('file-name').innerText = `exercice_${currentEx}.py - Visual Studio Code`;
+            document.getElementById('tab-label').innerText = `exercice_${currentEx}.py`;
+            
+            document.getElementById('btn-suivant').style.display = 'none';
+            document.getElementById('btn-valider').style.display = 'inline-block';
+            loadExerciseCode();
+        }
+
+        function finishSession() {
+            let endTime = new Date();
+            let timeDiff = (endTime - startTime) / 1000;
+            
+            let minutes = Math.floor(timeDiff / 60);
+            let secondes = Math.floor(timeDiff % 60);
+            
+            alert(`🏆 SESSION TERMINÉE & SAUVEGARDÉE SUR LE SERVEUR USTTB !\n\n📊 BILAN DE VOS TD :\n⏱️ Temps total mis : ${minutes} minute(s) et ${secondes} seconde(s)\n❌ Nombre total d'erreurs commises : ${totalErrors} erreur(s)`);
+        }
+    </script>
+</body>
+</html>

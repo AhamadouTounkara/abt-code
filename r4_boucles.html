@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script src="settings.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Code - Chapitre R4 : Boucles</title>
+    <script>if(localStorage.getItem('abt_connecte')!=='true'){window.location.href='Entre.html';}</script>
+    <style>
+        :root{--purple-main:#805AD5;--blue-main:#3182ce;--orange-main:#dd6b20;--green-success:#48bb78;--green-dark:#38a169;--bg-body:#f4f6f9;--text-main:#2c3e50;--text-muted:#4a5568;--border-gray:#cbd5e0;--r-color:#276dc3;}
+        body{background:var(--bg-body);font-family:'Segoe UI',-apple-system,sans-serif;color:#333;margin:0;padding:20px;}
+        .container{max-width:950px;margin:2rem auto;}
+        .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:white;padding:15px 25px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.04);}
+        .progress-indicator{font-weight:bold;font-size:1.1rem;}
+        .color-theorie{color:var(--purple-main);}.color-exemple{color:var(--blue-main);}.color-exercice{color:var(--orange-main);}
+        .btn-home{background:#cbd5e0;color:var(--text-muted);padding:8px 16px;font-weight:bold;border-radius:6px;text-decoration:none;font-size:0.9rem;}
+        .btn-home:hover{background:#b2bfcc;color:white;}
+        .screen-card{background:white;padding:50px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.05);margin-bottom:25px;}
+        .border-theorie{border-top:6px solid var(--purple-main);}.border-exemple{border-top:6px solid var(--blue-main);}.border-exercice{border-top:6px solid var(--orange-main);}
+        h1{margin-top:0;font-size:2.2rem;color:var(--text-main);}
+        h2{color:var(--text-main);font-size:1.5rem;margin-top:35px;border-bottom:2px solid #edf2f7;padding-bottom:8px;}
+        p,ul,ol{font-size:1.1rem;line-height:1.8;color:var(--text-muted);}li{margin-bottom:10px;}
+        code{background:#f0f4f8;color:#c0392b;padding:2px 6px;border-radius:4px;font-family:'Consolas',monospace;}
+        .r-badge{display:inline-block;background:var(--r-color);color:white;padding:3px 10px;border-radius:12px;font-size:0.78rem;font-weight:700;margin-bottom:20px;letter-spacing:1px;}
+        .interactive-simulator{background:#2c3e50;border-radius:8px;padding:20px;margin:25px 0;}
+        .simulator-header{color:#fff;font-weight:bold;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;}
+        pre{color:#f8f8f2;padding:0;margin:0;font-family:'Consolas','Courier New',monospace;font-size:1.05rem;line-height:1.6;}
+        .comment{color:#75715e;font-style:italic;}.keyword{color:#f92672;font-weight:bold;}.builtin{color:#66d9ef;}.number{color:#ae81ff;}
+        .output-console{background:#1a252f;border-left:5px solid var(--blue-main);padding:15px 20px;font-family:'Consolas',monospace;border-radius:4px;margin-top:15px;color:#48bb78;font-size:1.05rem;min-height:60px;white-space:pre-line;}
+        .btn-run{background:var(--green-success);color:white;border:none;padding:8px 16px;font-weight:bold;border-radius:4px;cursor:pointer;}
+        .btn-run:hover{background:var(--green-dark);}
+        .param-control{background:#34495e;padding:12px 18px;border-radius:6px;margin-bottom:15px;}
+        .param-row{display:flex;align-items:center;gap:15px;color:#ecf0f1;margin-bottom:8px;}
+        .param-input{width:120px;padding:6px;border:none;border-radius:4px;font-size:1rem;text-align:center;}
+        .input-box{width:100%;padding:15px;font-size:1.15rem;border:2px solid var(--border-gray);border-radius:8px;margin:20px 0;box-sizing:border-box;font-family:'Consolas',monospace;}
+        .feedback{margin-top:15px;padding:15px;border-radius:6px;font-weight:bold;display:none;font-size:1.1rem;}
+        .feedback.correct{background:#c6f6d5;color:#22543d;display:block;border-left:4px solid var(--green-success);}
+        .feedback.incorrect{background:#fed7d7;color:#742a2a;display:block;border-left:4px solid #e53e3e;}
+        .btn-nav{color:white;padding:14px 28px;font-weight:bold;border-radius:8px;text-decoration:none;display:inline-block;float:right;margin-top:20px;cursor:pointer;border:none;font-size:1.05rem;}
+        .btn-theorie{background:var(--purple-main);}.btn-exemple{background:var(--blue-main);}.btn-exercice{background:var(--orange-main);}
+        .btn-suivant{background:var(--green-success);display:none;}.btn-suivant:hover{background:var(--green-dark);}
+        .btn-back{background:#cbd5e0;color:var(--text-muted);padding:14px 28px;font-weight:bold;border-radius:8px;text-decoration:none;display:inline-block;margin-top:20px;border:none;font-size:1.05rem;cursor:pointer;}
+        .clearfix{clear:both;}
+        .info-box{background:#ebf8ff;border-left:5px solid var(--r-color);padding:16px 20px;border-radius:6px;margin:20px 0;}
+        .info-box strong{color:var(--r-color);}
+        .code-block{background:#2c3e50;padding:18px;border-radius:8px;margin:15px 0;}
+    </style>
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="responsive.css">
+
+    <style id="cours-responsive">
+    /* Responsive cours */
+    @media (max-width: 768px) {
+        body { padding: 10px !important; }
+        .container { margin: 0.5rem auto !important; }
+        .screen-card { padding: 18px 14px !important; border-radius: 8px !important; }
+        .screen-card h1 { font-size: 1.3rem !important; line-height: 1.3 !important; }
+        .top-bar {
+            flex-wrap: wrap !important; gap: 6px !important;
+            padding: 10px 12px !important;
+        }
+        .btn-nav, .btn-back {
+            padding: 10px 16px !important; font-size: 0.85rem !important;
+            float: none !important; display: inline-block !important;
+        }
+        .clearfix::after { content: ''; display: table; clear: both; }
+        .interactive-simulator pre { font-size: 0.78rem !important; overflow-x: auto; }
+        .output-console { font-size: 0.82rem !important; }
+        .param-row { flex-direction: column !important; align-items: flex-start !important; }
+        .param-input { width: 100% !important; }
+        .input-box { font-size: 0.95rem !important; }
+        /* Navigation buttons side by side on mobile */
+        .btn-nav, .btn-back { margin: 6px 4px !important; }
+        table { font-size: 0.8rem !important; }
+        table th, table td { padding: 6px 8px !important; }
+        .info-box { padding: 12px !important; font-size: 0.88rem !important; }
+    }
+    @media (max-width: 480px) {
+        .screen-card h1 { font-size: 1.15rem !important; }
+        .btn-nav { width: calc(50% - 8px) !important; text-align: center !important; margin: 4px !important; }
+        .btn-back { width: calc(50% - 8px) !important; text-align: center !important; margin: 4px !important; }
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- THÉORIE -->
+    <div id="ecran-theorie" class="screen-card border-theorie">
+        <div class="top-bar">
+            <div class="progress-indicator color-theorie">Cours R — Chapitre 4 : Boucles (Écran 1 : Théorie)</div>
+            <a href="exercices_r.html" class="btn-home" style="background:#276dc3;color:white;margin-right:6px;">🎯 Exercices R</a><a href="abt_ia_page.html" class="btn-home" style="background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);">✦ ABT IA</a>
+                    <a href="dashboard.html" class="btn-home">🏠 Tableau de bord</a>
+                    <a href="abt_ide.html" class="btn-home" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);">💻 IDE</a>
+                    </div>
+        <span class="r-badge">LANGAGE R</span>
+        <h1>4.1 Les Structures Répétitives en R</h1>
+
+        <h2>1. La boucle <code>for</code></h2>
+        <p>La boucle <code>for</code> en R parcourt les éléments d'un vecteur un par un. Sa syntaxe est :</p>
+        <div class="code-block">
+            <pre><span class="keyword">for</span> (variable <span class="keyword">in</span> vecteur) {
+  <span class="comment"># instructions répétées</span>
+}</pre>
+        </div>
+        <p>Exemple classique avec <code>1:n</code> pour générer une suite de nombres :</p>
+        <div class="code-block">
+            <pre><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1</span>:<span class="number">5</span>) {
+  <span class="builtin">print</span>(i)
+}
+<span class="comment"># Affiche : 1 2 3 4 5</span></pre>
+        </div>
+
+        <h2>2. La boucle <code>while</code></h2>
+        <p>La boucle <code>while</code> répète tant qu'une condition est vraie. Elle est utile quand on ne connaît pas à l'avance le nombre d'itérations :</p>
+        <div class="code-block">
+            <pre>x <span class="keyword">&lt;-</span> <span class="number">1</span>
+<span class="keyword">while</span> (x <= <span class="number">5</span>) {
+  <span class="builtin">print</span>(x)
+  x <span class="keyword">&lt;-</span> x + <span class="number">1</span>
+}</pre>
+        </div>
+
+        <h2>3. La boucle <code>repeat</code> + <code>break</code></h2>
+        <p>R possède aussi une boucle <code>repeat</code> qui tourne indéfiniment jusqu'à ce qu'un <code>break</code> l'interrompe. C'est utile pour les algorithmes numériques itératifs :</p>
+        <div class="code-block">
+            <pre>i <span class="keyword">&lt;-</span> <span class="number">0</span>
+<span class="keyword">repeat</span> {
+  i <span class="keyword">&lt;-</span> i + <span class="number">1</span>
+  <span class="keyword">if</span> (i >= <span class="number">5</span>) <span class="keyword">break</span>
+}</pre>
+        </div>
+
+        <div class="info-box">
+            <strong>✦ Particularité R :</strong> R encourage la <b>vectorisation</b> plutôt que les boucles. <code>sum(1:100)</code> est bien plus rapide que d'écrire une boucle for pour additionner 100 nombres ! Utilisez les boucles uniquement quand la vectorisation n'est pas possible.
+        </div>
+
+        <h2>4. Suite de Fibonacci — exemple concret</h2>
+        <p>Calculer les n premiers termes de la suite de Fibonacci (0, 1, 1, 2, 3, 5, 8...) avec une boucle <code>for</code> :</p>
+        <div class="code-block">
+            <pre>n <span class="keyword">&lt;-</span> <span class="number">10</span>
+x <span class="keyword">&lt;-</span> <span class="builtin">c</span>(<span class="number">0</span>, <span class="number">1</span>)
+<span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">3</span>:n) x[i] <span class="keyword">&lt;-</span> x[i-<span class="number">1</span>] + x[i-<span class="number">2</span>]
+<span class="builtin">print</span>(x)</pre>
+        </div>
+
+        <button class="btn-nav btn-exemple" onclick="voirExemple()">Accéder à l'Écran Exemples Interactifs ➔</button>
+        <div class="clearfix"></div>
+    </div>
+
+    <!-- EXEMPLES -->
+    <div id="ecran-exemple" class="screen-card border-exemple" style="display:none;">
+        <div class="top-bar">
+            <div class="progress-indicator color-exemple">Cours R — Chapitre 4 (Écran 2 : Exemples Interactifs)</div>
+            <a href="dashboard.html" class="btn-home">🏠 Tableau de bord</a>
+        </div>
+        <h1>4.2 Simulez les boucles R</h1>
+        <p>Modifiez le nombre de répétitions et choisissez le type de boucle pour observer les itérations.</p>
+
+        <div class="interactive-simulator">
+            <div class="simulator-header">
+                <span>💻 Simulateur R — Boucles for & Fibonacci</span>
+                <button class="btn-run" onclick="executerExempleR4()">▶ Exécuter</button>
+            </div>
+            <div class="param-control">
+                <div class="param-row">
+                    <label>Nombre de tours (n) :</label>
+                    <input type="number" id="val-n" class="param-input" value="6" min="1" max="15">
+                </div>
+                <div class="param-row">
+                    <label>Mode :</label>
+                    <select id="mode-boucle" style="padding:6px;border-radius:4px;border:none;font-size:1rem;">
+                        <option value="for">Boucle for simple</option>
+                        <option value="fib">Suite de Fibonacci</option>
+                        <option value="while">Boucle while</option>
+                    </select>
+                </div>
+            </div>
+            <pre id="code-affiche"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1</span>:<span id="code-n" class="number">6</span>) {
+  <span class="builtin">print</span>(i)
+}</pre>
+            <div id="console-r4" class="output-console">Cliquez sur "Exécuter"...</div>
+        </div>
+
+        <button class="btn-back" onclick="voirTheorie()">⬅ Retour à la Théorie</button>
+        <button class="btn-nav btn-exercice" onclick="voirExercice()">Passer à l'Exercice ➔</button>
+        <div class="clearfix"></div>
+    </div>
+
+    <!-- EXERCICE -->
+    <div id="ecran-exercice" class="screen-card border-exercice" style="display:none;">
+        <div class="top-bar">
+            <div class="progress-indicator color-exercice">Cours R — Chapitre 4 (Écran 3 : Défi)</div>
+            <a href="dashboard.html" class="btn-home">🏠 Tableau de bord</a>
+        </div>
+        <h1>4.3 Défi de Validation — Chapitre 4</h1>
+        <p><b>Énoncé :</b> En R, pour parcourir les éléments d'un vecteur avec une boucle <code>for</code>, on utilise le mot-clé <code>in</code>. Tapez <b>exactement</b> (sans espaces) l'instruction de début d'une boucle qui parcourt les entiers de 1 à 5 avec une variable <code>i</code>. N'oubliez pas les accolades ouvrantes.</p>
+        <p style="font-style:italic; color:#718096;">Hint : for(i in 1:5){</p>
+
+        <input type="text" id="reponse-r4" class="input-box" placeholder="Tapez la ligne de début de boucle..."
+            onkeydown="if(event.key==='Enter') validerR4()">
+        <div id="msg-r4" class="feedback"></div>
+
+        <button class="btn-back" onclick="retourExemple()">⬅ Revoir les Exemples</button>
+        <button class="btn-nav btn-exercice" onclick="validerR4()">Soumettre ma réponse</button>
+        <a href="r5_fonctions.html" id="btn-suivant-r4" class="btn-nav btn-suivant">Ouvrir le Chapitre 5 ➔</a>
+        <div class="clearfix"></div>
+    </div>
+
+</div>
+<script>
+    window.onload = function() {
+        document.getElementById('val-n').addEventListener('input',function(){document.getElementById('code-n').innerText=this.value||'1';});
+        document.getElementById('mode-boucle').addEventListener('change', mettreAJourCode);
+        executerExempleR4();
+    };
+
+    function mettreAJourCode() {
+        const n = document.getElementById('val-n').value || '6';
+        const mode = document.getElementById('mode-boucle').value;
+        const el = document.getElementById('code-affiche');
+        if (mode==='for') {
+            el.innerHTML = '<span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1</span>:<span id="code-n" class="number">'+n+'</span>) {\n  <span class="builtin">print</span>(i)\n}';
+        } else if (mode==='fib') {
+            el.innerHTML = 'n <span class="keyword">&lt;-</span> <span id="code-n" class="number">'+n+'</span>\nx <span class="keyword">&lt;-</span> <span class="builtin">c</span>(<span class="number">0</span>, <span class="number">1</span>)\n<span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">3</span>:n) x[i] <span class="keyword">&lt;-</span> x[i-<span class="number">1</span>] + x[i-<span class="number">2</span>]\n<span class="builtin">print</span>(x)';
+        } else {
+            el.innerHTML = 'x <span class="keyword">&lt;-</span> <span class="number">1</span>\n<span class="keyword">while</span> (x <= <span id="code-n" class="number">'+n+'</span>) {\n  <span class="builtin">print</span>(x)\n  x <span class="keyword">&lt;-</span> x + <span class="number">1</span>\n}';
+        }
+    }
+
+    function executerExempleR4() {
+        const n = parseInt(document.getElementById('val-n').value)||6;
+        const mode = document.getElementById('mode-boucle').value;
+        const c = document.getElementById('console-r4');
+        if (n < 1 || n > 15) { c.innerText='Erreur : entrez un nombre entre 1 et 15.'; return; }
+        c.style.color='#48bb78';
+        let out = '';
+        if (mode==='for') {
+            for(let i=1;i<=n;i++) out+='[1] '+i+'\n';
+        } else if (mode==='fib') {
+            let x=[0,1];
+            for(let i=2;i<n;i++) x.push(x[i-1]+x[i-2]);
+            out='[1] '+x.slice(0,n).join(' ');
+        } else {
+            let x=1;
+            while(x<=n){out+='[1] '+x+'\n';x++;}
+        }
+        c.innerText = out || '(aucune sortie)';
+        mettreAJourCode();
+    }
+
+    function voirExemple(){document.getElementById('ecran-theorie').style.display='none';document.getElementById('ecran-exemple').style.display='block';window.scrollTo(0,0);}
+    function voirTheorie(){document.getElementById('ecran-exemple').style.display='none';document.getElementById('ecran-theorie').style.display='block';window.scrollTo(0,0);}
+    function voirExercice(){document.getElementById('ecran-exemple').style.display='none';document.getElementById('ecran-exercice').style.display='block';window.scrollTo(0,0);setTimeout(()=>document.getElementById('reponse-r4').focus(),100);}
+    function retourExemple(){document.getElementById('ecran-exercice').style.display='none';document.getElementById('ecran-exemple').style.display='block';window.scrollTo(0,0);}
+
+    function validerR4(){
+        const rep=document.getElementById('reponse-r4').value.trim().replace(/\s+/g,'');
+        const fb=document.getElementById('msg-r4');
+        const btn=document.getElementById('btn-suivant-r4');
+        if(rep==='for(iin1:5){'){
+            fb.className='feedback correct';
+            fb.innerText='🎉 Parfait ! La syntaxe for(i in 1:5){ est exactement correcte. Vous maîtrisez les boucles R !';
+            btn.style.display='inline-block';
+        } else {
+            fb.className='feedback incorrect';
+            fb.innerText='❌ Pas tout à fait. La syntaxe correcte est : for(i in 1:5){ — vérifiez les parenthèses, le mot-clé "in", l\'opérateur ":" et l\'accolade ouvrante.';
+            btn.style.display='none';
+        }
+    }
+</script>
+    <script src="abt_ai.js"></script>
+</body>
+</html>

@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABT-Code IDE</title>
+<script src="settings.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/1.2.0/skulpt-stdlib.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/vs2015.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<style>
+:root{--vsc-app:#1e1e1e;--vsc-sb:#252526;--vsc-tab:#2d2d2d;--vsc-status:#007acc;--vsc-title:#3c3c3c;--vsc-act:#333;--vsc-border:#454545;--vsc-hover:#2a2d2e;--vsc-sel:#094771;--vsc-text:#d4d4d4;--vsc-muted:#858585;--vsc-green:#4ec9b0;--vsc-blue:#9cdcfe;--vsc-yellow:#dcdcaa;--vsc-red:#f44747;--vsc-orange:#ce9178;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--vsc-app);color:var(--vsc-text);font-family:-apple-system,'Segoe UI',sans-serif;font-size:13px;}
+button,input,textarea{font-family:inherit;font-size:inherit;}
+/* TITLEBAR */
+.tb{height:30px;background:var(--vsc-title);display:flex;align-items:center;padding:0 6px;border-bottom:1px solid rgba(0,0,0,.4);flex-shrink:0;position:relative;gap:2px;}
+.tb-logo{font-family:monospace;font-weight:800;font-size:12px;color:#4fc1ff;padding:0 10px 0 4px;cursor:default;white-space:nowrap;}
+.tb-m{position:relative;}
+.tb-mb{padding:4px 10px;font-size:12px;color:#ccc;cursor:pointer;border-radius:3px;background:none;border:none;white-space:nowrap;}
+.tb-mb:hover,.tb-mb.open{background:rgba(255,255,255,.12);}
+.tb-dd{display:none;position:absolute;top:100%;left:0;background:#252526;border:1px solid #454545;border-radius:4px;min-width:210px;z-index:9999;padding:3px 0;box-shadow:0 8px 24px rgba(0,0,0,.6);}
+.tb-dd.show{display:block;}
+.dd-i{padding:5px 20px;font-size:12px;color:#ccc;cursor:pointer;display:flex;justify-content:space-between;gap:24px;white-space:nowrap;}
+.dd-i:hover{background:var(--vsc-sel);}
+.dd-i .sc{color:#858585;font-size:11px;}
+.dd-sep{height:1px;background:#454545;margin:3px 0;}
+.tb-center{position:absolute;left:50%;transform:translateX(-50%);font-size:12px;color:#858585;pointer-events:none;white-space:nowrap;}
+.tb-right{margin-left:auto;display:flex;}
+.tb-wbtn{width:46px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:none;border:none;color:#ccc;font-size:13px;transition:background .1s;}
+.tb-wbtn:hover{background:rgba(255,255,255,.1);}
+/* APP */
+.app{display:flex;flex-direction:column;height:calc(100vh - 30px);}
+.wb{display:flex;flex:1;min-height:0;}
+/* ACTIVITY BAR */
+.ab{width:48px;background:var(--vsc-act);display:flex;flex-direction:column;align-items:center;border-right:1px solid rgba(0,0,0,.3);flex-shrink:0;}
+.ab-top{display:flex;flex-direction:column;align-items:center;padding-top:4px;}
+.ab-bot{margin-top:auto;padding-bottom:4px;display:flex;flex-direction:column;align-items:center;}
+.ab-btn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#858585;font-size:20px;transition:color .15s;border-left:2px solid transparent;position:relative;}
+.ab-btn:hover{color:#d4d4d4;}
+.ab-btn.on{color:#d4d4d4;border-left-color:#d4d4d4;}
+.ab-btn .tip{display:none;position:absolute;left:54px;top:50%;transform:translateY(-50%);background:#252526;border:1px solid #454545;color:#d4d4d4;padding:4px 10px;border-radius:4px;font-size:12px;white-space:nowrap;z-index:200;}
+.ab-btn:hover .tip{display:block;}
+/* SIDEBAR */
+.sb{width:240px;background:var(--vsc-sb);display:flex;flex-direction:column;border-right:1px solid rgba(0,0,0,.3);overflow:hidden;flex-shrink:0;transition:width .1s;}
+.sb.hide{width:0;}
+.sb-pnl{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.sb-pnl.on{display:flex;}
+.sb-hd{padding:8px 12px 5px;font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sb-acts{display:flex;gap:2px;}
+.sb-ibtn{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#858585;border-radius:3px;font-size:13px;background:none;border:none;}
+.sb-ibtn:hover{color:#d4d4d4;background:rgba(255,255,255,.08);}
+.ft{overflow-y:auto;flex:1;}
+.tg-lbl{display:flex;align-items:center;gap:5px;padding:4px 8px;font-size:11px;font-weight:700;color:#bbb;cursor:pointer;text-transform:uppercase;letter-spacing:.8px;}
+.tg-lbl:hover{background:rgba(255,255,255,.04);}
+.tg-arr{font-size:10px;color:#858585;transition:transform .15s;}
+.tg-lbl.cl .tg-arr{transform:rotate(-90deg);}
+.tg-ch{display:block;}
+.tg-lbl.cl+.tg-ch{display:none;}
+.fi{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 18px;cursor:pointer;font-size:13px;color:#d4d4d4;transition:background .1s;border-left:2px solid transparent;min-height:26px;}
+.fi:hover{background:var(--vsc-hover);}
+.fi.on{background:#37373d;border-left-color:#4fc1ff;}
+.fi-ic{font-size:14px;flex-shrink:0;}
+.fi-nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fi-cl{display:none;font-size:11px;padding:2px 4px;border-radius:3px;color:#858585;}
+.fi:hover .fi-cl{display:flex;}
+.fi-cl:hover{color:#d4d4d4;background:rgba(255,255,255,.1);}
+/* Langs in sidebar */
+.sb-langs{border-top:1px solid #3c3c3c;padding:6px;}
+.sb-lt{font-size:10px;font-weight:700;color:#858585;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;padding:0 4px;}
+.lr{display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:3px;cursor:pointer;}
+.lr:hover{background:rgba(255,255,255,.06);}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ln{font-size:12px;font-weight:600;flex:1;}
+.lv{font-size:10px;color:#858585;}
+/* Search */
+.srch-wrap{padding:10px;}
+.srch-f{width:100%;background:#3c3c3c;border:1px solid #3c3c3c;color:#d4d4d4;padding:6px 10px;border-radius:4px;font-size:13px;outline:none;}
+.srch-f:focus{border-color:#4fc1ff;}
+.srch-res{margin-top:8px;font-size:12px;color:#858585;overflow-y:auto;max-height:300px;}
+.sr-item{padding:4px 0;cursor:pointer;color:#d4d4d4;border-bottom:1px solid rgba(255,255,255,.04);}
+.sr-item:hover{color:#4fc1ff;}
+/* Extensions */
+.ext-srch{width:calc(100% - 14px);margin:7px;background:#3c3c3c;border:1px solid #3c3c3c;color:#d4d4d4;padding:5px 10px;border-radius:4px;font-size:13px;outline:none;display:block;}
+.ext-srch:focus{border-color:#4fc1ff;}
+.ext-sec{padding:4px 12px;font-size:11px;font-weight:700;color:#858585;text-transform:uppercase;letter-spacing:1px;}
+.ext-card{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;}
+.ext-card:hover{background:rgba(255,255,255,.04);}
+.ext-top{display:flex;gap:9px;margin-bottom:3px;}
+.ext-ic{font-size:1.3rem;flex-shrink:0;}
+.ext-info{flex:1;}
+.ext-name{font-size:13px;font-weight:600;color:#d4d4d4;}
+.ext-pub{font-size:10px;color:#858585;}
+.ext-desc{font-size:11px;color:#858585;}
+.ext-ibtn{background:#0e639c;color:white;border:none;padding:3px 9px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;align-self:flex-start;}
+.ext-ibtn:hover{background:#1177bb;}
+.ext-ibtn.done{background:transparent;color:#4ec9b0;border:1px solid #4ec9b0;cursor:default;}
+.ext-prog{height:2px;background:#3c3c3c;border-radius:1px;overflow:hidden;display:none;margin-top:5px;}
+.ext-pf{height:100%;background:#4fc1ff;width:0%;transition:width .08s;}
+/* EDITOR ZONE */
+.ez{flex:1;display:flex;flex-direction:column;min-width:0;}
+/* Tabs */
+.tbr{background:var(--vsc-tab);height:35px;display:flex;overflow-x:auto;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.3);scrollbar-width:none;}
+.tbr::-webkit-scrollbar{display:none;}
+.tab{display:flex;align-items:center;gap:6px;padding:0 13px;height:35px;cursor:pointer;color:#858585;font-size:13px;border-right:1px solid rgba(0,0,0,.2);transition:background .1s;white-space:nowrap;flex-shrink:0;min-width:85px;max-width:190px;border-top:1px solid transparent;}
+.tab:hover{background:#2a2d2e;color:#d4d4d4;}
+.tab.on{background:var(--vsc-app);color:#d4d4d4;border-top-color:#4fc1ff;}
+.tab-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.tab-nm{flex:1;overflow:hidden;text-overflow:ellipsis;}
+.tab-cl{font-size:11px;opacity:0;padding:2px 3px;border-radius:3px;color:#858585;}
+.tab:hover .tab-cl,.tab.on .tab-cl{opacity:.7;}
+.tab-cl:hover{opacity:1!important;background:rgba(255,255,255,.1);}
+/* Breadcrumb */
+.bc{background:var(--vsc-app);border-bottom:1px solid rgba(255,255,255,.04);padding:3px 14px;font-size:12px;color:#858585;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.bc-sep{color:#555;}
+/* Split */
+.sp{display:flex;flex-direction:column;flex:1;min-height:0;}
+.ep{display:flex;flex:1;min-height:0;}
+.ew{flex:1;overflow:hidden;}
+.CodeMirror{height:100%!important;font-family:'Consolas','Courier New',monospace!important;font-size:14px!important;line-height:1.6!important;background:#1e1e1e!important;color:#d4d4d4!important;}
+.CodeMirror-gutters{background:#1e1e1e!important;border-right:1px solid #3c3c3c!important;}
+.CodeMirror-linenumber{color:#5a5a5a!important;padding:0 8px!important;}
+.CodeMirror-cursor{border-left:2px solid #aeafad!important;}
+.CodeMirror-selected{background:#264f78!important;}
+.CodeMirror-scroll{scrollbar-width:thin;}
+/* Preview */
+.pvp{width:45%;border-left:1px solid #3c3c3c;display:none;flex-direction:column;flex-shrink:0;}
+.pvb{background:#252526;border-bottom:1px solid #3c3c3c;height:35px;display:flex;align-items:center;padding:0 10px;gap:8px;flex-shrink:0;}
+.pvd-wrap{display:flex;gap:5px;}
+.pvd{width:11px;height:11px;border-radius:50%;}
+.pvu{flex:1;background:#3c3c3c;border:none;color:#858585;padding:3px 10px;border-radius:4px;font-size:12px;font-family:monospace;outline:none;}
+.pvf{flex:1;border:none;background:#fff;}
+.pv-ref{background:none;border:none;cursor:pointer;color:#858585;font-size:14px;}
+.pv-ref:hover{color:#d4d4d4;}
+/* SQL */
+.sqlp{display:none;flex:1;flex-direction:column;min-height:0;}
+.sql-tb{background:#252526;border-bottom:1px solid #3c3c3c;padding:6px 10px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-shrink:0;}
+.sql-chip{background:#3c3c3c;border:1px solid #3c3c3c;color:#858585;padding:2px 9px;border-radius:3px;font-size:11px;cursor:pointer;font-family:monospace;transition:all .15s;}
+.sql-chip:hover,.sql-chip.on{border-color:#4db6ac;color:#4db6ac;background:rgba(77,182,172,.1);}
+.sql-body{display:flex;flex:1;min-height:0;}
+.sql-ep{flex:0 0 42%;border-right:1px solid #3c3c3c;display:flex;flex-direction:column;}
+.sql-ql{padding:5px 10px;font-size:11px;color:#858585;background:#252526;border-bottom:1px solid #3c3c3c;text-transform:uppercase;letter-spacing:1px;flex-shrink:0;}
+.sql-in{flex:1;background:var(--vsc-app);color:#d4d4d4;border:none;padding:10px;font-family:Consolas,monospace;font-size:13px;resize:none;outline:none;line-height:1.6;}
+.sql-rb{padding:6px 10px;background:#252526;border-top:1px solid #3c3c3c;display:flex;gap:7px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+.sql-btn{background:#0e639c;color:white;border:none;padding:4px 12px;border-radius:3px;font-weight:600;font-size:12px;cursor:pointer;}
+.sql-btn:hover{background:#1177bb;}
+.sql-gbtn{background:none;border:1px solid #3c3c3c;color:#858585;padding:3px 9px;border-radius:3px;font-size:11px;cursor:pointer;}
+.sql-gbtn:hover{border-color:#858585;color:#d4d4d4;}
+.sql-cnt{margin-left:auto;font-size:11px;color:#858585;font-family:monospace;}
+.sql-rp{flex:1;overflow:auto;}
+table.rt{width:100%;border-collapse:collapse;font-size:12px;font-family:Consolas,monospace;}
+table.rt th{background:#252526;color:#4db6ac;padding:6px 10px;text-align:left;border-bottom:2px solid #3c3c3c;font-weight:700;white-space:nowrap;position:sticky;top:0;}
+table.rt td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,.04);}
+table.rt tr:hover td{background:rgba(255,255,255,.03);}
+.sql-st{padding:3px 10px;font-size:11px;color:#858585;background:#252526;border-top:1px solid #3c3c3c;font-family:monospace;flex-shrink:0;}
+/* Panel */
+.panel{height:230px;background:var(--vsc-app);border-top:1px solid #3c3c3c;display:flex;flex-direction:column;flex-shrink:0;}
+.ptabs{background:#252526;border-bottom:1px solid #3c3c3c;height:35px;display:flex;align-items:stretch;flex-shrink:0;}
+.ptab{padding:0 16px;cursor:pointer;font-size:12px;color:#858585;display:flex;align-items:center;gap:5px;border-bottom:1px solid transparent;transition:all .15s;}
+.ptab:hover{color:#d4d4d4;}
+.ptab.on{color:#d4d4d4;border-bottom-color:#4fc1ff;}
+.ptab-cl{font-size:10px;opacity:.6;}
+.ptab:hover .ptab-cl{opacity:1;}
+.pacts{margin-left:auto;display:flex;align-items:center;padding-right:8px;gap:1px;}
+.pbtn{background:none;border:none;cursor:pointer;color:#858585;padding:4px 6px;border-radius:3px;font-size:13px;}
+.pbtn:hover{background:rgba(255,255,255,.08);color:#d4d4d4;}
+.pc{flex:1;display:none;overflow-y:auto;padding:6px 12px;scrollbar-width:thin;}
+.pc.on{display:block;}
+.term-out{font-family:Consolas,monospace;font-size:13px;line-height:1.5;}
+.ti-row{display:flex;align-items:center;gap:6px;padding:0 12px 5px;flex-shrink:0;}
+.t-pr{color:#4ec9b0;font-family:Consolas,monospace;font-size:13px;white-space:nowrap;}
+.t-in{flex:1;background:none;border:none;color:#d4d4d4;font-family:Consolas,monospace;font-size:13px;outline:none;}
+.tc-g{color:#4ec9b0;}.tc-b{color:#9cdcfe;}.tc-r{color:#f44747;}
+.tc-y{color:#dcdcaa;}.tc-gr{color:#6a9955;}.tc-o{color:#ce9178;}
+/* Status bar */
+.stb{height:22px;background:var(--vsc-status);display:flex;align-items:center;padding:0 8px;flex-shrink:0;}
+.si{padding:0 7px;font-size:12px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:3px;cursor:pointer;border-radius:3px;height:22px;white-space:nowrap;}
+.si:hover{background:rgba(255,255,255,.15);}
+.si-r{margin-left:auto;display:flex;}
+.si-ok{background:rgba(78,201,176,.25)!important;}
+.si-err{background:rgba(244,71,71,.25)!important;}
+/* Notifs */
+.nfc{position:fixed;bottom:28px;right:8px;z-index:9999;display:flex;flex-direction:column;gap:4px;}
+.nf{background:#252526;border:1px solid #454545;border-radius:4px;padding:9px 13px;font-size:12px;display:flex;align-items:center;gap:9px;min-width:250px;animation:nfIn .2s ease;}
+@keyframes nfIn{from{transform:translateX(28px);opacity:0;}to{transform:none;opacity:1;}}
+.nf-ok{border-left:3px solid #4ec9b0;}.nf-err{border-left:3px solid #f44747;}
+.nf-info{border-left:3px solid #4fc1ff;}.nf-warn{border-left:3px solid #ffb13b;}
+.nf-cl{cursor:pointer;color:#858585;background:none;border:none;margin-left:auto;font-size:13px;}
+.nf-cl:hover{color:#d4d4d4;}
+/* Resizers */
+.rsz-h{width:4px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .2s;}
+.rsz-h:hover,.rsz-h.dg{background:#4fc1ff;}
+.rsz-v{height:4px;background:transparent;cursor:row-resize;flex-shrink:0;transition:background .2s;}
+.rsz-v:hover,.rsz-v.dg{background:#4fc1ff;}
+/* AI Panel */
+.aip{position:fixed;right:0;top:30px;bottom:22px;width:310px;background:#1e1e1e;border-left:1px solid #3c3c3c;display:none;flex-direction:column;z-index:100;}
+.aip.on{display:flex;}
+.aip-hd{background:#252526;border-bottom:1px solid #3c3c3c;padding:9px 13px;display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.aip-logo{background:linear-gradient(135deg,#4f8ef7,#a78bfa);color:white;font-weight:800;font-size:11px;padding:2px 7px;border-radius:3px;}
+.aip-title{font-weight:700;font-size:13px;flex:1;}
+.aip-st{font-size:10px;color:#4ec9b0;display:block;}
+.aip-cl{background:none;border:none;color:#858585;cursor:pointer;font-size:13px;}
+.aip-cl:hover{color:#d4d4d4;}
+.aip-msgs{flex:1;overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:7px;scrollbar-width:thin;}
+.aim{border-radius:7px;padding:8px 11px;font-size:12px;line-height:1.5;}
+.aim.ai{background:#2d2d2d;border-left:3px solid #a78bfa;color:#d4d4d4;}
+.aim.user{background:rgba(79,142,247,.12);border-left:3px solid #4f8ef7;color:#d4d4d4;}
+.aim a{color:#4fc1ff;text-decoration:none;}
+.aim a:hover{text-decoration:underline;}
+.aim code{background:#3c3c3c;padding:1px 4px;border-radius:2px;font-family:monospace;font-size:11px;}
+.aim pre{background:#252526;padding:7px;border-radius:4px;overflow-x:auto;margin:5px 0;border:1px solid #3c3c3c;}
+.aim pre code{background:none;padding:0;font-size:11px;}
+.aip-acts{padding:5px 7px;border-top:1px solid #3c3c3c;display:flex;flex-wrap:wrap;gap:3px;flex-shrink:0;}
+.aip-ab{background:#2d2d2d;border:1px solid #3c3c3c;color:#9cdcfe;padding:3px 8px;border-radius:3px;font-size:11px;cursor:pointer;}
+.aip-ab:hover{border-color:#4f8ef7;background:rgba(79,142,247,.1);}
+.aip-ir{padding:5px 7px 7px;border-top:1px solid #3c3c3c;display:flex;gap:5px;flex-shrink:0;}
+.aip-input{flex:1;background:#3c3c3c;border:none;color:#d4d4d4;padding:6px 9px;border-radius:3px;font-size:12px;outline:none;}
+.aip-input:focus{outline:1px solid #4fc1ff;}
+.aip-send{background:linear-gradient(135deg,#4f8ef7,#a78bfa);border:none;width:30px;height:30px;border-radius:3px;cursor:pointer;color:white;font-size:14px;}
+.ai-typing{display:flex;gap:4px;padding:3px 0;}
+.ai-d{width:6px;height:6px;border-radius:50%;background:#858585;animation:aiD 1.2s infinite;}
+.ai-d:nth-child(2){animation-delay:.2s;}.ai-d:nth-child(3){animation-delay:.4s;}
+@keyframes aiD{0%,80%,100%{transform:scale(.8);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+/* Context menu */
+.ctx{position:fixed;background:#252526;border:1px solid #454545;border-radius:4px;padding:3px 0;min-width:180px;z-index:9998;display:none;}
+.ctx.on{display:block;}
+.ctx-i{padding:5px 15px;font-size:12px;color:#ccc;cursor:pointer;display:flex;justify-content:space-between;gap:18px;}
+.ctx-i:hover{background:var(--vsc-sel);}
+.ctx-sep{height:1px;background:#454545;margin:2px 0;}
+/* Mobile */
+@media(max-width:768px){
+  .tb-logo{padding:0 6px;}.tb-mb{padding:4px 6px;font-size:11px;}
+  .ab{width:42px;}.ab-btn{width:42px;height:44px;font-size:18px;}
+  .sb{width:200px;}.sb.hide{width:0;}
+  .tab{min-width:70px;max-width:130px;padding:0 9px;font-size:12px;}
+  .CodeMirror{font-size:12px!important;}
+  .panel{height:170px;}
+  .aip{width:260px;}
+}
+@media(max-width:480px){
+  .tb-center{display:none;}
+  .pvp{width:100%;position:absolute;top:35px;left:0;right:0;bottom:0;z-index:40;border-left:none;border-top:1px solid #3c3c3c;}
+}
+</style>
+</head>
+<body>
+<!-- TITLEBAR -->
+<div class="tb">
+  <span class="tb-logo">ABT-Code</span>
+  <div class="tb-m"><button class="tb-mb" onclick="tmenu('mf')">Fichier</button>
+    <div class="tb-dd" id="mf">
+      <div class="dd-i" onclick="newFile()">Nouveau fichier<span class="sc">Ctrl+N</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-i" onclick="saveCurrent()">Enregistrer<span class="sc">Ctrl+S</span></div>
+      <div class="dd-i" onclick="saveAll()">Tout enregistrer<span class="sc">Ctrl+⇧S</span></div>
+      <div class="dd-i" onclick="downloadCurrent()">Télécharger</div>
+      <div class="dd-i" onclick="importFile()">Importer un fichier...</div>
+      <div class="dd-sep"></div>
+      <div class="dd-i" onclick="location.href='dashboard.html'">Retour au tableau de bord</div>
+    </div>
+  </div>
+  <div class="tb-m"><button class="tb-mb" onclick="tmenu('me')">Édition</button>
+    <div class="tb-dd" id="me">
+      <div class="dd-i" onclick="cm?.execCommand('undo')">Annuler<span class="sc">Ctrl+Z</span></div>
+      <div class="dd-i" onclick="cm?.execCommand('redo')">Rétablir<span class="sc">Ctrl+Y</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-i" onclick="cm?.execCommand('selectAll')">Tout sélectionner<span class="sc">Ctrl+A</span></div>
+      <div class="dd-i" onclick="commentLine()">Commenter/Décommenter<span class="sc">Ctrl+/</span></div>
+      <div class="dd-i" onclick="formatDoc()">Formater le document<span class="sc">Alt+⇧F</span></div>
+    </div>
+  </div>
+  <div class="tb-m"><button class="tb-mb" onclick="tmenu('mv')">Affichage</button>
+    <div class="tb-dd" id="mv">
+      <div class="dd-i" onclick="toggleSB()">Explorateur<span class="sc">Ctrl+B</span></div>
+      <div class="dd-i" onclick="focusSearch()">Rechercher<span class="sc">Ctrl+⇧F</span></div>
+      <div class="dd-i" onclick="showExt()">Extensions<span class="sc">Ctrl+⇧X</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-i" onclick="togglePanel()">Terminal<span class="sc">Ctrl+&#96;</span></div>
+      <div class="dd-i" onclick="toggleAI()">ABT IA Coding<span class="sc">Ctrl+I</span></div>
+      <div class="dd-sep"></div>
+      <div class="dd-i" onclick="zIn()">Zoom avant<span class="sc">Ctrl++</span></div>
+      <div class="dd-i" onclick="zOut()">Zoom arrière<span class="sc">Ctrl+-</span></div>
+    </div>
+  </div>
+  <div class="tb-m"><button class="tb-mb" onclick="tmenu('mr')">Exécuter</button>
+    <div class="tb-dd" id="mr">
+      <div class="dd-i" onclick="runCurrent()">▶ Exécuter<span class="sc">Ctrl+Enter</span></div>
+      <div class="dd-i" onclick="clearTerm()">Effacer le terminal</div>
+    </div>
+  </div>
+  <div class="tb-m"><button class="tb-mb" onclick="tmenu('mh')">Aide</button>
+    <div class="tb-dd" id="mh">
+      <div class="dd-i" onclick="showShortcuts()">Raccourcis clavier</div>
+      <div class="dd-i" onclick="location.href='abt_ia_page.html'">ABT IA (page dédiée)</div>
+      <div class="dd-sep"></div>
+      <div class="dd-i">ABT-Code v2.0</div>
+    </div>
+  </div>
+  <div class="tb-center" id="tb-title">ABT-Code — Environnement virtuel</div>
+  <div class="tb-right">
+    <button class="tb-wbtn" onclick="toggleAI()" style="font-size:11px;font-weight:800;color:#a78bfa;">AI</button>
+    <button class="tb-wbtn" onclick="location.href='dashboard.html'" title="Tableau de bord">⌂</button>
+    <button class="tb-wbtn" onclick="location.href='parametres.html'" title="Paramètres">⚙</button>
+  </div>
+</div>
+
+<div class="app">
+<div class="wb">
+<!-- ACTIVITY BAR -->
+<div class="ab">
+  <div class="ab-top">
+    <div class="ab-btn on" id="ab-explorer" onclick="setAct('explorer')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>
+      <div class="tip">Explorateur (Ctrl+B)</div>
+    </div>
+    <div class="ab-btn" id="ab-search" onclick="setAct('search')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <div class="tip">Rechercher (Ctrl+⇧F)</div>
+    </div>
+    <div class="ab-btn" id="ab-extensions" onclick="setAct('extensions')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-2 .9-2 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/></svg>
+      <div class="tip">Extensions (Ctrl+⇧X)</div>
+    </div>
+  </div>
+  <div class="ab-bot">
+    <div class="ab-btn" onclick="toggleAI()" style="color:#a78bfa;font-size:11px;font-weight:800;">AI<div class="tip">ABT IA Coding (Ctrl+I)</div></div>
+    <div class="ab-btn" onclick="location.href='parametres.html'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      <div class="tip">Paramètres</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sb" id="sb">
+  <!-- Explorer -->
+  <div class="sb-pnl on" id="sb-explorer">
+    <div class="sb-hd">EXPLORATEUR
+      <div class="sb-acts">
+        <button class="sb-ibtn" onclick="newFile()" title="Nouveau fichier">⊕</button>
+        <button class="sb-ibtn" onclick="importFile()" title="Importer">⬆</button>
+      </div>
+    </div>
+    <div class="ft">
+      <div>
+        <div class="tg-lbl" onclick="this.classList.toggle('cl')"><span class="tg-arr">▾</span>PROJET</div>
+        <div class="tg-ch" id="file-list"></div>
+      </div>
+      <div>
+        <div class="tg-lbl" onclick="this.classList.toggle('cl')"><span class="tg-arr">▾</span>LANGAGES</div>
+        <div class="tg-ch" id="lang-list"></div>
+      </div>
+    </div>
+    <div class="sb-langs">
+      <div class="sb-lt">Installés</div>
+      <div id="langs-installed"></div>
+      <button onclick="setAct('extensions')" style="width:100%;background:none;border:1px solid #3c3c3c;color:#858585;padding:5px;border-radius:3px;font-size:11px;cursor:pointer;margin-top:5px;">＋ Installer des extensions</button>
+    </div>
+  </div>
+  <!-- Search -->
+  <div class="sb-pnl" id="sb-search">
+    <div class="sb-hd">RECHERCHER</div>
+    <div class="srch-wrap">
+      <input type="text" class="srch-f" id="srch-f" placeholder="Rechercher dans les fichiers..." oninput="doSearch(this.value)">
+      <div class="srch-res" id="srch-res">Tapez pour chercher...</div>
+    </div>
+  </div>
+  <!-- Extensions -->
+  <div class="sb-pnl" id="sb-extensions">
+    <div class="sb-hd">EXTENSIONS</div>
+    <input type="text" class="ext-srch" id="ext-srch" placeholder="Rechercher des extensions..." oninput="filterExts(this.value)">
+    <div style="overflow-y:auto;flex:1;" id="ext-list"></div>
+  </div>
+</div>
+<div class="rsz-h" id="sb-rsz" onmousedown="sbResize(event)"></div>
+
+<!-- EDITOR ZONE -->
+<div class="ez" id="ez">
+  <div class="tbr" id="tabbar"></div>
+  <div class="bc"><span>📁 projet</span><span class="bc-sep">›</span><span id="bc-f">main.py</span></div>
+  <div class="sp">
+    <div class="ep" id="ep">
+      <div class="ew" id="ew"><textarea id="ed-ta"></textarea></div>
+      <div class="rsz-h" id="pv-rsz" style="display:none" onmousedown="pvResize(event)"></div>
+      <div class="pvp" id="pvp">
+        <div class="pvb">
+          <div class="pvd-wrap"><div class="pvd" style="background:#ff5f57"></div><div class="pvd" style="background:#ffbd2e"></div><div class="pvd" style="background:#28c840"></div></div>
+          <input type="text" class="pvu" id="pvu" value="index.html" readonly>
+          <button class="pv-ref" onclick="runCurrent()">↻</button>
+        </div>
+        <iframe class="pvf" id="pvf" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div class="sqlp" id="sqlp">
+        <div class="sql-tb" id="sql-chips"></div>
+        <div class="sql-body">
+          <div class="sql-ep">
+            <div class="sql-ql">Requête SQL — Ctrl+Enter</div>
+            <textarea class="sql-in" id="sql-in" placeholder="SELECT * FROM etudiants;&#10;-- Ctrl+Enter pour exécuter"></textarea>
+            <div class="sql-rb">
+              <button class="sql-btn" onclick="runSQL()">▶ Exécuter</button>
+              <button class="sql-gbtn" onclick="resetDB()">🔄 Reset</button>
+              <span class="sql-cnt" id="sql-cnt"></span>
+            </div>
+          </div>
+          <div class="sql-rp" id="sql-res"><div style="padding:16px;color:#858585;font-size:12px;">Sélectionnez une table ou écrivez une requête...</div></div>
+        </div>
+        <div class="sql-st" id="sql-st">SQLite 3 — Prêt</div>
+      </div>
+    </div>
+    <div class="rsz-v" id="p-rsz" onmousedown="pResize(event)"></div>
+    <div class="panel" id="panel">
+      <div class="ptabs">
+        <div class="ptab on" id="pt-terminal" onclick="showPanel('terminal')">TERMINAL<span class="ptab-cl" onclick="togglePanel();event.stopPropagation()">✕</span></div>
+        <div class="ptab" id="pt-output"   onclick="showPanel('output')">SORTIE</div>
+        <div class="ptab" id="pt-problems" onclick="showPanel('problems')">PROBLÈMES<span id="prob-b" style="background:#f44747;color:#fff;border-radius:10px;padding:0 5px;font-size:10px;display:none;margin-left:4px;">0</span></div>
+        <div class="pacts">
+          <button class="pbtn" onclick="runCurrent()" title="Exécuter Ctrl+Enter">▶</button>
+          <button class="pbtn" onclick="clearTerm()" title="Effacer">🗑</button>
+          <button class="pbtn" onclick="togglePanel()" style="font-size:11px;">∧</button>
+        </div>
+      </div>
+      <div class="pc on" id="pc-terminal"><div class="term-out" id="term-out"></div></div>
+      <div class="pc" id="pc-output"><div id="out-content" style="font-family:Consolas,monospace;font-size:12px;color:#d4d4d4;"></div></div>
+      <div class="pc" id="pc-problems"><div id="prob-content" style="color:#858585;font-size:12px;padding:6px 0;">Aucun problème détecté.</div></div>
+      <div class="ti-row" id="ti-row">
+        <span class="t-pr">abt@ide:~$</span>
+        <input type="text" class="t-in" id="t-in" placeholder="help, run, clear, ls, pwd, cat ..." onkeydown="handleCmd(event)">
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="stb">
+  <div class="si" onclick="toggleSB()">☰</div>
+  <div class="si" id="si-lang">🐍 Python 3.13</div>
+  <div class="si" id="si-err"><span style="color:#f44747;">⊗</span><span id="si-ec">0</span><span style="color:#ffb13b;margin-left:5px;">⚠</span><span id="si-wc">0</span></div>
+  <div class="si-r">
+    <div class="si" id="si-pos">Ln 1, Col 1</div>
+    <div class="si">UTF-8</div>
+    <div class="si" id="si-run" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- AI PANEL -->
+<div class="aip" id="aip">
+  <div class="aip-hd">
+    <span class="aip-logo">AI</span>
+    <div><div class="aip-title">ABT IA Coding</div><span class="aip-st">● En ligne</span></div>
+    <button class="aip-cl" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="aip-msgs" id="aip-msgs">
+    <div class="aim ai">Bonjour ! Je suis <b style="color:#a78bfa;">ABT IA Coding</b>.<br><br>
+    🔍 Analyser votre code · 🐛 Corriger les erreurs<br>
+    📖 Expliquer le code · ⚡ Générer des exemples<br><br>
+    <span style="color:#858585;font-size:11px;">Utilisez les boutons ou posez une question.</span></div>
+  </div>
+  <div class="aip-acts">
+    <button class="aip-ab" onclick="aiAnalyze()">🔍 Analyser</button>
+    <button class="aip-ab" onclick="aiExplain()">📖 Expliquer</button>
+    <button class="aip-ab" onclick="aiFix()">🐛 Corriger</button>
+    <button class="aip-ab" onclick="aiGenerate()">⚡ Générer</button>
+    <button class="aip-ab" onclick="aiOptimize()">✨ Optimiser</button>
+    <button class="aip-ab" onclick="location.href='abt_ia_page.html'" style="color:#a78bfa;">✦ ABT IA →</button>
+  </div>
+  <div class="aip-ir">
+    <input type="text" class="aip-input" id="aip-in" placeholder="Question sur votre code..." onkeydown="if(event.key==='Enter')aiSend()">
+    <button class="aip-send" onclick="aiSend()">➤</button>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx" id="ctx">
+  <div class="ctx-i" onclick="cm?.execCommand('undo')">Annuler<span>Ctrl+Z</span></div>
+  <div class="ctx-i" onclick="document.execCommand('copy')">Copier<span>Ctrl+C</span></div>
+  <div class="ctx-i" onclick="document.execCommand('cut')">Couper<span>Ctrl+X</span></div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-i" onclick="commentLine()">Commenter<span>Ctrl+/</span></div>
+  <div class="ctx-i" onclick="formatDoc()">Formater<span>Alt+⇧F</span></div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-i" onclick="runCurrent()">▶ Exécuter<span>Ctrl+Enter</span></div>
+</div>
+
+<div class="nfc" id="nfc"></div>
+<input type="file" id="fi-import" style="display:none" onchange="handleImport(this)">
+
+<script>
+'use strict';
+const L={
+  python:    {n:'Python',    v:'3.13',   ext:'.py',   ic:'🐍',dot:'#3794ff',cm:'python',    out:'console'},
+  r:         {n:'R',         v:'4.4',    ext:'.r',    ic:'📊',dot:'#4a9eff',cm:'r',         out:'console'},
+  html:      {n:'HTML',      v:'5',      ext:'.html', ic:'🟠',dot:'#e34f26',cm:'htmlmixed', out:'preview'},
+  css:       {n:'CSS',       v:'3',      ext:'.css',  ic:'🔵',dot:'#1572b6',cm:'css',       out:'preview'},
+  javascript:{n:'JavaScript',v:'ES2024', ext:'.js',   ic:'🟡',dot:'#f7df1e',cm:'javascript',out:'console'},
+  sql:       {n:'SQL',       v:'SQLite3',ext:'.sql',  ic:'🗄️',dot:'#4db6ac',cm:'sql',       out:'sql'},
+  typescript:{n:'TypeScript',v:'5.4',   ext:'.ts',   ic:'🔷',dot:'#3178c6',cm:'javascript',out:'console'},
+  java:      {n:'Java',      v:'21',     ext:'.java', ic:'☕',dot:'#ed8b00',cm:'text/x-java',out:'console'},
+  php:       {n:'PHP',       v:'8.3',    ext:'.php',  ic:'🐘',dot:'#777bb4',cm:'htmlmixed', out:'console'},
+  bash:      {n:'Bash',      v:'5.2',    ext:'.sh',   ic:'🖥️',dot:'#89e051',cm:'shell',     out:'console'},
+  cpp:       {n:'C++',       v:'23',     ext:'.cpp',  ic:'⚙️',dot:'#00599c',cm:'text/x-csrc',out:'console'},
+};
+
+const CODE={
+python:`# Python 3.13 — ABT-Code  (Ctrl+Enter pour exécuter)
+print("=== Bienvenue dans ABT-Code ===")
+nom,age,note="Aminata",21,16.5
+print(f"Nom:{nom}  Age:{age}  Note:{note}")
+fruits=["mangue","banane","papaye","orange"]
+for i,f in enumerate(fruits,1): print(f"  {i}. {f.upper()}")
+def factorielle(n): return 1 if n<=1 else n*factorielle(n-1)
+for i in range(1,8): print(f"  {i}! = {factorielle(i)}")
+class Etudiant:
+    def __init__(self,nom,notes): self.nom=nom; self.notes=notes
+    def moyenne(self): return sum(self.notes)/len(self.notes)
+    def __repr__(self): return f"Etudiant({self.nom}, moy={self.moyenne():.2f})"
+e=Etudiant("Moussa",[15,18,12,20])
+print(e)`,
+r:`# R 4.4 — ABT-Code  (Ctrl+Enter pour exécuter)
+cat("=== ABT-Code R ===\\n")
+notes<-c(12,16,18,14,9,17,15,11,20,13)
+cat("Notes:",notes,"\\n")
+cat("Moyenne:",mean(notes),"\\nMediane:",median(notes),"\\n")
+cat("Ecart-type:",round(sd(notes),2),"\\n")
+for(i in 1:6) cat("  7 x",i,"=",7*i,"\\n")
+aire<-function(l,h) l*h
+cat("Aire 5x3:",aire(5,3),"\\n")`,
+html:`<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex;justify-content:center;align-items:center;}
+.card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:36px;max-width:400px;width:100%;text-align:center;}
+h1{color:#4fc1ff;margin-bottom:12px;}
+p{color:#8b949e;margin-bottom:20px;line-height:1.6;}
+button{background:#238636;color:white;border:none;padding:11px 26px;border-radius:7px;font-size:1rem;cursor:pointer;transition:all .3s;}
+button:hover{background:#2ea043;transform:translateY(-2px);}
+</style></head>
+<body><div class="card">
+  <h1>🚀 ABT-Code IDE</h1>
+  <p>Modifiez ce code HTML et voyez le résultat en <strong>direct</strong> !</p>
+  <button onclick="this.innerText='Bravo ! 🎉';this.style.background='#4db6ac'">Cliquer ici !</button>
+</div></body></html>`,
+css:`/* CSS3 — ABT-Code  (Prévisualisation live) */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.card{background:white;border-radius:16px;padding:36px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+h2{color:#4a5568;margin-bottom:12px;}
+p{color:#718096;margin-bottom:20px;line-height:1.6;}
+.btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 28px;border-radius:50px;font-size:1rem;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(102,126,234,.4);}
+.btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(102,126,234,.5);}
+<!-- Demo HTML -->
+<div class="card"><h2>🎨 CSS en action !</h2><p>Modifiez le CSS et observez le résultat en temps réel !</p><button class="btn">Bouton stylisé</button></div>`,
+javascript:`// JavaScript ES2024 — ABT-Code  (Ctrl+Enter)
+console.log("=== ABT-Code JavaScript ===");
+const nom="Aminata";
+const notes=[12,18,15,9,20,14,16];
+const moy=notes.reduce((a,b)=>a+b,0)/notes.length;
+console.log("Bonjour",nom);
+console.log("Notes:",notes.join(", "));
+console.log("Moyenne:",moy.toFixed(2));
+const fact=n=>n<=1?1:n*fact(n-1);
+[3,4,5,6,7].forEach(i=>console.log(i+"! =",fact(i)));
+class Etudiant{
+  #notes=[];
+  constructor(nom,niveau){this.nom=nom;this.niveau=niveau;}
+  ajouter(n){this.#notes.push(n);}
+  get moyenne(){return this.#notes.length?(this.#notes.reduce((a,b)=>a+b,0)/this.#notes.length).toFixed(2):0;}
+  toString(){return this.nom+" ("+this.niveau+") — Moy: "+this.moyenne;}
+}
+const e=new Etudiant("Moussa","L2");
+[15,18,12,20].forEach(n=>e.ajouter(n));
+console.log("Étudiant:",e.toString());`,
+sql:`-- SQL SQLite3 — ABT-Code
+-- Ctrl+Enter pour exécuter
+SELECT * FROM etudiants ORDER BY nom;`,
+typescript:`// TypeScript 5.4 — ABT-Code
+interface Etudiant{id:number;nom:string;notes:number[];}
+function moyenne(e:Etudiant):number{return e.notes.reduce((a,b)=>a+b,0)/e.notes.length;}
+const etudiants:Etudiant[]=[
+  {id:1,nom:"Aminata",notes:[17,18,16,19]},
+  {id:2,nom:"Moussa", notes:[14,12,15,13]},
+];
+etudiants.forEach(e=>console.log(e.nom,"— Moy:",moyenne(e).toFixed(2)));`,
+java:`// Java 21 — ABT-Code (simulation)
+public class Main {
+  static double moyenne(int[] arr){int s=0;for(int n:arr)s+=n;return(double)s/arr.length;}
+  public static void main(String[] args){
+    System.out.println("=== ABT-Code Java ===");
+    String nom="Aminata";
+    int[] notes={15,18,12,20,16};
+    System.out.println("Nom: "+nom);
+    System.out.printf("Moyenne: %.2f%n",moyenne(notes));
+    for(int n:notes) System.out.println("  - "+n);
+  }
+}`,
+php:`<?php
+// PHP 8.3 — ABT-Code
+echo "=== ABT-Code PHP ===\\n";
+$nom="Aminata"; $age=21;
+$notes=[15,18,12,20,16,14];
+echo "Nom: $nom, Age: $age\\n";
+$moy=array_sum($notes)/count($notes);
+echo "Moyenne: ".round($moy,2)."\\n";
+foreach($notes as $i=>$n) echo "  ".($i+1).". $n/20\\n";
+function bmi(float $p,float $t):float{return round($p/($t**2),1);}
+echo "IMC: ".bmi(70,1.75)."\\n";
+?>`,
+bash:"#!/bin/bash\n# Bash 5.2\necho \"=== ABT-Code Bash ===\"\nNOM=\"Aminata\"; AGE=21\necho \"Nom: $NOM, Age: $AGE\"\nfor i in 1 2 3 4 5; do\n  echo \"  Tour $i\"\ndone\nif [ $AGE -ge 18 ]; then echo \"Majeur\"; fi",
+cpp:`// C++ 23 — ABT-Code (simulation)
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+struct Etudiant{string nom;vector<double> notes;
+  double moyenne()const{return accumulate(notes.begin(),notes.end(),0.0)/notes.size();}
+};
+int main(){
+  cout<<"=== ABT-Code C++ ==="<<endl;
+  vector<Etudiant> lst={{"Aminata",{17.5,18,16.5,19}},{"Moussa",{14,12,15,13}}};
+  for(auto& e:lst) cout<<e.nom<<" — "<<e.moyenne()<<"/20"<<endl;
+  return 0;
+}`
+};
+
+let files=[
+  {id:'f1',lang:'python',    name:'main.py',      mod:false},
+  {id:'f2',lang:'r',         name:'analyse.r',    mod:false},
+  {id:'f3',lang:'html',      name:'index.html',   mod:false},
+  {id:'f4',lang:'css',       name:'style.css',    mod:false},
+  {id:'f5',lang:'javascript',name:'script.js',    mod:false},
+  {id:'f6',lang:'sql',       name:'database.sql', mod:false},
+];
+let cur='f1',cm=null,sqlDB=null,sqlOk=false,panelOn=true,aiOn=false,fontSize=14;
+let termHist=[],termIdx=-1;
+
+window.addEventListener('load',()=>{
+  initCM(); buildAll(); switchFile('f1'); initSQL(); setupKeys(); setupMenuClose();
+  tw('<span class="tc-b">ABT-Code IDE v2.0</span>');
+  tw('<span class="tc-gr">// Ctrl+Enter=Exécuter · Ctrl+S=Enregistrer · Ctrl+I=AI · Ctrl+B=Sidebar</span>');
+  notify('Bienvenue dans ABT-Code IDE','info');
+});
+
+function gf(id){return files.find(f=>f.id===id);}
+
+function initCM(){
+  cm=CodeMirror.fromTextArea(document.getElementById('ed-ta'),{
+    theme:'vs2015',lineNumbers:true,autoCloseBrackets:true,matchBrackets:true,
+    indentUnit:4,tabSize:4,indentWithTabs:false,lineWrapping:false,
+    extraKeys:{'Ctrl-Enter':()=>runCurrent(),'Ctrl-S':()=>saveCurrent(),'Ctrl-/':()=>commentLine(),'Alt-Shift-F':()=>formatDoc()}
+  });
+  cm.setSize('100%','100%');
+  cm.on('cursorActivity',()=>{
+    const c=cm.getCursor();
+    document.getElementById('si-pos').innerText=`Ln ${c.line+1}, Col ${c.ch+1}`;
+  });
+  cm.on('change',()=>{
+    markDirty();
+    const f=gf(cur);
+    if(f&&(f.lang==='html'||f.lang==='css')){clearTimeout(window._lt);window._lt=setTimeout(runCurrent,900);}
+  });
+  cm.getWrapperElement().addEventListener('contextmenu',e=>{e.preventDefault();showCtx(e.clientX,e.clientY);});
+}
+
+function buildAll(){buildTabs();buildFilelist();buildLangList();buildInstalledLangs();buildExts();}
+
+function buildTabs(){
+  document.getElementById('tabbar').innerHTML=files.map(f=>{
+    const l=L[f.lang]||L.python;
+    return `<div class="tab ${f.id===cur?'on':''}" id="tab-${f.id}" onclick="switchFile('${f.id}')">
+      <div class="tab-dot" style="background:${l.dot}"></div>
+      <span class="tab-nm">${f.name}${f.mod?' ●':''}</span>
+      <span class="tab-cl" onclick="closeFile('${f.id}',event)">✕</span>
+    </div>`;
+  }).join('');
+}
+
+function buildFilelist(){
+  document.getElementById('file-list').innerHTML=files.map(f=>{
+    const l=L[f.lang]||L.python;
+    return `<div class="fi ${f.id===cur?'on':''}" id="fi-${f.id}" onclick="switchFile('${f.id}')">
+      <span class="fi-ic">${l.ic}</span>
+      <span class="fi-nm">${f.name}${f.mod?' ●':''}</span>
+      <span class="fi-cl" onclick="closeFile('${f.id}',event)">✕</span>
+    </div>`;
+  }).join('');
+}
+
+function buildLangList(){
+  document.getElementById('lang-list').innerHTML=Object.entries(L).map(([id,l])=>
+    `<div class="fi" onclick="switchToLang('${id}')">
+      <span class="fi-ic">${l.ic}</span>
+      <span class="fi-nm">${l.n} ${l.v}</span>
+    </div>`).join('');
+}
+
+function buildInstalledLangs(){
+  document.getElementById('langs-installed').innerHTML=Object.entries(L).map(([id,l])=>
+    `<div class="lr" onclick="switchToLang('${id}')">
+      <div class="ld" style="background:${l.dot}"></div>
+      <span class="ln">${l.ic} ${l.n}</span>
+      <span class="lv">${l.v}</span>
+    </div>`).join('');
+}
+
+function switchFile(id){
+  if(cm&&cur) localStorage.setItem('abt_ide_'+cur,cm.getValue());
+  cur=id;
+  const f=gf(id); if(!f)return;
+  const l=L[f.lang]||L.python;
+  cm.setOption('mode',l.cm);
+  cm.setValue(localStorage.getItem('abt_ide_'+id)||CODE[f.lang]||'');
+  setTimeout(()=>{cm.refresh();cm.focus();},20);
+
+  const ew=document.getElementById('ew');
+  const pvp=document.getElementById('pvp');
+  const pvr=document.getElementById('pv-rsz');
+  const sqlp=document.getElementById('sqlp');
+  ew.style.display='flex'; sqlp.style.display='none';
+  pvp.style.display='none'; pvr.style.display='none';
+
+  if(l.out==='sql'){ew.style.display='none';sqlp.style.display='flex';if(sqlOk)previewTable('etudiants');}
+  else if(l.out==='preview'){pvp.style.display='flex';pvr.style.display='block';setTimeout(runCurrent,150);}
+
+  document.getElementById('si-lang').innerText=l.ic+' '+l.n+' '+l.v;
+  document.getElementById('bc-f').innerText=f.name;
+  document.getElementById('tb-title').innerText=f.name+' — ABT-Code';
+  document.getElementById('pvu').value=f.name;
+  buildAll();
+}
+
+function switchToLang(lang){const f=files.find(x=>x.lang===lang);if(f)switchFile(f.id);}
+function markDirty(){const f=gf(cur);if(f&&!f.mod){f.mod=true;buildAll();}}
+
+function closeFile(id,e){
+  e&&e.stopPropagation();
+  const f=gf(id);
+  if(f?.mod&&!confirm(`Fermer "${f.name}" sans enregistrer ?`))return;
+  files=files.filter(x=>x.id!==id);
+  if(cur===id){cur=files.length?files[0].id:null;if(cur)switchFile(cur);}
+  buildAll();
+}
+
+function newFile(){
+  const name=prompt('Nom du fichier (ex: script.py):');if(!name)return;
+  const ext=name.split('.').pop().toLowerCase();
+  const em={py:'python',r:'r',html:'html',css:'css',js:'javascript',sql:'sql',ts:'typescript',java:'java',php:'php',sh:'bash',cpp:'cpp'};
+  const lang=em[ext]||'python';
+  const id='f_'+Date.now();
+  files.push({id,lang,name,mod:false});
+  localStorage.setItem('abt_ide_'+id,CODE[lang]||'');
+  switchFile(id); notify('Nouveau fichier : '+name,'ok');
+}
+
+function saveCurrent(){
+  if(!cm||!cur)return;
+  localStorage.setItem('abt_ide_'+cur,cm.getValue());
+  const f=gf(cur);if(f){f.mod=false;buildAll();}
+  showSt('💾 Sauvegardé',false); notify('Enregistré','ok');
+}
+
+function saveAll(){
+  files.forEach(f=>{
+    const code=f.id===cur?cm.getValue():(localStorage.getItem('abt_ide_'+f.id)||'');
+    localStorage.setItem('abt_ide_'+f.id,code);f.mod=false;
+  });
+  buildAll(); notify('Tous les fichiers enregistrés','ok');
+}
+
+function downloadCurrent(){
+  const f=gf(cur);if(!f||!cm)return;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([cm.getValue()],{type:'text/plain;charset=utf-8'}));
+  a.download=f.name; a.click(); URL.revokeObjectURL(a.href);
+  notify('Téléchargé : '+f.name,'ok');
+}
+
+function importFile(){document.getElementById('fi-import').click();}
+function handleImport(inp){
+  const file=inp.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const em={py:'python',r:'r',html:'html',css:'css',js:'javascript',sql:'sql',ts:'typescript',java:'java',php:'php',sh:'bash',cpp:'cpp'};
+  const lang=em[ext]||'python';
+  const r=new FileReader();
+  r.onload=e=>{const id='fi_'+Date.now();files.push({id,lang,name:file.name,mod:false});localStorage.setItem('abt_ide_'+id,e.target.result);switchFile(id);notify('Importé : '+file.name,'ok');};
+  r.readAsText(file); inp.value='';
+}
+
+// ── RUN ──
+function runCurrent(){
+  const f=gf(cur);if(!f)return;
+  const code=cm.getValue(); saveCurrent();
+  const l=L[f.lang];
+  if(l.out==='console')showPanel('terminal');
+  clearProblems();
+  const runners={
+    python:runPython, r:runR, javascript:runJS, typescript:runTS,
+    html:()=>runHTML(code), css:()=>runCSS(code), sql:runSQL,
+    java:()=>runJava(code), php:()=>runPHP(code), bash:()=>runBash(code), cpp:()=>runCPP(code)
+  };
+  runners[f.lang]?.(code);
+}
+
+// Python
+function runPython(code){
+  const t0=Date.now();
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">python '+gf(cur).name+'</span>');
+  let out='';
+  Sk.configure({output:t=>{out+=t;},read:x=>{if(Sk.builtinFiles?.files?.[x])return Sk.builtinFiles.files[x];throw new Error(x);},__future__:Sk.python3});
+  Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody("<stdin>",false,code,true))
+    .then(()=>{
+      tw('<span class="tc-g">'+(out?esc(out):'// Aucune sortie')+'</span>');
+      tw('<span class="tc-gr">// Exécuté en '+(Date.now()-t0)+'ms</span>');
+      showSt('✓ Python '+(Date.now()-t0)+'ms',false);
+    })
+    .catch(e=>{tw('<span class="tc-r">❌ '+esc(e.toString())+'</span>');showSt('✕ Erreur Python',true);addProb('error',e.toString(),gf(cur).name);});
+}
+
+// R
+function runR(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">Rscript '+gf(cur).name+'</span>');
+  let out=''; const emit=s=>{out+=s;};
+  const env={pi:Math.PI,TRUE:true,FALSE:false,T:true,F:false,Inf:Infinity,NA:NaN,NULL:null};
+  try{evalRBlock(code.split('\n'),env,makeRFns(emit),emit);tw('<span class="tc-g">'+esc(out||'// Aucune sortie')+'</span>');showSt('✓ R OK',false);}
+  catch(e){tw('<span class="tc-r">❌ R: '+esc(e.message)+'</span>');showSt('✕ Erreur R',true);addProb('error',e.message,gf(cur).name);}
+}
+
+// JS
+function runJS(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">node '+gf(cur).name+'</span>');
+  const li=[];
+  const con={
+    log:(...a)=>li.push({c:'tc-g',m:a.map(v=>typeof v==='object'?JSON.stringify(v,null,2):String(v)).join(' ')}),
+    warn:(...a)=>li.push({c:'tc-y',m:'⚠ '+a.join(' ')}),
+    error:(...a)=>li.push({c:'tc-r',m:'✖ '+a.join(' ')}),
+    info:(...a)=>li.push({c:'tc-b',m:'ℹ '+a.join(' ')}),
+    table:(...a)=>li.push({c:'tc-g',m:JSON.stringify(a[0],null,2)}),
+  };
+  try{
+    new Function('console',code)(con);
+    li.forEach(l=>tw(`<span class="${l.c}">${esc(l.m)}</span>`));
+    if(!li.length)tw('<span class="tc-gr">// Aucune sortie</span>');
+    showSt('✓ JS OK',false);
+  }catch(e){tw('<span class="tc-r">❌ JS: '+esc(e.message)+'</span>');showSt('✕ Erreur JS',true);addProb('error',e.message,gf(cur).name);}
+}
+
+// TypeScript
+function runTS(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">tsc && node main.js</span>');
+  const js=code
+    .replace(/:\s*(string|number|boolean|any|void|never|unknown|null|undefined|object)(\[\])?/g,'')
+    .replace(/interface\s+\w+\s*(\{[^}]*\})/gs,'').replace(/type\s+\w+\s*=[^\n;]+[;\n]/g,'')
+    .replace(/<[\w,\s]+>/g,'').replace(/(private|public|protected|readonly|abstract|override)\s+/g,'');
+  runJS(js);
+}
+
+// HTML/CSS preview
+function runHTML(code){
+  const fr=document.getElementById('pvf');fr.srcdoc=code;
+  document.getElementById('pvu').value=gf(cur)?.name||'index.html';showSt('✓ HTML Live',false);
+}
+function runCSS(code){
+  const fr=document.getElementById('pvf');
+  const hm=code.match(/<!--\s*([\s\S]*?)\s*-->[\s\n]*$/);
+  const pure=hm?code.slice(0,hm.index):code;
+  const demo=hm?hm[1]:'<div style="padding:20px;font-family:sans-serif;"><h2>CSS Preview</h2><p>Modifiez le CSS et observez.</p><button class="btn">Bouton</button></div>';
+  fr.srcdoc=`<!DOCTYPE html><html><head><style>${pure}</style></head><body style="margin:0;">${demo}</body></html>`;
+  document.getElementById('pvu').value=gf(cur)?.name||'style.css';showSt('✓ CSS Live',false);
+}
+
+// Java
+function runJava(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">javac Main.java && java Main</span>');
+  const li=[];
+  try{
+    let body=code.match(/void\s+main[\s\S]*?\{([\s\S]*?)\n\s*\}/)?.[1]||'';
+    body=body
+      .replace(/System\.out\.println\(([^;]+)\);/g,(_,a)=>`li.push(String(${a.replace(/"/g,'"')}));`)
+      .replace(/System\.out\.printf\("[^"]+",([^)]+)\);/g,'')
+      .replace(/(?:String|int|double|float|auto|long)\s+(\w+)\s*=/g,'let $1 =')
+      .replace(/int\[\]\s+(\w+)\s*=\s*\{([^}]+)\}/g,'let $1=[$2]')
+      .replace(/for\s*\(let\s+(\w+)\s*:\s*(\w+)\)/g,'for(let $1 of $2)');
+    new Function('li',body)(li);
+    li.forEach(l=>tw('<span class="tc-g">'+esc(String(l))+'</span>'));
+    if(!li.length)tw('<span class="tc-gr">// Aucune sortie</span>');
+    showSt('✓ Java OK',false);
+  }catch(e){tw('<span class="tc-r">❌ Java: '+esc(e.message)+'</span>');showSt('✕ Erreur',true);}
+}
+
+// PHP
+function runPHP(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">php '+gf(cur).name+'</span>');
+  let out=''; const vars={};
+  try{
+    const lines=code.replace(/<\?php\s*/,'').replace(/\?>/g,'').split('\n');
+    for(const raw of lines){
+      const l=raw.trim();
+      if(!l||l.startsWith('//')||l.startsWith('*')||l.startsWith('declare'))continue;
+      const em=l.match(/^echo\s+"((?:[^"\\]|\\.)*)(?:\\n)?"\s*;/);
+      if(em){let s=em[1].replace(/\\n/g,'\n');s=s.replace(/\{?\$(\w+)\}?/g,(_,k)=>vars[k]!==undefined?vars[k]:'');out+=s+'\n';continue;}
+      const ev=l.match(/^echo\s+([^;]+)\s*;/);
+      if(ev){out+=String(ev[1].replace(/\$(\w+)/g,(_,k)=>vars[k]!==undefined?vars[k]:'')).replace(/^["']|["']$/g,'')+'\n';continue;}
+      const am=l.match(/^\$(\w+)\s*=\s*"?((?:[^"\\]|\\.)*)"?\s*;/);
+      if(am){vars[am[1]]=am[2];continue;}
+      const an=l.match(/^\$(\w+)\s*=\s*(\d+(?:\.\d+)?)\s*;/);
+      if(an){vars[an[1]]=parseFloat(an[2]);continue;}
+    }
+    tw('<span class="tc-g">'+esc(out||'// Aucune sortie')+'</span>');showSt('✓ PHP OK',false);
+  }catch(e){tw('<span class="tc-r">❌ PHP: '+esc(e.message)+'</span>');showSt('✕ Erreur',true);}
+}
+
+// Bash
+function runBash(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">bash '+gf(cur).name+'</span>');
+  let out=''; const vars={}; const arr={};
+  for(const raw of code.split('\n')){
+    const l=raw.trim();
+    if(!l||l.startsWith('#'))continue;
+    if(l.startsWith('echo ')){
+      let t=l.slice(5).replace(/^["'`]|["'`]$/g,'');
+      t=t.replace(/\$\{(\w+)\[@\]\}/g,(_,k)=>(arr[k]||[]).join(' ')).replace(/\$\{(\w+)\}/g,(_,k)=>vars[k]!==undefined?vars[k]:'').replace(/\$(\w+)/g,(_,k)=>vars[k]!==undefined?vars[k]:'').replace(/\\n/g,'\n');
+      out+=t+'\n';
+    }else if(l.match(/^\w+=\(/)){const m=l.match(/(\w+)=\(([^)]+)\)/);if(m)arr[m[1]]=m[2].trim().split(/\s+/);}
+    else if(l.match(/^\w+=/)){const m=l.match(/^(\w+)=(.*)$/);if(m)vars[m[1]]=m[2].replace(/^["']|["']$/g,'');}
+  }
+  tw('<span class="tc-g">'+esc(out||'// Aucune sortie')+'</span>');showSt('✓ Bash OK',false);
+}
+
+// C++
+function runCPP(code){
+  tw('<span class="tc-b">abt@ide:~$</span> <span class="tc-g">g++ -std=c++23 -o main main.cpp && ./main</span>');
+  const li=[];
+  try{
+    let body=code.match(/int\s+main\s*\(\s*\)\s*\{([\s\S]*?)\n\s*return\s+0;\s*\}/)?.[1]||'';
+    body=body
+      .replace(/cout\s*<<\s*"([^"]+)"\s*<<\s*endl\s*;/g,(_,s)=>`li.push("${s}");`)
+      .replace(/cout\s*<<\s*([^;]+)\s*<<\s*endl\s*;/g,(_,v)=>`try{li.push(String(${v.trim().replace(/""/g,'').replace(/<<\s*/g,'+')}));}catch(e){}`)
+      .replace(/(?:string|int|double|float|auto)\s+(\w+)/g,'let $1')
+      .replace(/vector<\w+>\s+(\w+)\s*=\s*\{([^}]+)\}/g,'let $1=[$2]')
+      .replace(/for\s*\((?:const\s+)?(?:auto|int|string)\s+(\w+)\s*:\s*(\w+)\)/g,'for(let $1 of $2)');
+    new Function('li',body)(li);
+    li.forEach(l=>tw('<span class="tc-g">'+esc(String(l))+'</span>'));
+    if(!li.length)tw('<span class="tc-gr">// Aucune sortie</span>');
+    showSt('✓ C++ OK',false);
+  }catch(e){tw('<span class="tc-r">❌ C++: '+esc(e.message)+'</span>');showSt('✕ Erreur',true);}
+}
+
+// ── SQL ──
+async function initSQL(){
+  try{
+    if(!window.initSqlJs)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.min.js');
+    const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`});
+    sqlDB=new SQL.Database();
+    sqlDB.run(`CREATE TABLE IF NOT EXISTS universites(id INTEGER PRIMARY KEY,nom TEXT,ville TEXT,pays TEXT);
+INSERT OR IGNORE INTO universites VALUES(1,'Univ. de Bamako','Bamako','Mali'),(2,'ENI','Bamako','Mali'),(3,'USTTB','Bamako','Mali'),(4,'UCAD','Dakar','Sénégal'),(5,'FHB','Abidjan','Côte d''Ivoire');
+CREATE TABLE IF NOT EXISTS etudiants(id INTEGER PRIMARY KEY,prenom TEXT,nom TEXT,age INTEGER,niveau TEXT,universite_id INTEGER);
+INSERT OR IGNORE INTO etudiants VALUES(1,'Aminata','Coulibaly',21,'Master',1),(2,'Moussa','Traoré',20,'Licence 2',2),(3,'Fatoumata','Diallo',22,'Licence 3',1),(4,'Ibrahim','Konaté',19,'Licence 1',3),(5,'Mariam','Sanogo',23,'Master',2),(6,'Oumar','Sidibé',21,'Licence 2',1),(7,'Aïcha','Touré',24,'Doctorat',4),(8,'Seydou','Dembélé',20,'Licence 1',5),(9,'Kadiatou','Keïta',22,'Licence 3',3),(10,'Boubacar','Maïga',25,'Master',2);
+CREATE TABLE IF NOT EXISTS cours(id INTEGER PRIMARY KEY,titre TEXT,langage TEXT,niveau TEXT,chapitres INTEGER);
+INSERT OR IGNORE INTO cours VALUES(1,'Intro Python','Python','Débutant',5),(2,'Stats R','R','Intermédiaire',5),(3,'SQL débutants','SQL','Débutant',5),(4,'HTML CSS','Web','Débutant',5),(5,'Algos Python','Python','Avancé',8),(6,'Data Science R','R','Avancé',7);
+CREATE TABLE IF NOT EXISTS notes(id INTEGER PRIMARY KEY,etudiant_id INTEGER,cours_id INTEGER,note REAL,mention TEXT);
+INSERT OR IGNORE INTO notes VALUES(1,1,1,17.5,'Bien'),(2,1,2,18,'TB'),(3,2,1,14,'AB'),(4,3,3,16.5,'Bien'),(5,4,1,12.5,'Passable'),(6,5,2,19,'Excellent'),(7,6,4,15,'AB'),(8,7,5,20,'Excellent'),(9,8,1,11.5,'Passable'),(10,9,3,14.5,'AB');
+CREATE TABLE IF NOT EXISTS inscriptions(id INTEGER PRIMARY KEY,etudiant_id INTEGER,cours_id INTEGER,date_inscription TEXT,statut TEXT);
+INSERT OR IGNORE INTO inscriptions VALUES(1,1,1,'2026-01-15','Terminé'),(2,1,2,'2026-01-16','En cours'),(3,2,1,'2026-01-20','En cours'),(4,3,3,'2026-02-01','Terminé'),(5,4,1,'2026-02-05','En cours');`);
+    sqlOk=true; buildSQLChips();
+    document.getElementById('sql-st').innerText='✅ SQLite 3 — 5 tables chargées';
+  }catch(e){console.warn('SQL:',e.message);}
+}
+function buildSQLChips(){
+  const bar=document.getElementById('sql-chips');
+  bar.innerHTML='<span style="font-size:11px;color:#858585;text-transform:uppercase;letter-spacing:1px;margin-right:5px;">Tables:</span>';
+  ['etudiants','cours','notes','inscriptions','universites'].forEach(t=>{
+    const b=document.createElement('span');b.className='sql-chip';b.innerText=t;b.onclick=()=>previewTable(t);bar.appendChild(b);
+  });
+}
+function previewTable(name){document.getElementById('sql-in').value='SELECT * FROM '+name+';';runSQL();}
+function runSQL(){
+  if(!sqlOk||!sqlDB){document.getElementById('sql-res').innerHTML='<div style="padding:16px;color:#ffb13b;font-size:12px;">⏳ Chargement...</div>';return;}
+  const q=document.getElementById('sql-in').value.trim();if(!q)return;
+  const res=document.getElementById('sql-res'),st=document.getElementById('sql-st');
+  try{
+    const stmts=q.split(';').map(s=>s.trim()).filter(s=>s&&!s.startsWith('--'));
+    let html='',rows=0;
+    for(const stmt of stmts){if(!stmt)continue;
+      const r=sqlDB.exec(stmt);
+      if(r.length){for(const t of r){rows+=t.values.length;
+        html+=`<table class="rt"><thead><tr>${t.columns.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+        html+=t.values.map(row=>`<tr>${row.map(v=>`<td style="color:${v===null?'#6a9955':typeof v==='number'?'#b5cea8':'#ce9178'}">${v??'<em style="color:#6a9955">NULL</em>'}</td>`).join('')}</tr>`).join('');
+        html+='</tbody></table>';}}
+      else html+=`<div style="padding:8px 10px;color:#4ec9b0;font-family:monospace;font-size:12px;">✓ ${stmt.split(' ')[0].toUpperCase()} — OK</div>`;
+    }
+    res.innerHTML=html||'<div style="padding:16px;color:#858585;font-size:12px;">Aucun résultat.</div>';
+    st.innerText=`✓ ${rows} ligne${rows!==1?'s':''} retournée${rows!==1?'s':''}`;
+    document.getElementById('sql-cnt').innerText=rows+' ligne'+(rows!==1?'s':'');
+  }catch(e){res.innerHTML=`<div style="padding:10px;color:#f44747;font-family:monospace;font-size:12px;background:rgba(244,71,71,.06);border-left:3px solid #f44747;">❌ ${esc(e.message)}</div>`;st.innerText='❌ Erreur SQL';}
+}
+function resetDB(){sqlDB=null;sqlOk=false;setTimeout(initSQL,100);}
+
+// ── R INTERPRETER ──
+function makeRFns(emit){
+  const f={
+    print:v=>{emit(fmtR(v)+'\n');},
+    cat:(...a)=>{emit(a.map(x=>Array.isArray(x)?x.join(' '):typeof x==='boolean'?(x?'TRUE':'FALSE'):String(x??'NULL')).join(' ').replace(/\\n/g,'\n').replace(/\\t/g,'\t'));},
+    c:(...a)=>a.flat(),
+    length:v=>Array.isArray(v)?v.length:1,
+    sum:v=>(Array.isArray(v)?v:[v]).reduce((a,b)=>+a+ +b,0),
+    mean:v=>{const a=Array.isArray(v)?v:[v];return a.reduce((s,x)=>s+ +x,0)/a.length;},
+    median:v=>{const s=[...v].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;},
+    sd:v=>{const m=f.mean(v);return Math.sqrt(f.mean(v.map(x=>(x-m)**2)));},
+    max:v=>Math.max(...(Array.isArray(v)?v:[v])),min:v=>Math.min(...(Array.isArray(v)?v:[v])),
+    abs:v=>Array.isArray(v)?v.map(Math.abs):Math.abs(v),sqrt:v=>Array.isArray(v)?v.map(Math.sqrt):Math.sqrt(v),
+    round:(v,n=0)=>parseFloat((+v).toFixed(n)),floor:v=>Math.floor(v),ceiling:v=>Math.ceil(v),
+    log:v=>Math.log(v),exp:v=>Math.exp(v),
+    paste:(...a)=>a.join(' '),paste0:(...a)=>a.join(''),
+    nchar:v=>String(v).length,toupper:v=>String(v).toUpperCase(),tolower:v=>String(v).toLowerCase(),
+    seq:(from,to,by=1)=>{const r=[];for(let i=+from;by>0?i<=+to:i>=+to;i+=+by)r.push(i);return r;},
+    rep:(v,n)=>Array.from({length:+n},()=>v).flat(),
+    rev:v=>[...v].reverse(),sort:v=>[...v].sort((a,b)=>a-b),
+    which:v=>v.map((x,i)=>x?i+1:null).filter(x=>x!==null),
+    sprintf:(fmt,...a)=>{let i=0;return fmt.replace(/%[\d.]*[dfs]/g,()=>a[i++]);},
+  };
+  return f;
+}
+function evalRBlock(lines,env,rfns,emit){
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i].trim();if(!line||line.startsWith('#')){i++;continue;}
+    const forM=line.match(/^for\s*\(\s*(\w+)\s+in\s+(.+?)\s*\)\s*\{?\s*$/);
+    if(forM){let seq;try{seq=evalR(forM[2],env,rfns,emit);}catch(e){i++;continue;}if(!Array.isArray(seq))seq=[seq];let body=[],d=line.endsWith('{')?1:0;if(!d&&i+1<lines.length&&lines[i+1].trim()==='{'){d=1;i++;}i++;while(i<lines.length&&d>0){const l=lines[i].trim();if(l.includes('{'))d++;if(l.startsWith('}'))d--;if(d>0)body.push(lines[i]);i++;}for(const val of seq){env[forM[1]]=val;evalRBlock(body,env,rfns,emit);}continue;}
+    const wM=line.match(/^while\s*\((.+)\)\s*\{?\s*$/);
+    if(wM){let body=[],d=1;i++;while(i<lines.length&&d>0){const l=lines[i].trim();if(l.includes('{'))d++;if(l.startsWith('}'))d--;if(d>0)body.push(lines[i]);i++;}let s=0;while(evalR(wM[1],env,rfns,emit)&&++s<1000)evalRBlock(body,env,rfns,emit);continue;}
+    const ifM=line.match(/^if\s*\((.+)\)\s*\{?\s*$/);
+    if(ifM){let body=[],elseB=[],d=1,inE=false;i++;while(i<lines.length){const l=lines[i].trim();if(l.match(/^\}\s*else\s*\{/)&&d===1){inE=true;i++;d=1;continue;}if(l.includes('{'))d++;if(l.startsWith('}'))d--;if(d===0){i++;break;}(inE?elseB:body).push(lines[i]);i++;}if(evalR(ifM[1],env,rfns,emit))evalRBlock(body,env,rfns,emit);else evalRBlock(elseB,env,rfns,emit);continue;}
+    const fnD=line.match(/^(\w+)\s*<-\s*function\s*\(([^)]*)\)\s*\{?\s*$/);
+    if(fnD){const params=fnD[2].split(',').map(p=>p.trim()).filter(Boolean);let body=[],d=1;i++;while(i<lines.length&&d>0){const l=lines[i].trim();if(l.includes('{'))d++;if(l.startsWith('}'))d--;if(d>0)body.push(lines[i]);i++;}env[fnD[1]]=(...args)=>{const le={...env};params.forEach((p,j)=>{const pn=p.split('=')[0].trim();le[pn]=args[j]!==undefined?args[j]:(p.includes('=')?evalR(p.split('=')[1].trim(),le,rfns,()=>{}):undefined);});evalRBlock(body,le,rfns,s=>emit(s));};continue;}
+    const assM=line.match(/^(\w+)(\[.+\])?\s*<-\s*(.+)$/);
+    if(assM){try{const v=evalR(assM[3],env,rfns,emit);if(assM[2]){const idx=evalR(assM[2].slice(1,-1),env,rfns,emit)-1;if(!Array.isArray(env[assM[1]]))env[assM[1]]=[];env[assM[1]][idx]=v;}else env[assM[1]]=v;}catch(e){}i++;continue;}
+    if(line.startsWith('cat(')||line.startsWith('print(')){try{evalR(line,env,rfns,emit);}catch(e){emit('Err:'+e.message+'\n');}i++;continue;}
+    try{const r=evalR(line,env,rfns,emit);if(r!==undefined&&r!==null)emit(fmtR(r)+'\n');}catch(e){}
+    i++;
+  }
+}
+function evalR(expr,env,rfns,emit){
+  expr=(expr||'').trim();if(!expr)return undefined;
+  if(/^\d+\s*:\s*\d+$/.test(expr)||/^\w+\s*:\s*\w+$/.test(expr)){const p=expr.split(':');try{const a=+evalR(p[0].trim(),env,rfns,emit),b=+evalR(p[1].trim(),env,rfns,emit);const r=[];if(a<=b)for(let i=a;i<=b;i++)r.push(i);else for(let i=a;i>=b;i--)r.push(i);return r;}catch(e){}}
+  const fnM=expr.match(/^(\w+)\s*\((.*)?\)$/s);
+  if(fnM){const nm=fnM[1],argsStr=fnM[2]||'';const args=splitA(argsStr).map(a=>{const kv=a.match(/^\w+\s*=\s*(.+)$/);return evalR(kv?kv[1]:a.trim(),env,rfns,emit);});if(nm==='cat'){rfns.cat(...args);return undefined;}if(nm==='print'){rfns.print(args[0]);return undefined;}if(rfns[nm])return rfns[nm](...args);if(env[nm]&&typeof env[nm]==='function')return env[nm](...args);if(Math[nm])return Math[nm](...args);throw new Error('Fn:'+nm);}
+  const idxM=expr.match(/^(\w+)\[(.+)\]$/);if(idxM){const v=env[idxM[1]],idx=evalR(idxM[2],env,rfns,emit);return Array.isArray(v)?(Array.isArray(idx)?idx.map(i=>v[i-1]):v[idx-1]):undefined;}
+  for(const[op,fn]of[['%%',(a,b)=>((+a%+b)+Math.abs(+b))%Math.abs(+b)],['%/%',(a,b)=>Math.trunc(+a/+b)],['^',(a,b)=>Math.pow(+a,+b)],['\\*',(a,b)=>+a*+b],['/',(a,b)=>+a/+b],['-',(a,b)=>+a-+b],['\\+',(a,b)=>+a+ +b]]){const re=new RegExp(`^(.+?)\\s*${op}\\s*(.+)$`);const m=expr.match(re);if(m){try{const a=evalR(m[1].trim(),env,rfns,emit),b=evalR(m[2].trim(),env,rfns,emit);if(Array.isArray(a)||Array.isArray(b)){const va=Array.isArray(a)?a:[a],vb=Array.isArray(b)?b:[b];return va.map((x,i)=>fn(x,vb[i%vb.length]));}return fn(a,b);}catch(e){}}}
+  const cmp=expr.match(/^(.+?)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);if(cmp){const a=evalR(cmp[1].trim(),env,rfns,emit),b=evalR(cmp[3].trim(),env,rfns,emit);return{'==':a==b,'!=':a!=b,'>=':+a>=+b,'<=':+a<=+b,'>':+a>+b,'<':+a<+b}[cmp[2]];}
+  if((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'")))return expr.slice(1,-1).replace(/\\n/g,'\n').replace(/\\t/g,'\t');
+  if(expr==='TRUE'||expr==='T')return true;if(expr==='FALSE'||expr==='F')return false;
+  if(expr==='NULL')return null;if(expr==='NA')return NaN;if(expr==='pi')return Math.PI;if(expr==='Inf')return Infinity;
+  if(!isNaN(expr))return Number(expr);if(env.hasOwnProperty(expr))return env[expr];
+  throw new Error('Expr:'+expr);
+}
+function splitA(str){const a=[];let d=0,cur='',inS=false,sc='';for(const ch of str){if(inS){cur+=ch;if(ch===sc)inS=false;}else if(ch==='"'||ch==="'"){inS=true;sc=ch;cur+=ch;}else if(ch==='('||ch==='['){d++;cur+=ch;}else if(ch===')'||ch===']'){d--;cur+=ch;}else if(ch===','&&d===0){a.push(cur.trim());cur='';}else cur+=ch;}if(cur.trim())a.push(cur.trim());return a.filter(x=>x.length>0);}
+function fmtR(v){if(v===undefined||v===null)return'NULL';if(typeof v==='boolean')return'[1] '+(v?'TRUE':'FALSE');if(Array.isArray(v)){let o='';for(let i=0;i<v.length;i+=10)o+='['+(i+1)+'] '+v.slice(i,i+10).map(x=>typeof x==='boolean'?(x?'TRUE':'FALSE'):(typeof x==='number'&&!Number.isInteger(x)?x.toFixed(6).replace(/\.?0+$/,''):x)).join(' ')+'\n';return o.trim();}if(typeof v==='number')return'[1] '+(Number.isInteger(v)?v:v.toFixed(6).replace(/\.?0+$/,''));return'[1] "'+v+'"';}
+
+// ── TERMINAL ──
+function tw(html){const t=document.getElementById('term-out');const d=document.createElement('div');d.innerHTML=html;t.appendChild(d);t.parentElement.scrollTop=t.parentElement.scrollHeight;}
+function clearTerm(){document.getElementById('term-out').innerHTML='<span class="tc-gr">// Terminal effacé — '+new Date().toLocaleTimeString()+'</span>';}
+function handleCmd(e){
+  if(e.key==='ArrowUp'){termIdx=Math.min(termIdx+1,termHist.length-1);if(termHist[termIdx])e.target.value=termHist[termIdx];e.preventDefault();return;}
+  if(e.key==='ArrowDown'){termIdx=Math.max(termIdx-1,-1);e.target.value=termIdx>=0?termHist[termIdx]:'';e.preventDefault();return;}
+  if(e.key!=='Enter')return;
+  const cmd=e.target.value.trim();if(!cmd)return;
+  termHist.unshift(cmd);termIdx=-1;e.target.value='';
+  tw(`<span class="t-pr">abt@ide:~$</span> ${esc(cmd)}`);
+  const p=cmd.toLowerCase().split(/\s+/);
+  if(p[0]==='clear'||p[0]==='cls'){clearTerm();return;}
+  if(p[0]==='help'){tw('<span class="tc-b">Commandes: clear, run, ls, pwd, cat &lt;f&gt;, date, echo, python, r, node</span>');return;}
+  if(p[0]==='run'){runCurrent();return;}
+  if(p[0]==='ls'){tw('<span class="tc-g">'+files.map(f=>f.name).join('  ')+'</span>');return;}
+  if(p[0]==='pwd'){tw('<span class="tc-g">/home/abt/projet</span>');return;}
+  if(p[0]==='date'){tw('<span class="tc-g">'+new Date().toString()+'</span>');return;}
+  if(p[0]==='echo'){tw('<span class="tc-y">'+esc(p.slice(1).join(' '))+'</span>');return;}
+  if(p[0]==='cat'){const f=files.find(x=>x.name===p[1]);if(f)tw('<span style="color:#d4d4d4;">'+esc(localStorage.getItem('abt_ide_'+f.id)||CODE[f.lang]||'')+'</span>');else tw('<span class="tc-r">Fichier introuvable: '+esc(p[1])+'</span>');return;}
+  if(['python','python3','rscript','r','node','deno','php','java','javac','bash','g++'].includes(p[0])){runCurrent();return;}
+  tw(`<span class="tc-r">Commande inconnue: ${esc(p[0])} — tapez 'help'</span>`);
+}
+function showPanel(tab){
+  ['terminal','output','problems'].forEach(t=>{document.getElementById('pt-'+t)?.classList.toggle('on',t===tab);document.getElementById('pc-'+t)?.classList.toggle('on',t===tab);});
+  document.getElementById('ti-row').style.display=tab==='terminal'?'flex':'none';
+  if(!panelOn){panelOn=true;document.getElementById('panel').style.display='flex';}
+}
+function togglePanel(){panelOn=!panelOn;document.getElementById('panel').style.display=panelOn?'flex':'none';}
+
+// ── SIDEBAR ──
+function setAct(name){
+  document.querySelectorAll('.ab-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('ab-'+name)?.classList.add('on');
+  document.querySelectorAll('.sb-pnl').forEach(p=>p.classList.remove('on'));
+  document.getElementById('sb-'+name)?.classList.add('on');
+  if(document.getElementById('sb').classList.contains('hide'))toggleSB();
+}
+function toggleSB(){document.getElementById('sb').classList.toggle('hide');}
+function showExt(){setAct('extensions');}
+function focusSearch(){setAct('search');setTimeout(()=>document.getElementById('srch-f')?.focus(),100);}
+function doSearch(q){
+  const el=document.getElementById('srch-res');if(!q){el.innerText='Tapez pour chercher...';return;}
+  const res=[];
+  files.forEach(f=>{const code=localStorage.getItem('abt_ide_'+f.id)||CODE[f.lang]||'';code.split('\n').forEach((l,i)=>{if(l.toLowerCase().includes(q.toLowerCase()))res.push({file:f.name,fid:f.id,line:i+1,text:l.trim().slice(0,55)});});});
+  el.innerHTML=res.length?res.slice(0,15).map(r=>`<div class="sr-item" onclick="gotoLine('${r.fid}',${r.line})"><span style="color:#858585;margin-right:5px;">${r.line}</span>${esc(r.text)}<div style="font-size:10px;color:#858585;">${r.file}</div></div>`).join(''):'<div style="font-size:11px;color:#858585;">Aucun résultat</div>';
+}
+function gotoLine(fid,line){switchFile(fid);setTimeout(()=>cm.setCursor({line:line-1,ch:0}),100);}
+
+// ── EXTENSIONS ──
+const EXTS=[
+  {id:'py',  name:'Python',            pub:'Microsoft',     ic:'🐍', desc:'IntelliSense, Linting, Debugging', ok:true},
+  {id:'r',   name:'R Extension',       pub:'REditorSupport',ic:'📊', desc:'R Language Support',              ok:true},
+  {id:'htm', name:'HTML CSS Support',  pub:'ecmel',         ic:'🟠', desc:'CSS class name completion',       ok:true},
+  {id:'cs',  name:'CSS IntelliSense',  pub:'Zignd',         ic:'🔵', desc:'Autocompletion for CSS',          ok:true},
+  {id:'js',  name:'JavaScript ES2024', pub:'Microsoft',     ic:'🟡', desc:'Built-in JS features',            ok:true},
+  {id:'sql', name:'SQLite Viewer',     pub:'qwtel',         ic:'🗄️', desc:'SQLite database viewer',         ok:true},
+  {id:'pr',  name:'Prettier',          pub:'Prettier',      ic:'✨', desc:'Code formatter',                  ok:true},
+  {id:'ts',  name:'TypeScript',        pub:'Microsoft',     ic:'🔷', desc:'TypeScript language',             ok:false},
+  {id:'gl',  name:'GitLens',           pub:'GitKraken',     ic:'🌿', desc:'Git supercharged',                ok:false},
+  {id:'jv',  name:'Java Extension Pack',pub:'Microsoft',   ic:'☕', desc:'Java support + debugging',        ok:false},
+  {id:'ph',  name:'PHP IntelliSense',  pub:'Felix Becker',  ic:'🐘', desc:'Advanced PHP IntelliSense',      ok:false},
+  {id:'cpp', name:'C/C++ Extension',   pub:'Microsoft',     ic:'⚙️', desc:'C and C++ IntelliSense',        ok:false},
+  {id:'jn',  name:'Jupyter',           pub:'Microsoft',     ic:'📓', desc:'Jupyter notebook support',        ok:false},
+  {id:'rs',  name:'Rust Analyzer',     pub:'rust-lang',     ic:'🦀', desc:'Rust language support',           ok:false},
+  {id:'dk',  name:'Docker',            pub:'Microsoft',     ic:'🐳', desc:'Manage Docker containers',        ok:false},
+];
+function buildExts(filter=''){
+  const el=document.getElementById('ext-list');
+  const list=filter?EXTS.filter(e=>e.name.toLowerCase().includes(filter)||e.desc.toLowerCase().includes(filter)):EXTS;
+  const installed=list.filter(e=>e.ok),avail=list.filter(e=>!e.ok);
+  let html='';
+  if(installed.length){html+=`<div class="ext-sec">Installées</div>`;html+=installed.map(extCard).join('');}
+  if(avail.length){html+=`<div class="ext-sec">Recommandées</div>`;html+=avail.map(extCard).join('');}
+  el.innerHTML=html;
+}
+function extCard(e){
+  return `<div class="ext-card" id="ext-${e.id}">
+    <div class="ext-top">
+      <span class="ext-ic">${e.ic}</span>
+      <div class="ext-info"><div class="ext-name">${e.name}</div><div class="ext-pub">${e.pub}</div><div class="ext-desc">${e.desc}</div></div>
+      ${e.ok?`<button class="ext-ibtn done">✓</button>`:`<button class="ext-ibtn" onclick="installExt('${e.id}','${e.name}')">Installer</button>`}
+    </div>
+    <div class="ext-prog" id="ep-${e.id}"><div class="ext-pf" id="ef-${e.id}"></div></div>
+  </div>`;
+}
+function filterExts(q){buildExts(q.toLowerCase());}
+function installExt(id,name){
+  const btn=document.querySelector(`#ext-${id} .ext-ibtn`);
+  const prog=document.getElementById('ep-'+id);
+  const fill=document.getElementById('ef-'+id);
+  if(!btn||!prog)return;
+  btn.disabled=true;btn.innerText='...';prog.style.display='block';
+  let p=0;
+  const iv=setInterval(()=>{p+=Math.random()*12+3;if(p>=100){clearInterval(iv);fill.style.width='100%';setTimeout(()=>{prog.style.display='none';btn.classList.add('done');btn.innerText='✓';btn.disabled=false;const e=EXTS.find(x=>x.id===id);if(e)e.ok=true;notify(name+' installée','ok');},300);}else fill.style.width=p+'%';},80);
+}
+
+// ── ABT IA CODING ──
+function toggleAI(){aiOn=!aiOn;document.getElementById('aip').classList.toggle('on',aiOn);document.getElementById('ez').style.marginRight=aiOn?'310px':'0';}
+function aiMsg(role,html){const el=document.getElementById('aip-msgs');const d=document.createElement('div');d.className='aim '+role;d.innerHTML=html;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function aiType(){const el=document.getElementById('aip-msgs');const d=document.createElement('div');d.className='aim ai';d.id='ai-ty';d.innerHTML='<div class="ai-typing"><div class="ai-d"></div><div class="ai-d"></div><div class="ai-d"></div></div>';el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function aiSend(){const inp=document.getElementById('aip-in');const q=inp.value.trim();if(!q)return;inp.value='';aiMsg('user',esc(q));aiType();setTimeout(()=>{document.getElementById('ai-ty')?.remove();aiMsg('ai',aiResp(q));},400+Math.random()*500);}
+function aiResp(q){
+  const m=q.toLowerCase(),f=gf(cur),lang=L[f?.lang||'python']?.n||'Python';
+  if(m.includes('analyser')||m.includes('analyze'))return aiAnalyze(true);
+  if(m.includes('expliquer'))return aiExplain(true);
+  if(m.includes('corriger')||m.includes('erreur')||m.includes('bug'))return aiFix(true);
+  if(m.includes('optimiser'))return aiOptimize(true);
+  if(m.includes('générer')||m.includes('exemple'))return aiGenerate(true);
+  return `Pour votre code <b>${lang}</b>, utilisez les boutons ci-dessus ou <a href="abt_ia_page.html">ABT IA →</a> pour une aide détaillée.`;
+}
+function aiAnalyze(s=false){
+  const f=gf(cur),lang=f?.lang||'python',code=cm?.getValue()||'';
+  const errs=[],warns=[],oks=[];
+  if(lang==='python'){if(/print [^(]/.test(code))errs.push('❌ <code>print()</code> requiert des parenthèses');if(!code.includes('#'))warns.push('💡 Ajoutez des commentaires');if(code.includes('def '))oks.push('✅ Fonctions détectées');oks.push('✅ Python 3 détecté');}
+  else if(lang==='javascript'){if(code.includes('var '))warns.push('⚠️ Utilisez <code>const</code>/<code>let</code>');oks.push('✅ JS détecté');}
+  else oks.push('✅ Code '+L[lang]?.n+' détecté');
+  if(!errs.length&&!warns.length)oks.push('🎉 Aucun problème évident !');
+  const r=`<b style="color:#dcdcaa;">🔍 Analyse ${L[lang]?.n} :</b><br><br>${[...errs,...warns,...oks].join('<br>')}`;
+  if(!s)aiMsg('ai',r);return r;
+}
+function aiExplain(s=false){
+  const f=gf(cur),lang=L[f?.lang||'python']?.n||'Python',code=cm?.getValue()||'';
+  const lines=code.split('\n').filter(l=>l.trim()).length;
+  const parts=[];
+  if(code.includes('def ')||code.includes('function')||code.includes('<-'))parts.push('⚡ Fonctions');
+  if(code.includes('for ')||code.includes('while '))parts.push('🔁 Boucles');
+  if(code.includes('class '))parts.push('📦 Classes');
+  const r=`<b style="color:#9cdcfe;">📖 ${lang} — ${lines} lignes</b><br><br>${parts.length?parts.join(', '):'Code basique'}<br><br>Pour une explication détaillée : <a href="abt_ia_page.html">ABT IA →</a>`;
+  if(!s)aiMsg('ai',r);return r;
+}
+function aiFix(s=false){
+  const f=gf(cur),lang=f?.lang||'python',code=cm?.getValue()||'';
+  const suggs=[];
+  if(lang==='python'&&/print [^(]/.test(code))suggs.push('🔧 <code>print "..."</code> → <code>print("...")</code>');
+  if(lang==='javascript'&&code.includes('var '))suggs.push('🔧 <code>var</code> → <code>const</code>/<code>let</code>');
+  const r=suggs.length?`<b style="color:#f44747;">🐛 Corrections :</b><br><br>${suggs.join('<br>')}`:`<b style="color:#4ec9b0;">✅ Aucune erreur évidente !</b><br>Exécutez avec <b>Ctrl+Enter</b>.`;
+  if(!s)aiMsg('ai',r);return r;
+}
+function aiGenerate(s=false){
+  const f=gf(cur),lg=f?.lang||'python';
+  const ex={python:"def moyenne(lst):\n    return sum(lst)/len(lst)\nnotes=[12,15,18,9,20]\nprint('Moy:',moyenne(notes))",javascript:"const moy=a=>a.reduce((s,n)=>s+n,0)/a.length;\nconsole.log('Moy:',moy([12,15,18,9,20]).toFixed(2));",r:"notes<-c(12,15,18,9,20)\ncat('Moy:',mean(notes),'\\n')",sql:"SELECT e.prenom,e.nom,n.note\nFROM notes n\nJOIN etudiants e ON n.etudiant_id=e.id\nORDER BY n.note DESC;"};
+  const code=ex[lg]||ex.python;
+  const r=`<b style="color:#4ec9b0;">⚡ Exemple ${L[lg]?.n} :</b><br><pre><code>${esc(code)}</code></pre>`;
+  if(!s)aiMsg('ai',r);return r;
+}
+function aiOptimize(s=false){
+  const r=`<b style="color:#dcdcaa;">✨ Conseils :</b><br><br>• Fonctions courtes (une responsabilité)<br>• Noms descriptifs<br>• Éviter la duplication (DRY)<br>• Gestion des erreurs<br>• Commentaires explicatifs<br><br><a href="abt_ia_page.html">ABT IA →</a> pour analyse approfondie`;
+  if(!s)aiMsg('ai',r);return r;
+}
+
+// ── EDIT ──
+function commentLine(){
+  if(!cm)return;
+  const f=gf(cur);
+  const pfx={python:'# ',r:'# ',javascript:'// ',typescript:'// ',html:'',css:'/* ',sql:'-- ',java:'// ',php:'// ',bash:'# ',cpp:'// '};
+  const p=pfx[f?.lang||'python']||'// ';
+  const sel=cm.getSelection();
+  if(sel){const lines=sel.split('\n');const ac=lines.every(l=>l.trim().startsWith(p.trim()));cm.replaceSelection(ac?lines.map(l=>l.replace(p,'').replace(/^\s/,'')).join('\n'):lines.map(l=>p+l).join('\n'));}
+  else{const c=cm.getCursor(),l=cm.getLine(c.line);cm.setLine(c.line,l.trim().startsWith(p.trim())?l.replace(p,''):p+l);}
+}
+function formatDoc(){if(!cm)return;const v=cm.getValue();cm.setValue(v);notify('Document formaté','info');}
+
+// ── PROBLEMS ──
+let probCount=0;
+function clearProblems(){probCount=0;document.getElementById('prob-content').innerHTML='<div style="color:#858585;font-size:12px;padding:5px 0;">Aucun problème détecté.</div>';document.getElementById('prob-b').style.display='none';document.getElementById('si-ec').innerText='0';}
+function addProb(type,msg,file){probCount++;const b=document.getElementById('prob-b');b.innerText=probCount;b.style.display='inline';document.getElementById('si-ec').innerText=probCount;document.getElementById('prob-content').innerHTML+=`<div style="display:flex;align-items:center;gap:7px;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04);"><span style="color:${type==='error'?'#f44747':'#ffb13b'};">${type==='error'?'⊗':'⚠'}</span><span style="flex:1;">${esc(msg)}</span><span style="font-size:10px;color:#858585;">${esc(file||'')}</span></div>`;}
+
+// ── STATUS ──
+function showSt(msg,err=false){const el=document.getElementById('si-run');el.style.display='block';el.innerText=msg;el.className='si '+(err?'si-err':'si-ok');clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3000);}
+function notify(msg,type='info'){const c=document.getElementById('nfc');const d=document.createElement('div');d.className='nf nf-'+type;d.innerHTML=`<span>${esc(msg)}</span><button class="nf-cl" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
+
+// ── MENUS ──
+function tmenu(id){const m=document.getElementById(id);const was=m.classList.contains('show');document.querySelectorAll('.tb-dd').forEach(d=>d.classList.remove('show'));document.querySelectorAll('.tb-mb').forEach(b=>b.classList.remove('open'));if(!was){m.classList.add('show');m.previousElementSibling?.classList.add('open');}}
+function setupMenuClose(){document.addEventListener('click',e=>{if(!e.target.closest('.tb-m')){document.querySelectorAll('.tb-dd').forEach(d=>d.classList.remove('show'));document.querySelectorAll('.tb-mb').forEach(b=>b.classList.remove('open'));}if(!e.target.closest('.ctx')&&!e.target.closest('.CodeMirror'))document.getElementById('ctx').classList.remove('on');});}
+function showCtx(x,y){const m=document.getElementById('ctx');m.style.left=x+'px';m.style.top=y+'px';m.classList.add('on');}
+
+// ── RESIZE ──
+function sbResize(e){e.preventDefault();const sb=document.getElementById('sb');const onMove=ev=>{const w=ev.clientX-48;if(w>80&&w<500)sb.style.width=w+'px';};const onUp=()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);}
+function pvResize(e){e.preventDefault();const pv=document.getElementById('pvp');const onMove=ev=>{const total=document.getElementById('ep').offsetWidth;const w=total-ev.clientX+document.getElementById('ez').getBoundingClientRect().left;if(w>120&&w<total-120)pv.style.width=w+'px';};const onUp=()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);}
+function pResize(e){e.preventDefault();const panel=document.getElementById('panel');const sy=e.clientY,sh=panel.offsetHeight;const onMove=ev=>{const h=sh+(sy-ev.clientY);if(h>60&&h<600)panel.style.height=h+'px';};const onUp=()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);}
+
+// ── ZOOM ──
+let fz=14;
+function zIn(){fz=Math.min(fz+2,28);const el=document.querySelector('.CodeMirror');if(el)el.style.fontSize=fz+'px';}
+function zOut(){fz=Math.max(fz-2,8);const el=document.querySelector('.CodeMirror');if(el)el.style.fontSize=fz+'px';}
+
+// ── SHORTCUTS ──
+function setupKeys(){
+  document.addEventListener('keydown',e=>{
+    const ctrl=e.ctrlKey||e.metaKey;
+    if(ctrl&&e.key==='b'){e.preventDefault();toggleSB();}
+    if(ctrl&&e.key==='`'){e.preventDefault();togglePanel();if(panelOn)showPanel('terminal');}
+    if(ctrl&&e.key==='i'){e.preventDefault();toggleAI();}
+    if(ctrl&&e.shiftKey&&e.key==='X'){e.preventDefault();showExt();}
+    if(ctrl&&e.shiftKey&&e.key==='F'){e.preventDefault();focusSearch();}
+    if(ctrl&&(e.key==='+'||e.key==='=')){e.preventDefault();zIn();}
+    if(ctrl&&e.key==='-'){e.preventDefault();zOut();}
+    if(ctrl&&e.key==='n'){e.preventDefault();newFile();}
+    if(ctrl&&e.shiftKey&&e.key==='S'){e.preventDefault();saveAll();}
+  });
+}
+
+function showShortcuts(){alert(['⌨️  RACCOURCIS ABT-Code','─────────────────────','Ctrl+Enter   → Exécuter','Ctrl+S       → Enregistrer','Ctrl+⇧S      → Tout enregistrer','Ctrl+Z/Y     → Annuler/Rétablir','Ctrl+/       → Commenter','Alt+⇧F       → Formater','Ctrl+A       → Tout sélectionner','Ctrl+N       → Nouveau fichier','─────────────────────','Ctrl+B       → Sidebar','Ctrl+&#96;  → Terminal','Ctrl+I       → ABT IA Coding','Ctrl+⇧X      → Extensions','Ctrl+⇧F      → Rechercher','─────────────────────','Ctrl++/-     → Zoom +/-'].join('\n'));}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loadScript(src){return new Promise((r,j)=>{const s=document.createElement('script');s.src=src;s.onload=r;s.onerror=j;document.head.appendChild(s);});}
+</script>
+</body>
+</html>

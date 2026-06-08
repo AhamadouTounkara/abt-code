@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<script>
+  const p=JSON.parse(localStorage.getItem('abt_params')||'{}');
+  if(p.maintenance && localStorage.getItem('abt_admin')!=='true'){
+    window.location.href='maintenance.html';
+  } else if(localStorage.getItem('abt_connecte')==='true'){
+    window.location.href='dashboard.html';
+  } else {
+    window.location.href='Entre.html';
+  }
+</script>
+</head>
+<body></body>
+</html>

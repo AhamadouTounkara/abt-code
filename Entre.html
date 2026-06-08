@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABT Code — Connexion</title>
+<script src="settings.js"></script>
+<link rel="stylesheet" href="abt.css">
+<style>
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:var(--bg);}
+.login-wrap{width:100%;max-width:420px;}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo h1{font-family:monospace;font-size:2rem;font-weight:800;}
+.login-logo h1 span{color:var(--accent);}
+.login-logo p{color:var(--muted);font-size:0.88rem;margin-top:6px;}
+.login-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;}
+.login-box h2{font-size:1.2rem;font-weight:700;margin-bottom:24px;text-align:center;}
+.tab-switch{display:flex;gap:4px;background:var(--bg3);padding:4px;border-radius:9px;margin-bottom:24px;}
+.tab-sw{flex:1;padding:8px;text-align:center;border-radius:6px;cursor:pointer;font-weight:700;font-size:0.85rem;color:var(--muted);transition:all 0.2s;}
+.tab-sw.active{background:var(--bg2);color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.form-panel{display:none;}
+.form-panel.active{display:block;}
+.divider{text-align:center;color:var(--muted);font-size:0.82rem;margin:14px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.divider::before{left:0;} .divider::after{right:0;}
+.error-msg{background:rgba(229,62,62,0.1);border:1px solid rgba(229,62,62,0.3);color:#fc8181;padding:10px 14px;border-radius:7px;font-size:0.85rem;margin-bottom:14px;display:none;}
+.success-msg{background:rgba(72,187,120,0.1);border:1px solid rgba(72,187,120,0.3);color:#68d391;padding:10px 14px;border-radius:7px;font-size:0.85rem;margin-bottom:14px;display:none;}
+.forgot-link{font-size:0.82rem;color:var(--muted);text-align:right;display:block;margin-top:6px;cursor:pointer;}
+.forgot-link:hover{color:var(--accent);}
+.admin-hint{margin-top:16px;padding:10px 14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:7px;font-size:0.78rem;color:var(--accent4);text-align:center;}
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-logo">
+    <h1><span>ABT</span> Code</h1>
+    <p>Plateforme éducative de programmation</p>
+  </div>
+  <div class="login-box">
+    <div class="tab-switch">
+      <div class="tab-sw active" onclick="switchTab('login',this)">Se connecter</div>
+      <div class="tab-sw" onclick="switchTab('register',this)">Créer un compte</div>
+    </div>
+
+    <!-- CONNEXION -->
+    <div class="form-panel active" id="panel-login">
+      <div class="error-msg" id="login-error"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" class="form-input" placeholder="votre@email.com">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="login-mdp" class="form-input" placeholder="••••••••">
+        <span class="forgot-link" onclick="showForgot()">Mot de passe oublié ?</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="seConnecter()">Se connecter →</button>
+      <div class="admin-hint">Admin : ahamadoutounkara753@gmail.com</div>
+    </div>
+
+    <!-- INSCRIPTION -->
+    <div class="form-panel" id="panel-register">
+      <div class="error-msg" id="reg-error"></div>
+      <div class="success-msg" id="reg-success"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group"><label>Prénom</label><input type="text" id="reg-prenom" class="form-input" placeholder="Aminata"></div>
+        <div class="form-group"><label>Nom</label><input type="text" id="reg-nom" class="form-input" placeholder="Coulibaly"></div>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="reg-email" class="form-input" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe (min. 6 caractères)</label><input type="password" id="reg-mdp" class="form-input" placeholder="••••••••"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group"><label>Niveau</label>
+          <select id="reg-niveau" class="form-input">
+            <option value="">Choisir...</option>
+            <option>Licence 1</option><option>Licence 2</option><option>Licence 3</option>
+            <option>Master 1</option><option>Master 2</option><option>Doctorat</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Âge</label><input type="number" id="reg-age" class="form-input" placeholder="21" min="10" max="99"></div>
+      </div>
+      <div class="form-group"><label>École / Université</label><input type="text" id="reg-ecole" class="form-input" placeholder="Université de Bamako"></div>
+      <div class="form-group"><label>Ville / Localité</label><input type="text" id="reg-localite" class="form-input" placeholder="Bamako, Mali"></div>
+      <button class="btn btn-success" style="width:100%;justify-content:center;" onclick="sInscrire()">Créer mon compte →</button>
+    </div>
+
+    <!-- RÉCUPÉRATION MDP -->
+    <div class="form-panel" id="panel-forgot">
+      <div class="error-msg" id="forgot-error"></div>
+      <div class="success-msg" id="forgot-success"></div>
+      <p style="color:var(--muted);font-size:0.88rem;margin-bottom:16px;">Entrez votre email pour réinitialiser votre mot de passe.</p>
+      <div class="form-group"><label>Email</label><input type="email" id="forgot-email" class="form-input" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="forgot-newmdp" class="form-input" placeholder="Nouveau mot de passe"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="resetMdp()">Réinitialiser →</button>
+      <div class="divider">ou</div>
+      <span class="forgot-link" style="text-align:center;display:block;" onclick="switchTab('login',document.querySelector('.tab-sw'))">← Retour à la connexion</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN = {email:'ahamadoutounkara753@gmail.com', mdp:'@Tounkara66'};
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-sw').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+function showForgot() {
+  document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-forgot').classList.add('active');
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.innerText=msg;e.style.display='block';}
+function hideErr(id){document.getElementById(id).style.display='none';}
+function showOk(id,msg){const e=document.getElementById(id);e.innerText=msg;e.style.display='block';}
+
+function seConnecter() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const mdp   = document.getElementById('login-mdp').value;
+  hideErr('login-error');
+
+  if(!email||!mdp){showErr('login-error','Veuillez remplir tous les champs.');return;}
+
+  // Admin
+  if(email===ADMIN.email && mdp===ADMIN.mdp){
+    localStorage.setItem('abt_connecte','true');
+    localStorage.setItem('abt_session_email',email);
+    localStorage.setItem('abt_session_prenom','Ahamadou');
+    localStorage.setItem('abt_admin','true');
+    window.location.href='dashboard.html';
+    return;
+  }
+
+  const comptes=JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  const compte=comptes.find(c=>c.email.toLowerCase()===email);
+  if(!compte){showErr('login-error','Email introuvable. Créez un compte ?');return;}
+  if(compte.mdp!==mdp){showErr('login-error','Mot de passe incorrect.');return;}
+
+  localStorage.setItem('abt_connecte','true');
+  localStorage.setItem('abt_session_email',compte.email);
+  localStorage.setItem('abt_session_prenom',compte.prenom);
+  localStorage.removeItem('abt_admin');
+  window.location.href='dashboard.html';
+}
+
+function sInscrire() {
+  const prenom  = document.getElementById('reg-prenom').value.trim();
+  const nom     = document.getElementById('reg-nom').value.trim();
+  const email   = document.getElementById('reg-email').value.trim().toLowerCase();
+  const mdp     = document.getElementById('reg-mdp').value;
+  const niveau  = document.getElementById('reg-niveau').value;
+  const age     = document.getElementById('reg-age').value;
+  const ecole   = document.getElementById('reg-ecole').value.trim();
+  const localite= document.getElementById('reg-localite').value.trim();
+  hideErr('reg-error'); hideErr('reg-success');
+
+  if(!prenom||!nom||!email||!mdp||!niveau){showErr('reg-error','Tous les champs obligatoires doivent être remplis.');return;}
+  if(mdp.length<6){showErr('reg-error','Le mot de passe doit faire au moins 6 caractères.');return;}
+  if(!/\S+@\S+\.\S+/.test(email)){showErr('reg-error','Email invalide.');return;}
+
+  const comptes=JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  if(comptes.find(c=>c.email.toLowerCase()===email)){showErr('reg-error','Cet email est déjà utilisé.');return;}
+
+  const nouveau={prenom,nom,email,mdp,niveau,age:parseInt(age)||'',ecole,localite,
+    date_inscription:new Date().toLocaleDateString('fr-FR'),
+    heure_inscription:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    gps_lat:'',gps_lng:''};
+
+  function finalize(lat,lng){
+    nouveau.gps_lat=lat||''; nouveau.gps_lng=lng||'';
+    comptes.push(nouveau);
+    localStorage.setItem('abt_comptes',JSON.stringify(comptes));
+    localStorage.setItem('abt_connecte','true');
+    localStorage.setItem('abt_session_email',email);
+    localStorage.setItem('abt_session_prenom',prenom);
+    localStorage.removeItem('abt_admin');
+    window.location.href='dashboard.html';
+  }
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      p=>finalize(p.coords.latitude,p.coords.longitude),
+      ()=>finalize('',''),
+      {timeout:4000}
+    );
+  } else { finalize('',''); }
+}
+
+function resetMdp(){
+  const email=document.getElementById('forgot-email').value.trim().toLowerCase();
+  const newMdp=document.getElementById('forgot-newmdp').value;
+  hideErr('forgot-error');
+  if(!email||!newMdp){showErr('forgot-error','Remplissez tous les champs.');return;}
+  if(newMdp.length<6){showErr('forgot-error','Le nouveau mot de passe doit faire au moins 6 caractères.');return;}
+  const comptes=JSON.parse(localStorage.getItem('abt_comptes')||'[]');
+  const idx=comptes.findIndex(c=>c.email.toLowerCase()===email);
+  if(idx<0){showErr('forgot-error','Email non trouvé dans le système.');return;}
+  comptes[idx].mdp=newMdp;
+  localStorage.setItem('abt_comptes',JSON.stringify(comptes));
+  showOk('forgot-success','✅ Mot de passe modifié avec succès ! Vous pouvez vous connecter.');
+}
+
+// Connexion avec Entrée
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const active=document.querySelector('.form-panel.active');
+    if(active.id==='panel-login') seConnecter();
+    else if(active.id==='panel-register') sInscrire();
+    else if(active.id==='panel-forgot') resetMdp();
+  }
+});
+</script>
+</body>
+</html>
