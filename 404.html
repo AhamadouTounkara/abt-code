@@ -1,33 +1,1060 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <script src="settings.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABT Code — Page introuvable</title>
-    <script src="themes.js"></script>
-    <link rel="stylesheet" href="responsive.css">
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:var(--bg,#0d0f14);color:var(--text,#e2e8f0);font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;}
-        .wrap{max-width:480px;}
-        .code{font-size:6rem;font-weight:800;color:var(--accent,#4f8ef7);line-height:1;margin-bottom:16px;font-family:monospace;}
-        h1{font-size:1.6rem;margin-bottom:10px;}
-        p{color:var(--muted,#64748b);margin-bottom:28px;line-height:1.6;}
-        .btn{display:inline-block;background:var(--accent,#4f8ef7);color:white;padding:12px 28px;border-radius:9px;text-decoration:none;font-weight:700;transition:all 0.2s;margin:4px;}
-        .btn:hover{opacity:0.85;transform:translateY(-2px);}
-        .btn-ghost{background:transparent;border:1px solid var(--border,#2a2f45);color:var(--muted,#64748b);}
-        .btn-ghost:hover{border-color:var(--accent,#4f8ef7);color:var(--accent,#4f8ef7);}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABT Code — Tableau de bord</title>
+<script src="settings.js"></script>
+<link rel="stylesheet" href="abt.css">
+<style>
+/* ═══════════════════════════════════════════
+   ABT CODE — DASHBOARD PROFESSIONNEL
+   ═══════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg,#0d0f14);color:var(--text,#e2e8f0);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ── NAV DESKTOP ── */
+.top-nav{
+  background:rgba(13,15,20,0.97);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border,#2a2f45);
+  height:60px;display:flex;align-items:center;
+  padding:0 28px;position:sticky;top:0;z-index:200;gap:12px;
+}
+.nav-logo{font-family:monospace;font-weight:800;font-size:1.15rem;margin-right:auto;}
+.nav-logo .la{color:var(--accent,#4f8ef7);}
+.nav-logo .lc{color:var(--text,#e2e8f0);}
+.nav-links{display:flex;align-items:center;gap:6px;}
+.nav-btn{
+  background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);
+  color:var(--muted,#64748b);padding:6px 14px;border-radius:8px;
+  font-size:0.82rem;font-weight:600;cursor:pointer;text-decoration:none;
+  transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;
+}
+.nav-btn:hover{border-color:var(--accent,#4f8ef7);color:var(--accent,#4f8ef7);}
+.nav-btn.ia{border-color:rgba(167,139,250,0.4);color:#a78bfa;}
+.nav-btn.ia:hover{background:rgba(167,139,250,0.1);}
+.nav-btn.admin{border-color:rgba(244,114,182,0.4);color:#f472b6;}
+.nav-notif{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;position:relative;transition:all 0.2s;
+}
+.nav-notif:hover{border-color:var(--accent,#4f8ef7);}
+.notif-dot{
+  position:absolute;top:4px;right:4px;
+  width:8px;height:8px;border-radius:50%;
+  background:#f44747;border:2px solid var(--bg,#0d0f14);
+}
+.nav-user{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);
+  padding:5px 12px 5px 5px;border-radius:20px;cursor:pointer;
+  transition:all 0.2s;
+}
+.nav-user:hover{border-color:var(--accent,#4f8ef7);}
+.nav-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent,#4f8ef7),#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.78rem;color:white;flex-shrink:0;
+}
+.nav-username{font-size:0.82rem;font-weight:600;color:var(--text,#e2e8f0);}
+.nav-hamburger{
+  display:none;background:none;border:none;color:var(--text,#e2e8f0);
+  font-size:1.4rem;cursor:pointer;padding:4px;
+}
+
+/* ── MOBILE TOP BAR ── */
+.mob-top{
+  display:none;
+  background:rgba(13,15,20,0.97);
+  border-bottom:1px solid var(--border,#2a2f45);
+  height:58px;padding:0 16px;
+  position:sticky;top:0;z-index:200;
+  align-items:center;justify-content:space-between;
+}
+.mob-logo{font-family:monospace;font-weight:800;font-size:1.15rem;}
+.mob-logo .la{color:var(--accent,#4f8ef7);}
+.mob-logo .lc{color:var(--text,#e2e8f0);}
+.mob-right{display:flex;align-items:center;gap:8px;}
+.mob-icon-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;cursor:pointer;text-decoration:none;
+  color:var(--muted,#64748b);transition:all 0.2s;position:relative;
+}
+.mob-icon-btn:hover{border-color:var(--accent,#4f8ef7);color:var(--accent,#4f8ef7);}
+.mob-icon-btn .nd{
+  position:absolute;top:3px;right:3px;
+  width:7px;height:7px;border-radius:50%;
+  background:#f44747;border:2px solid var(--bg,#0d0f14);
+}
+
+/* ── CONTENU PRINCIPAL ── */
+.main-content{
+  max-width:1000px;margin:0 auto;
+  padding:28px 24px 100px;
+}
+
+/* ── HERO SECTION ── */
+.hero{
+  background:linear-gradient(135deg,var(--bg2,#141720) 0%,rgba(28,16,64,0.8) 100%);
+  border:1px solid var(--border,#2a2f45);border-radius:20px;
+  padding:40px 36px;margin-bottom:28px;position:relative;overflow:hidden;
+  text-align:center;
+}
+.hero::before{
+  content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,142,247,0.08),transparent 70%);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);
+  color:var(--accent,#4f8ef7);padding:5px 16px;border-radius:20px;
+  font-size:0.78rem;font-weight:700;margin-bottom:20px;
+}
+.hero h1{
+  font-size:2.2rem;font-weight:800;line-height:1.25;margin-bottom:14px;
+  background:linear-gradient(135deg,var(--text,#e2e8f0) 0%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-langs{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:24px;
+}
+.lang-pill{
+  background:rgba(255,255,255,0.06);border:1px solid var(--border,#2a2f45);
+  padding:4px 12px;border-radius:12px;font-size:0.8rem;font-weight:600;
+  color:var(--muted,#64748b);
+}
+.hero-btns{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+.btn-hero{
+  padding:11px 22px;border-radius:10px;font-weight:700;font-size:0.9rem;
+  cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:7px;
+  text-decoration:none;border:none;
+}
+.btn-hero:hover{transform:translateY(-2px);}
+.btn-hero.primary{background:var(--accent,#4f8ef7);color:white;}
+.btn-hero.primary:hover{background:#3b7de8;box-shadow:0 6px 20px rgba(79,142,247,0.3);}
+.btn-hero.secondary{background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);color:var(--text,#e2e8f0);}
+.btn-hero.secondary:hover{border-color:var(--accent,#4f8ef7);color:var(--accent,#4f8ef7);}
+.btn-hero.ia{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;}
+.btn-hero.ia:hover{background:rgba(167,139,250,0.2);}
+
+/* Signature créateur */
+.creator-banner{
+  background:rgba(79,142,247,0.06);border-top:1px solid rgba(79,142,247,0.15);
+  margin:-40px -36px -40px;margin-top:0;padding:14px 36px;
+  display:flex;align-items:center;gap:12px;justify-content:center;
+}
+.creator-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent,#4f8ef7),#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.9rem;color:white;flex-shrink:0;
+}
+.creator-text{font-size:0.85rem;}
+.creator-text strong{color:var(--text,#e2e8f0);}
+.creator-text span{color:var(--muted,#64748b);}
+
+/* ── MES COURS ── */
+.section-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.section-title h2{font-size:1.05rem;font-weight:700;}
+.section-title a{font-size:0.82rem;color:var(--accent,#4f8ef7);text-decoration:none;font-weight:600;}
+.section-title a:hover{text-decoration:underline;}
+
+.cours-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+.cours-card{
+  background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);
+  border-radius:14px;padding:18px;cursor:pointer;transition:all 0.2s;text-decoration:none;
+  display:block;position:relative;overflow:hidden;
+}
+.cours-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--cc,var(--accent,#4f8ef7));border-radius:14px 14px 0 0;
+}
+.cours-card:hover{transform:translateY(-3px);border-color:var(--cc,var(--accent,#4f8ef7));box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+.cours-icon{font-size:1.6rem;margin-bottom:10px;}
+.cours-name{font-weight:700;font-size:0.92rem;margin-bottom:4px;color:var(--text,#e2e8f0);}
+.cours-sub{font-size:0.76rem;color:var(--muted,#64748b);margin-bottom:12px;}
+.cours-prog-bar{height:5px;background:var(--bg3,#1c2030);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.cours-prog-fill{height:100%;border-radius:3px;background:var(--cc,var(--accent,#4f8ef7));transition:width 0.6s ease;}
+.cours-pct{font-size:0.75rem;font-weight:700;color:var(--cc,var(--accent,#4f8ef7));}
+
+/* ── STATISTIQUES ── */
+.stats-section{margin-bottom:28px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.stat-card{
+  background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);
+  border-radius:14px;padding:20px 16px;text-align:center;transition:all 0.2s;
+}
+.stat-card:hover{border-color:var(--accent,#4f8ef7);transform:translateY(-2px);}
+.stat-icon{font-size:1.5rem;margin-bottom:8px;}
+.stat-num{font-size:1.8rem;font-weight:800;color:var(--accent,#4f8ef7);line-height:1;}
+.stat-lbl{font-size:0.72rem;color:var(--muted,#64748b);margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* ── TÉMOIGNAGES ── */
+.temoignages-section{margin-bottom:28px;}
+.temo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.temo-card{
+  background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);
+  border-radius:14px;padding:20px;
+}
+.temo-stars{color:#f59e0b;font-size:0.85rem;margin-bottom:10px;}
+.temo-text{font-size:0.85rem;color:var(--muted,#64748b);line-height:1.6;margin-bottom:14px;font-style:italic;}
+.temo-user{display:flex;align-items:center;gap:10px;}
+.temo-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent,#4f8ef7),#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.8rem;color:white;flex-shrink:0;
+}
+.temo-name{font-weight:700;font-size:0.82rem;}
+.temo-role{font-size:0.72rem;color:var(--muted,#64748b);}
+
+/* ── ANNONCE ── */
+.annonce-bar{
+  background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);
+  border-radius:10px;padding:12px 16px;margin-bottom:20px;
+  display:none;align-items:center;gap:12px;
+}
+.annonce-bar.show{display:flex;}
+.ann-close{margin-left:auto;background:none;border:none;color:var(--muted,#64748b);cursor:pointer;font-size:1rem;}
+
+/* ── FOOTER ── */
+.site-footer{
+  background:var(--bg2,#141720);border-top:1px solid var(--border,#2a2f45);
+  padding:28px 24px;text-align:center;margin-top:40px;
+}
+.footer-logo{font-family:monospace;font-weight:800;font-size:1.1rem;margin-bottom:6px;}
+.footer-logo .la{color:var(--accent,#4f8ef7);}
+.footer-creator{font-size:0.82rem;color:var(--muted,#64748b);margin-bottom:4px;}
+.footer-creator strong{color:var(--text,#e2e8f0);}
+.footer-copy{font-size:0.75rem;color:var(--muted,#64748b);margin-top:4px;}
+.footer-links{display:flex;justify-content:center;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.footer-links a{font-size:0.8rem;color:var(--muted,#64748b);text-decoration:none;}
+.footer-links a:hover{color:var(--accent,#4f8ef7);}
+
+/* ── MOBILE BOTTOM NAV ── */
+.mob-bottom{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:rgba(13,15,20,0.98);
+  border-top:1px solid var(--border,#2a2f45);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:6px 0 calc(8px + env(safe-area-inset-bottom));
+  z-index:200;
+}
+.mob-nav-row{display:flex;justify-content:space-around;}
+.mob-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:5px 10px;cursor:pointer;border:none;background:none;
+  color:var(--muted,#64748b);font-size:0.58rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.3px;
+  text-decoration:none;transition:all 0.2s;min-width:52px;
+  border-top:2px solid transparent;
+}
+.mob-nav-item .mni{font-size:1.3rem;line-height:1;}
+.mob-nav-item.active{color:var(--accent,#4f8ef7);border-top-color:var(--accent,#4f8ef7);}
+.mob-nav-item:hover{color:var(--text,#e2e8f0);}
+
+/* ── SECTIONS CACHÉES ── */
+.dash-section{display:none;}
+.dash-section.active{display:block;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* Sections Cours/Exercices/IDE/IA/Communauté/Paramètres */
+.sec-inner{background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);border-radius:16px;padding:24px;margin-bottom:16px;}
+.sec-h{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* Chap grid */
+.chap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.chap-card{
+  background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);
+  border-radius:10px;padding:14px;cursor:pointer;transition:all 0.2s;
+  text-decoration:none;display:block;border-left:3px solid var(--cc,var(--accent,#4f8ef7));
+}
+.chap-card:hover{border-color:var(--cc,var(--accent,#4f8ef7));transform:translateY(-2px);}
+.chap-num{font-size:0.7rem;color:var(--muted,#64748b);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.chap-title{font-weight:700;font-size:0.9rem;color:var(--text,#e2e8f0);margin:3px 0;}
+.chap-desc{font-size:0.76rem;color:var(--muted,#64748b);}
+
+/* Outils */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+.tool-link{
+  background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);
+  border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;
+  text-decoration:none;transition:all 0.2s;
+}
+.tool-link:hover{border-color:var(--accent,#4f8ef7);}
+.tool-ic{font-size:1.5rem;flex-shrink:0;}
+.tool-name{font-weight:700;font-size:0.88rem;color:var(--text,#e2e8f0);}
+.tool-desc{font-size:0.75rem;color:var(--muted,#64748b);}
+
+/* Communauté */
+.comm-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.comm-box{background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;}
+.comm-title{font-size:0.9rem;font-weight:700;border-bottom:1px solid var(--border,#2a2f45);padding-bottom:10px;}
+.comm-input{background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);color:var(--text,#e2e8f0);padding:9px 12px;border-radius:7px;font-size:0.85rem;width:100%;}
+.comm-input:focus{outline:none;border-color:var(--accent,#4f8ef7);}
+.msg-item{padding:8px 0;border-bottom:1px solid var(--border,#2a2f45);font-size:0.83rem;}
+.msg-item:last-child{border-bottom:none;}
+.msg-author{font-weight:700;color:var(--accent,#4f8ef7);}
+.msg-time{font-size:0.7rem;color:var(--muted,#64748b);margin-left:5px;}
+.msg-text{color:var(--text,#e2e8f0);margin-top:2px;}
+.group-item{background:var(--bg2,#141720);border-radius:8px;padding:10px;font-size:0.83rem;}
+.group-name{font-weight:700;margin-bottom:3px;}
+.group-meta{font-size:0.72rem;color:var(--muted,#64748b);}
+
+/* Paramètres */
+.params-grid{display:grid;gap:14px;}
+.param-bloc{background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:12px;padding:20px;}
+.param-bloc h3{font-size:0.92rem;font-weight:700;margin-bottom:4px;}
+.param-desc{font-size:0.8rem;color:var(--muted,#64748b);margin-bottom:14px;}
+.param-btns{display:flex;gap:7px;flex-wrap:wrap;}
+.param-btn{padding:7px 13px;border:2px solid var(--border,#2a2f45);border-radius:7px;background:var(--bg2,#141720);color:var(--muted,#64748b);cursor:pointer;font-weight:700;font-size:0.78rem;transition:all 0.2s;}
+.param-btn:hover{border-color:var(--accent,#4f8ef7);color:var(--accent,#4f8ef7);}
+.param-btn.active{border-color:var(--accent,#4f8ef7);background:rgba(79,142,247,0.1);color:var(--accent,#4f8ef7);}
+
+/* Exos */
+.exo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.exo-card{background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:16px;text-decoration:none;display:block;transition:all 0.2s;}
+.exo-card:hover{border-color:var(--accent,#4f8ef7);transform:translateY(-2px);}
+.exo-icon{font-size:1.5rem;margin-bottom:8px;}
+.exo-title{font-weight:700;font-size:0.9rem;color:var(--text,#e2e8f0);}
+.exo-sub{font-size:0.76rem;color:var(--muted,#64748b);margin-top:4px;}
+.exo-badge{display:inline-block;margin-top:8px;background:rgba(79,142,247,0.12);color:var(--accent,#4f8ef7);padding:2px 9px;border-radius:10px;font-size:0.7rem;font-weight:700;}
+
+/* Btns */
+.btn{padding:10px 20px;border-radius:8px;font-weight:700;font-size:0.88rem;cursor:pointer;transition:all 0.2s;border:none;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{transform:translateY(-1px);}
+.btn-primary{background:var(--accent,#4f8ef7);color:white;}
+.btn-primary:hover{background:#3b7de8;}
+.btn-success{background:var(--accent3,#48bb78);color:white;}
+.btn-danger{background:rgba(229,62,62,0.12);border:1px solid rgba(229,62,62,0.25);color:#fc8181;}
+
+/* MDP */
+.form-input{width:100%;background:var(--bg2,#141720);border:1px solid var(--border,#2a2f45);color:var(--text,#e2e8f0);padding:9px 13px;border-radius:8px;font-size:0.88rem;}
+.form-input:focus{outline:none;border-color:var(--accent,#4f8ef7);}
+
+/* ── RESPONSIVE MOBILE ── */
+@media(max-width:900px){
+  .top-nav{display:none!important;}
+  .mob-top{display:flex;}
+  .mob-bottom{display:block;}
+  .main-content{padding:16px 14px 90px;}
+  .hero{padding:24px 18px;}
+  .hero h1{font-size:1.5rem;}
+  .creator-banner{padding:12px 18px;margin:-24px -18px -24px;margin-top:0;}
+  .cours-grid{grid-template-columns:1fr;gap:10px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .temo-grid{grid-template-columns:1fr;}
+  .comm-layout{grid-template-columns:1fr;}
+  .chap-grid{grid-template-columns:1fr 1fr;}
+  .tools-grid{grid-template-columns:1fr;}
+  .exo-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .hero h1{font-size:1.25rem;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .hero-btns{gap:7px;}
+  .btn-hero{padding:9px 14px;font-size:0.82rem;}
+  .chap-grid{grid-template-columns:1fr;}
+}
+</style>
 </head>
 <body>
-    <div class="wrap">
-        <div class="code">404</div>
-        <h1>Page introuvable</h1>
-        <p>La page que vous cherchez n'existe pas ou a été déplacée.</p>
-        <a href="dashboard.html" class="btn">🏠 Retour à l'accueil</a>
-        <a href="javascript:history.back()" class="btn btn-ghost">← Retour</a>
+<script>if(localStorage.getItem('abt_connecte')!=='true'){window.location.href='Entre.html';}</script>
+
+<!-- ══════════════════════════════════════
+     NAV DESKTOP
+══════════════════════════════════════ -->
+<nav class="top-nav">
+  <div class="nav-logo"><span class="la">ABT</span><span class="lc"> Code</span></div>
+  <div class="nav-links">
+    <button class="nav-btn" onclick="showSec('accueil')">🏠 Accueil</button>
+    <button class="nav-btn" onclick="showSec('cours')">📚 Cours</button>
+    <button class="nav-btn" onclick="showSec('exercices')">⚡ Exercices</button>
+    <button class="nav-btn" onclick="showSec('ide')">💻 IDE</button>
+    <button class="nav-btn ia" onclick="showSec('ia')">✦ ABT IA</button>
+    <button class="nav-btn" onclick="showSec('communaute')">💬 Communauté</button>
+    <button class="nav-btn" onclick="showSec('parametres')">⚙️ Paramètres</button>
+    <button class="nav-btn admin" id="btn-admin" style="display:none" onclick="location.href='admin.html'">🔑 Admin</button>
+  </div>
+  <div class="nav-notif" onclick="toggleNotifs()" title="Notifications">
+    🔔<div class="notif-dot" id="notif-dot" style="display:none"></div>
+  </div>
+  <div class="nav-user" onclick="showSec('parametres')">
+    <div class="nav-avatar" id="desk-avatar">A</div>
+    <span class="nav-username" id="desk-name">Étudiant</span>
+  </div>
+  <button class="nav-btn" onclick="deconnexion()" style="margin-left:4px;">↪</button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     NAV MOBILE TOP
+══════════════════════════════════════ -->
+<div class="mob-top">
+  <div class="mob-logo"><span class="la">ABT</span><span class="lc"> Code</span></div>
+  <div class="mob-right">
+    <div class="mob-icon-btn" onclick="toggleNotifs()">
+      🔔<div class="nd" id="mob-notif-dot" style="display:none"></div>
     </div>
+    <div class="mob-icon-btn" id="mob-avatar" onclick="showSec('parametres')">A</div>
+    <button class="mob-icon-btn" id="mob-admin" style="display:none" onclick="location.href='admin.html'">🔑</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CONTENU PRINCIPAL
+══════════════════════════════════════ -->
+<div class="main-content">
+
+<!-- Annonce admin -->
+<div class="annonce-bar" id="annonce-bar">
+  <span style="font-size:1.1rem;">📢</span>
+  <div style="flex:1;">
+    <div id="ann-titre" style="font-weight:700;color:var(--accent,#4f8ef7);font-size:0.88rem;"></div>
+    <div id="ann-msg" style="color:var(--muted,#64748b);font-size:0.8rem;margin-top:2px;"></div>
+  </div>
+  <button class="ann-close" onclick="document.getElementById('annonce-bar').classList.remove('show')">✕</button>
+</div>
+
+<!-- ── SECTION ACCUEIL ── -->
+<div class="dash-section active" id="sec-accueil">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">🚀 Plateforme éducative africaine</div>
+    <h1>Apprenez les technologies<br>de demain</h1>
+    <div class="hero-langs">
+      <span class="lang-pill">🐍 Python</span>
+      <span class="lang-pill">📊 R</span>
+      <span class="lang-pill">🗄️ SQL</span>
+      <span class="lang-pill">🌐 HTML/CSS</span>
+      <span class="lang-pill">🟡 JavaScript</span>
+      <span class="lang-pill">✦ IA</span>
+    </div>
+    <div class="hero-btns">
+      <button class="btn-hero primary" onclick="showSec('cours')">📚 Commencer</button>
+      <button class="btn-hero secondary" onclick="showSec('ide')">💻 VS Code</button>
+      <button class="btn-hero ia" onclick="location.href='abt_ia_page.html'">✨ ABT IA</button>
+    </div>
+    <!-- Signature créateur -->
+    <div class="creator-banner">
+      <div class="creator-avatar">AT</div>
+      <div class="creator-text">
+        <strong>👨‍💻 Créé et développé par Ahamadou Tounkara</strong><br>
+        <span>Plateforme éducative pour les étudiants africains</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MES COURS -->
+  <div class="section-title">
+    <h2>📚 Mes cours</h2>
+    <a href="#" onclick="showSec('cours');return false;">Voir tout →</a>
+  </div>
+  <div class="cours-grid">
+    <a href="notion1_cour.html" class="cours-card" style="--cc:#3794ff;">
+      <div class="cours-icon">🐍</div>
+      <div class="cours-name">Python 3.13</div>
+      <div class="cours-sub">5 chapitres · Débutant → Avancé</div>
+      <div class="cours-prog-bar"><div class="cours-prog-fill" id="prog-py" style="width:0%"></div></div>
+      <div class="cours-pct" id="prog-py-txt">0% complété</div>
+    </a>
+    <a href="r1_introduction.html" class="cours-card" style="--cc:#a78bfa;">
+      <div class="cours-icon">📊</div>
+      <div class="cours-name">R 4.4</div>
+      <div class="cours-sub">5 chapitres · Statistiques</div>
+      <div class="cours-prog-bar"><div class="cours-prog-fill" id="prog-r" style="width:0%;background:#a78bfa"></div></div>
+      <div class="cours-pct" id="prog-r-txt" style="color:#a78bfa;">0% complété</div>
+    </a>
+    <a href="abt_ide.html" class="cours-card" style="--cc:#4db6ac;">
+      <div class="cours-icon">🗄️</div>
+      <div class="cours-name">SQL & Web</div>
+      <div class="cours-sub">Pratiquez dans l'IDE · Bientôt des cours</div>
+      <div class="cours-prog-bar"><div class="cours-prog-fill" style="width:0%;background:#4db6ac"></div></div>
+      <div class="cours-pct" style="color:#4db6ac;">Bientôt disponible</div>
+    </a>
+  </div>
+
+  <!-- STATISTIQUES -->
+  <div class="stats-section">
+    <div class="section-title"><h2>📊 Statistiques</h2></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-num" id="stat-etudiants">0</div>
+        <div class="stat-lbl">Étudiants</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📖</div>
+        <div class="stat-num">10</div>
+        <div class="stat-lbl">Cours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-num">26</div>
+        <div class="stat-lbl">Exercices</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-num" id="stat-cert">0</div>
+        <div class="stat-lbl">Certifications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TÉMOIGNAGES -->
+  <div class="temoignages-section">
+    <div class="section-title"><h2>⭐ Témoignages des étudiants</h2></div>
+    <div class="temo-grid">
+      <div class="temo-card">
+        <div class="temo-stars">★★★★★</div>
+        <p class="temo-text">« ABT Code m'a permis d'apprendre Python en quelques semaines. Les cours sont clairs, progressifs et adaptés aux étudiants africains. »</p>
+        <div class="temo-user">
+          <div class="temo-avatar">FK</div>
+          <div>
+            <div class="temo-name">Fatoumata Kouyaté</div>
+            <div class="temo-role">Étudiante L2 Informatique · Bamako</div>
+          </div>
+        </div>
+      </div>
+      <div class="temo-card">
+        <div class="temo-stars">★★★★★</div>
+        <p class="temo-text">« L'IDE intégré est incroyable. Je peux coder Python, R et SQL directement dans le navigateur sans rien installer. »</p>
+        <div class="temo-user">
+          <div class="temo-avatar" style="background:linear-gradient(135deg,#48bb78,#4db6ac);">MD</div>
+          <div>
+            <div class="temo-name">Moussa Diallo</div>
+            <div class="temo-role">Étudiant Master · Dakar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /sec-accueil -->
+
+<!-- ── SECTION COURS ── -->
+<div class="dash-section" id="sec-cours">
+  <div class="sec-inner">
+    <div class="sec-h">📚 Cours Python 3.13</div>
+    <div class="chap-grid">
+      <a href="notion1_cour.html" class="chap-card" style="--cc:#3794ff;"><div class="chap-num">Chapitre 1</div><div class="chap-title">Introduction à Python</div><div class="chap-desc">Variables, types, print(), input()</div></a>
+      <a href="notion2_exemple.html" class="chap-card" style="--cc:#3794ff;"><div class="chap-num">Chapitre 2</div><div class="chap-title">Variables & Mémoire</div><div class="chap-desc">Allocation, types avancés, conversion</div></a>
+      <a href="notion3_exercice.html" class="chap-card" style="--cc:#3794ff;"><div class="chap-num">Chapitre 3</div><div class="chap-title">Conditions</div><div class="chap-desc">if, elif, else, opérateurs logiques</div></a>
+      <a href="notion4_operateurs.html" class="chap-card" style="--cc:#3794ff;"><div class="chap-num">Chapitre 4</div><div class="chap-title">Boucles</div><div class="chap-desc">for, while, range(), break, continue</div></a>
+      <a href="notion5_fonctions.html" class="chap-card" style="--cc:#3794ff;"><div class="chap-num">Chapitre 5</div><div class="chap-title">Fonctions</div><div class="chap-desc">def, return, paramètres, récursion</div></a>
+    </div>
+  </div>
+  <div class="sec-inner">
+    <div class="sec-h">📊 Cours R 4.4</div>
+    <div class="chap-grid">
+      <a href="r1_introduction.html" class="chap-card" style="--cc:#a78bfa;"><div class="chap-num">Chapitre 1</div><div class="chap-title">Introduction à R</div><div class="chap-desc">R, RStudio, opérateur &lt;-, cat()</div></a>
+      <a href="r2_vecteurs.html" class="chap-card" style="--cc:#a78bfa;"><div class="chap-num">Chapitre 2</div><div class="chap-title">Vecteurs & Objets</div><div class="chap-desc">c(), indexation, length(), sum()</div></a>
+      <a href="r3_operateurs.html" class="chap-card" style="--cc:#a78bfa;"><div class="chap-num">Chapitre 3</div><div class="chap-title">Opérateurs</div><div class="chap-desc">%%, %/%, ^, fonctions mathématiques</div></a>
+      <a href="r4_boucles.html" class="chap-card" style="--cc:#a78bfa;"><div class="chap-num">Chapitre 4</div><div class="chap-title">Boucles</div><div class="chap-desc">for, while, repeat, break, next</div></a>
+      <a href="r5_fonctions.html" class="chap-card" style="--cc:#a78bfa;"><div class="chap-num">Chapitre 5</div><div class="chap-title">Fonctions</div><div class="chap-desc">function(), return implicite</div></a>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION EXERCICES ── -->
+<div class="dash-section" id="sec-exercices">
+  <div class="sec-inner">
+    <div class="sec-h">⚡ Exercices pratiques</div>
+    <div class="exo-grid">
+      <a href="exercices_python.html" class="exo-card"><div class="exo-icon">🐍</div><div class="exo-title">Exercices Python</div><div class="exo-sub">10 exercices progressifs — variables, boucles, fonctions, classes</div><span class="exo-badge">10 exercices</span></a>
+      <a href="exercices_r.html" class="exo-card"><div class="exo-icon">📊</div><div class="exo-title">Exercices R</div><div class="exo-sub">16 exercices — vecteurs, boucles, fonctions, statistiques</div><span class="exo-badge" style="background:rgba(167,139,250,0.12);color:#a78bfa;">16 exercices</span></a>
+      <div class="exo-card" style="opacity:0.5;cursor:default;"><div class="exo-icon">🏆</div><div class="exo-title">Défis hebdomadaires</div><div class="exo-sub">Un défi par semaine pour progresser</div><span class="exo-badge" style="background:rgba(245,158,11,0.12);color:#f59e0b;">Bientôt</span></div>
+      <div class="exo-card" style="opacity:0.5;cursor:default;"><div class="exo-icon">📁</div><div class="exo-title">Projets guidés</div><div class="exo-sub">Calculatrice, analyseur de données, jeu...</div><span class="exo-badge" style="background:rgba(245,158,11,0.12);color:#f59e0b;">Bientôt</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION IDE / VS CODE ── -->
+<div class="dash-section" id="sec-ide">
+
+  <!-- GitHub Codespaces -->
+  <div class="sec-inner" style="margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap;">
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#24292e,#0d1117);border:1px solid #30363d;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      </div>
+      <div>
+        <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:4px;">💻 GitHub Codespaces — VS Code complet</h2>
+        <p style="color:var(--muted,#64748b);font-size:0.85rem;">Le vrai VS Code dans votre navigateur avec terminal, Git, extensions et tous les langages.</p>
+      </div>
+      <span style="margin-left:auto;background:rgba(72,187,120,0.12);border:1px solid rgba(72,187,120,0.3);color:#48bb78;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:700;flex-shrink:0;">✓ Gratuit 60h/mois</span>
+    </div>
+
+    <!-- Ce que Codespaces inclut -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:24px;">
+      <div style="background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">🖥️</span>
+        <div><div style="font-weight:700;font-size:0.85rem;margin-bottom:3px;">VS Code complet</div><div style="font-size:0.75rem;color:var(--muted,#64748b);">Interface identique à l'application bureau</div></div>
+      </div>
+      <div style="background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">⚡</span>
+        <div><div style="font-weight:700;font-size:0.85rem;margin-bottom:3px;">Terminal Linux</div><div style="font-size:0.75rem;color:var(--muted,#64748b);">Bash complet, pip, npm, git...</div></div>
+      </div>
+      <div style="background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">🧩</span>
+        <div><div style="font-weight:700;font-size:0.85rem;margin-bottom:3px;">Extensions</div><div style="font-size:0.75rem;color:var(--muted,#64748b);">Python, Pylance, GitLens, Prettier...</div></div>
+      </div>
+      <div style="background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">🐍</span>
+        <div><div style="font-weight:700;font-size:0.85rem;margin-bottom:3px;">Tous les langages</div><div style="font-size:0.75rem;color:var(--muted,#64748b);">Python, R, JS, Java, C++, PHP...</div></div>
+      </div>
+      <div style="background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">☁️</span>
+        <div><div style="font-weight:700;font-size:0.85rem;margin-bottom:3px;">Cloud synchronisé</div><div style="font-size:0.75rem;color:var(--muted,#64748b);">Fichiers sauvegardés automatiquement sur GitHub</div></div>
+      </div>
+      <div style="background:var(--bg3,#1c2030);border:1px solid var(--border,#2a2f45);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">📱</span>
+        <div><div style="font-weight:700;font-size:0.85rem;margin-bottom:3px;">Fonctionne partout</div><div style="font-size:0.75rem;color:var(--muted,#64748b);">PC, tablette, téléphone avec Chrome</div></div>
+      </div>
+    </div>
+
+    <!-- Boutons principaux -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+      <button class="btn btn-primary" onclick="ouvrirCodespaces()" style="font-size:0.95rem;padding:12px 24px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        Ouvrir GitHub Codespaces
+      </button>
+      <button class="btn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:12px 24px;" onclick="showGuideCodespaces()">
+        📖 Guide d'utilisation
+      </button>
+      <a href="abt_ide.html" class="btn" style="background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);color:var(--accent);padding:12px 24px;text-decoration:none;">
+        💻 ABT-Code IDE (alternative)
+      </a>
+    </div>
+
+    <!-- Alerte GitHub requis -->
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;">
+      <span style="font-size:1.1rem;flex-shrink:0;">⚠️</span>
+      <div style="font-size:0.83rem;">
+        <strong style="color:var(--accent4,#f59e0b);">Un compte GitHub est requis</strong>
+        <p style="color:var(--muted,#64748b);margin-top:3px;line-height:1.5;">
+          GitHub Codespaces nécessite un compte GitHub gratuit. 
+          <a href="https://github.com/signup" target="_blank" style="color:var(--accent,#4f8ef7);font-weight:600;">Créer un compte →</a>
+          · Ensuite 60 heures gratuites par mois.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guide étape par étape -->
+  <div class="sec-inner" id="guide-codespaces" style="display:none;">
+    <div class="sec-h">📖 Comment utiliser GitHub Codespaces</div>
+    <div style="display:grid;gap:12px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent,#4f8ef7);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;flex-shrink:0;">1</div>
+        <div>
+          <div style="font-weight:700;margin-bottom:4px;">Créer un compte GitHub</div>
+          <div style="color:var(--muted,#64748b);font-size:0.83rem;line-height:1.5;">Va sur <a href="https://github.com/signup" target="_blank" style="color:var(--accent,#4f8ef7);">github.com/signup</a> — c'est gratuit. Entre ton email, un mot de passe et un nom d'utilisateur.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent,#4f8ef7);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;flex-shrink:0;">2</div>
+        <div>
+          <div style="font-weight:700;margin-bottom:4px;">Créer un repository</div>
+          <div style="color:var(--muted,#64748b);font-size:0.83rem;line-height:1.5;">Une fois connecté, clique "New" → nomme ton repository (ex: <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-size:0.8rem;">mes-projets-abt</code>) → "Create repository".</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent,#4f8ef7);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;flex-shrink:0;">3</div>
+        <div>
+          <div style="font-weight:700;margin-bottom:4px;">Ouvrir un Codespace</div>
+          <div style="color:var(--muted,#64748b);font-size:0.83rem;line-height:1.5;">Dans ton repository, clique le bouton vert <strong>"Code"</strong> → onglet <strong>"Codespaces"</strong> → <strong>"Create codespace on main"</strong>.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:50%;background:#48bb78;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;flex-shrink:0;">✓</div>
+        <div>
+          <div style="font-weight:700;margin-bottom:4px;">VS Code s'ouvre dans le navigateur !</div>
+          <div style="color:var(--muted,#64748b);font-size:0.83rem;line-height:1.5;">Tu as maintenant VS Code complet avec terminal Linux. Tape <code style="background:var(--bg3);padding:1px 6px;border-radius:3px;font-size:0.8rem;">python3 --version</code> dans le terminal pour vérifier.</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;background:rgba(72,187,120,0.06);border:1px solid rgba(72,187,120,0.2);border-radius:8px;padding:12px 14px;">
+      <strong style="color:#48bb78;font-size:0.83rem;">💡 Astuce :</strong>
+      <span style="color:var(--muted,#64748b);font-size:0.83rem;"> Tu peux aussi ouvrir directement <a href="https://github.com/codespaces/new" target="_blank" style="color:var(--accent,#4f8ef7);">github.com/codespaces/new</a> pour créer un Codespace sans repository.</span>
+    </div>
+    <button class="btn" style="margin-top:14px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);" onclick="hideGuideCodespaces()">✕ Fermer le guide</button>
+  </div>
+
+  <!-- Liens rapides utiles -->
+  <div class="sec-inner">
+    <div class="sec-h">🔗 Liens utiles pour coder</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+      <a href="https://github.com/codespaces/new" target="_blank" class="tool-link">
+        <span class="tool-ic">🚀</span>
+        <div><div class="tool-name">Nouveau Codespace</div><div class="tool-desc">Créer un VS Code en ligne directement</div></div>
+      </a>
+      <a href="https://github.com" target="_blank" class="tool-link">
+        <span class="tool-ic">🐙</span>
+        <div><div class="tool-name">GitHub</div><div class="tool-desc">Gérer vos repositories et projets</div></div>
+      </a>
+      <a href="https://colab.research.google.com" target="_blank" class="tool-link">
+        <span class="tool-ic">🔬</span>
+        <div><div class="tool-name">Google Colab</div><div class="tool-desc">Python & notebooks Jupyter en ligne</div></div>
+      </a>
+      <a href="https://replit.com" target="_blank" class="tool-link">
+        <span class="tool-ic">💡</span>
+        <div><div class="tool-name">Replit</div><div class="tool-desc">IDE en ligne multi-langages gratuit</div></div>
+      </a>
+      <a href="https://www.w3schools.com" target="_blank" class="tool-link">
+        <span class="tool-ic">🌐</span>
+        <div><div class="tool-name">W3Schools</div><div class="tool-desc">HTML, CSS, JS, SQL — tutoriels</div></div>
+      </a>
+      <a href="abt_ide.html" class="tool-link">
+        <span class="tool-ic">💻</span>
+        <div><div class="tool-name">ABT-Code IDE</div><div class="tool-desc">IDE intégré ABT Code (sans compte)</div></div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── SECTION IA ── -->
+<div class="dash-section" id="sec-ia">
+  <div class="sec-inner" style="text-align:center;padding:40px;">
+    <div style="font-size:3rem;margin-bottom:16px;">✦</div>
+    <h2 style="font-size:1.3rem;margin-bottom:10px;">ABT IA</h2>
+    <p style="color:var(--muted,#64748b);margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.6;">Assistant IA spécialisé en programmation et apprentissage. Génère du code, explique les concepts, débogue vos erreurs et propose des idées de projets.</p>
+    <button class="btn" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;font-size:1rem;padding:13px 28px;" onclick="location.href='abt_ia_page.html'">✦ Ouvrir ABT IA</button>
+  </div>
+</div>
+
+<!-- ── SECTION COMMUNAUTÉ ── -->
+<div class="dash-section" id="sec-communaute">
+  <div class="comm-layout">
+    <div>
+      <div class="sec-inner" style="margin-bottom:14px;">
+        <div class="sec-h">👥 Créer un groupe</div>
+        <div style="display:grid;gap:8px;">
+          <input type="text" id="grp-nom" class="comm-input" placeholder="Nom du groupe...">
+          <input type="text" id="grp-desc" class="comm-input" placeholder="Description...">
+          <input type="text" id="grp-contact" class="comm-input" placeholder="Contact WhatsApp, Telegram...">
+          <button class="btn btn-primary" onclick="creerGroupe()" style="width:100%;justify-content:center;">Créer le groupe</button>
+        </div>
+      </div>
+      <div class="sec-inner" style="max-height:300px;overflow-y:auto;">
+        <div class="comm-title">Groupes actifs</div>
+        <div id="groupes-list" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;"><div style="color:var(--muted);font-size:0.83rem;">Aucun groupe.</div></div>
+      </div>
+    </div>
+    <div class="sec-inner" style="display:flex;flex-direction:column;">
+      <div class="comm-title">📣 Forum général</div>
+      <div id="forum-msgs" style="flex:1;overflow-y:auto;max-height:340px;margin-top:10px;display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="display:flex;gap:7px;margin-top:10px;">
+        <input type="text" id="forum-input" class="comm-input" placeholder="Votre message..." onkeydown="if(event.key==='Enter')envoyerMsg()">
+        <button class="btn btn-primary" onclick="envoyerMsg()" style="flex-shrink:0;">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION PARAMÈTRES ── -->
+<div class="dash-section" id="sec-parametres">
+  <div class="params-grid">
+    <div class="param-bloc">
+      <h3>🎨 Thème de couleur</h3>
+      <p class="param-desc">S'applique à toutes les pages du site.</p>
+      <div class="param-btns" id="p-themes"></div>
+    </div>
+    <div class="param-bloc">
+      <h3>🌍 Langue de l'interface</h3>
+      <p class="param-desc">Change la langue sur toutes les pages.</p>
+      <div class="param-btns" id="p-langs"></div>
+    </div>
+    <div class="param-bloc">
+      <h3>🔤 Taille du texte</h3>
+      <p class="param-desc">Ajustez selon votre confort.</p>
+      <div class="param-btns" id="p-fonts"></div>
+      <div id="p-preview" style="margin-top:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);font-size:var(--font-size,16px);">Aperçu du texte ABT Code.</div>
+    </div>
+    <div class="param-bloc">
+      <h3>🔑 Changer mon mot de passe</h3>
+      <p class="param-desc">Modifiez votre mot de passe de connexion.</p>
+      <div style="display:grid;gap:8px;">
+        <input type="password" id="mdp-actuel" class="form-input" placeholder="Mot de passe actuel">
+        <input type="password" id="mdp-nouveau" class="form-input" placeholder="Nouveau mot de passe">
+        <input type="password" id="mdp-confirm" class="form-input" placeholder="Confirmer">
+        <button class="btn btn-primary" onclick="changerMdp()">Enregistrer</button>
+        <div id="mdp-msg" style="font-size:0.82rem;min-height:16px;"></div>
+      </div>
+    </div>
+    <div class="param-bloc">
+      <h3>🔄 Réinitialisation</h3>
+      <p class="param-desc">Remet les paramètres à leur valeur par défaut.</p>
+      <button class="btn btn-danger" onclick="if(confirm('Réinitialiser ?')){localStorage.removeItem('abt_settings');location.reload();}">🔄 Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- ══ FOOTER ══ -->
+<footer class="site-footer">
+  <div class="footer-logo"><span class="la">ABT</span><span class="lc"> Code</span></div>
+  <p class="footer-creator">Créé et développé par <strong>Ahamadou Tounkara</strong></p>
+  <p class="footer-creator">Plateforme éducative de programmation pour les étudiants africains</p>
+  <div class="footer-links">
+    <a href="main.html">Plan du site</a>
+    <a href="abt_ide.html">IDE</a>
+    <a href="abt_ia_page.html">ABT IA</a>
+    <a href="#" onclick="showSec('parametres');return false;">Paramètres</a>
+  </div>
+  <p class="footer-copy">© 2026 ABT Code · Ahamadou Tounkara · Tous droits réservés.</p>
+</footer>
+
+<!-- ══ NAV MOBILE BAS ══ -->
+<div class="mob-bottom">
+  <div class="mob-nav-row">
+    <button class="mob-nav-item active" id="mnav-accueil" onclick="showSec('accueil')"><span class="mni">🏠</span>Accueil</button>
+    <button class="mob-nav-item" id="mnav-cours" onclick="showSec('cours')"><span class="mni">📚</span>Cours</button>
+    <button class="mob-nav-item" id="mnav-exercices" onclick="showSec('exercices')"><span class="mni">⚡</span>Exercices</button>
+    <button class="mob-nav-item" id="mnav-ide" onclick="showSec('ide')"><span class="mni">💻</span>VS Code</button>
+    <button class="mob-nav-item" id="mnav-ia" onclick="showSec('ia')"><span class="mni">✦</span>IA</button>
+    <button class="mob-nav-item" id="mnav-parametres" onclick="showSec('parametres')"><span class="mni">⚙️</span>Profil</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════
+function showSec(id) {
+  document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+id)?.classList.add('active');
+  document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('mnav-'+id)?.classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'parametres') buildParams();
+  if (id === 'communaute') { chargerGroupes(); chargerForum(); }
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const prenom = localStorage.getItem('abt_session_prenom') || 'Étudiant';
+  const initiale = prenom.charAt(0).toUpperCase();
+
+  // Avatars
+  document.getElementById('desk-avatar').innerText = initiale;
+  document.getElementById('desk-name').innerText = prenom;
+  document.getElementById('mob-avatar').innerText = initiale;
+
+  // Admin
+  if (localStorage.getItem('abt_admin') === 'true') {
+    document.getElementById('btn-admin').style.display = 'inline-flex';
+    const ma = document.getElementById('mob-admin');
+    if (ma) ma.style.display = 'flex';
+  }
+
+  chargerStats();
+  chargerAnnonces();
+  chargerGroupes();
+  chargerForum();
+});
+
+// ══════════════════════════════════
+// STATS & PROGRESSION
+// ══════════════════════════════════
+function chargerStats() {
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes') || '[]');
+  const exoPy = JSON.parse(localStorage.getItem('abt_exo_py') || '{}');
+  const exoR  = JSON.parse(localStorage.getItem('abt_exo_r')  || '{}');
+  const pyDone = Object.values(exoPy).filter(Boolean).length;
+  const rDone  = Object.values(exoR).filter(Boolean).length;
+
+  document.getElementById('stat-etudiants').innerText = comptes.length;
+  document.getElementById('stat-cert').innerText = pyDone >= 10 || rDone >= 16 ? 1 : 0;
+
+  // Progression cours
+  const pyPct = Math.round(pyDone / 10 * 100);
+  const rPct  = Math.round(rDone  / 16 * 100);
+  document.getElementById('prog-py').style.width = pyPct + '%';
+  document.getElementById('prog-r').style.width  = rPct  + '%';
+  document.getElementById('prog-py-txt').innerText = pyPct + '% complété';
+  document.getElementById('prog-r-txt').innerText  = rPct  + '% complété';
+}
+
+// ══════════════════════════════════
+// ANNONCES
+// ══════════════════════════════════
+function chargerAnnonces() {
+  const anns = JSON.parse(localStorage.getItem('abt_annonces') || '[]');
+  if (!anns.length) return;
+  const last = anns[anns.length - 1];
+  document.getElementById('ann-titre').innerText = last.titre;
+  document.getElementById('ann-msg').innerText   = last.msg;
+  document.getElementById('annonce-bar').classList.add('show');
+  document.getElementById('notif-dot').style.display = 'block';
+  document.getElementById('mob-notif-dot').style.display = 'block';
+}
+
+function toggleNotifs() {
+  const bar = document.getElementById('annonce-bar');
+  bar.classList.toggle('show');
+}
+
+// ══════════════════════════════════
+// COMMUNAUTÉ
+// ══════════════════════════════════
+function creerGroupe() {
+  const nom     = document.getElementById('grp-nom').value.trim();
+  const desc    = document.getElementById('grp-desc').value.trim();
+  const contact = document.getElementById('grp-contact').value.trim();
+  if (!nom) return;
+  const prenom = localStorage.getItem('abt_session_prenom') || 'Anonyme';
+  const groupes = JSON.parse(localStorage.getItem('abt_groupes') || '[]');
+  groupes.push({ nom, desc, contact, createur: prenom,
+    date:  new Date().toLocaleDateString('fr-FR'),
+    heure: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) });
+  localStorage.setItem('abt_groupes', JSON.stringify(groupes));
+  document.getElementById('grp-nom').value = '';
+  document.getElementById('grp-desc').value = '';
+  document.getElementById('grp-contact').value = '';
+  chargerGroupes();
+}
+
+function chargerGroupes() {
+  const groupes = JSON.parse(localStorage.getItem('abt_groupes') || '[]');
+  const el = document.getElementById('groupes-list');
+  if (!el) return;
+  el.innerHTML = groupes.length
+    ? groupes.map(g => `<div class="group-item">
+        <div class="group-name">👥 ${g.nom}</div>
+        <div class="group-meta">${g.desc || ''}</div>
+        <div class="group-meta">📞 ${g.contact || '—'} · 👤 ${g.createur} · 📅 ${g.date} ${g.heure || ''}</div>
+      </div>`).join('')
+    : '<div style="color:var(--muted);font-size:0.83rem;">Aucun groupe pour l\'instant.</div>';
+}
+
+function envoyerMsg() {
+  const inp = document.getElementById('forum-input');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const prenom = localStorage.getItem('abt_session_prenom') || 'Anonyme';
+  const msgs = JSON.parse(localStorage.getItem('abt_forum') || '[]');
+  msgs.push({ auteur: prenom, texte: txt,
+    date:  new Date().toLocaleDateString('fr-FR'),
+    heure: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) });
+  localStorage.setItem('abt_forum', JSON.stringify(msgs));
+  inp.value = '';
+  chargerForum();
+}
+
+function chargerForum() {
+  const msgs = JSON.parse(localStorage.getItem('abt_forum') || '[]');
+  const el = document.getElementById('forum-msgs');
+  if (!el) return;
+  el.innerHTML = msgs.length
+    ? msgs.slice(-30).map(m => `<div class="msg-item">
+        <span class="msg-author">${m.auteur}</span>
+        <span class="msg-time">📅 ${m.date || ''} ${m.heure || ''}</span>
+        <div class="msg-text">${m.texte}</div>
+      </div>`).join('')
+    : '<div style="color:var(--muted);font-size:0.83rem;">Soyez le premier à écrire !</div>';
+  el.scrollTop = el.scrollHeight;
+}
+
+// ══════════════════════════════════
+// PARAMÈTRES
+// ══════════════════════════════════
+function buildParams() {
+  if (document.getElementById('p-themes').children.length > 0) return;
+  const s = JSON.parse(localStorage.getItem('abt_settings') || '{}');
+  const THEMES = {dark:'🌙 Sombre',ocean:'🌊 Océan',forest:'🌿 Forêt',sunset:'🌅 Coucher',purple:'🔮 Galaxie',rose:'🌸 Rose',light:'☀️ Clair',contrast:'⚡ Contraste'};
+  const LANGS  = {fr:'🇫🇷 Français',en:'🇬🇧 English',ar:'🇩🇿 العربية',pt:'🇧🇷 Português',es:'🇪🇸 Español',sw:'🇰🇪 Kiswahili',ha:'🇳🇬 Hausa',bm:'🇲🇱 Bambara'};
+
+  // Thèmes
+  const tg = document.getElementById('p-themes');
+  Object.entries(THEMES).forEach(([id, nm]) => {
+    const b = document.createElement('button');
+    b.className = 'param-btn' + ((s.theme || 'dark') === id ? ' active' : '');
+    b.textContent = nm;
+    b.onclick = () => { saveSetting('theme', id); setTimeout(() => location.reload(), 300); };
+    tg.appendChild(b);
+  });
+
+  // Langues
+  const lg = document.getElementById('p-langs');
+  Object.entries(LANGS).forEach(([code, nm]) => {
+    const b = document.createElement('button');
+    b.className = 'param-btn' + ((s.lang || 'fr') === code ? ' active' : '');
+    b.textContent = nm;
+    b.onclick = () => { saveSetting('lang', code); setTimeout(() => location.reload(), 300); };
+    lg.appendChild(b);
+  });
+
+  // Polices
+  const fg = document.getElementById('p-fonts');
+  [13, 15, 16, 18, 20].forEach(sz => {
+    const b = document.createElement('button');
+    b.className = 'param-btn' + ((parseInt(s.fontSize) || 16) === sz ? ' active' : '');
+    b.textContent = sz + 'px';
+    b.onclick = () => {
+      fg.querySelectorAll('.param-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.body.style.fontSize = sz + 'px';
+      document.getElementById('p-preview').style.fontSize = sz + 'px';
+      saveSetting('fontSize', sz);
+    };
+    fg.appendChild(b);
+  });
+}
+
+function saveSetting(key, val) {
+  const s = JSON.parse(localStorage.getItem('abt_settings') || '{}');
+  s[key] = val;
+  localStorage.setItem('abt_settings', JSON.stringify(s));
+}
+
+// ══════════════════════════════════
+// MOT DE PASSE
+// ══════════════════════════════════
+function changerMdp() {
+  const actuel  = document.getElementById('mdp-actuel').value;
+  const nouveau = document.getElementById('mdp-nouveau').value;
+  const confirm2= document.getElementById('mdp-confirm').value;
+  const msg     = document.getElementById('mdp-msg');
+  const email   = localStorage.getItem('abt_session_email') || '';
+  if (!actuel || !nouveau || !confirm2) { msg.style.color='#fc8181'; msg.innerText='Remplissez tous les champs.'; return; }
+  if (nouveau.length < 6) { msg.style.color='#fc8181'; msg.innerText='Minimum 6 caractères.'; return; }
+  if (nouveau !== confirm2) { msg.style.color='#fc8181'; msg.innerText='Les mots de passe ne correspondent pas.'; return; }
+  const comptes = JSON.parse(localStorage.getItem('abt_comptes') || '[]');
+  const idx = comptes.findIndex(c => c.email === email);
+  if (idx < 0) { msg.style.color='#fc8181'; msg.innerText='Compte introuvable.'; return; }
+  if (comptes[idx].mdp !== actuel) { msg.style.color='#fc8181'; msg.innerText='Mot de passe actuel incorrect.'; return; }
+  comptes[idx].mdp = nouveau;
+  localStorage.setItem('abt_comptes', JSON.stringify(comptes));
+  msg.style.color = '#68d391'; msg.innerText = '✅ Mot de passe modifié !';
+  ['mdp-actuel','mdp-nouveau','mdp-confirm'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ══════════════════════════════════
+// DÉCONNEXION
+// ══════════════════════════════════
+function deconnexion() {
+  if (!confirm('Se déconnecter ?')) return;
+  ['abt_connecte','abt_session_email','abt_session_prenom','abt_admin'].forEach(k => localStorage.removeItem(k));
+  window.location.href = 'Entre.html';
+}
+</script>
 <script src="abt_ai.js"></script>
 </body>
 </html>
